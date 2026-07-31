@@ -8,5 +8,6 @@ import { HospitalBranch } from './entities/hospital-branch.entity';
   imports: [TypeOrmModule.forFeature([HospitalBranch])],
   controllers: [HospitalBranchController],
   providers: [HospitalBranchService],
+  exports: [HospitalBranchService],
 })
 export class HospitalBranchModule {}

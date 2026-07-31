@@ -34,7 +34,7 @@ export class UsersController {
   @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Logged in successfully.' })
   @ApiResponse({ status: 401, description: 'Invalid email or password.' })
-  login(@Body() body: LoginDto) {
+  async login(@Body() body: LoginDto) {
     const email = body.email.trim();
     const password = body.password;
     
@@ -42,7 +42,7 @@ export class UsersController {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const user = this.usersService.login(email, password);
+    const user = await this.usersService.login(email, password);
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }

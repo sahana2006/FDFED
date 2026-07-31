@@ -1,7 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PatientsService } from '../patients/patients.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { LabTechnician } from '../lab-technicians/entities/lab-technician.entity';
 
-export type UserRole = 'admin' | 'patient' | 'doctor' | 'frontdesk';
+export type UserRole = 'admin' | 'patient' | 'doctor' | 'frontdesk' | 'labtech';
 
 export type User = {
   id: string;
@@ -52,7 +55,11 @@ export type UpdateFrontdeskUserInput = {
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly patientsService: PatientsService) {}
+  constructor(
+    private readonly patientsService: PatientsService,
+    @InjectRepository(LabTechnician)
+    private readonly labTechnicianRepository: Repository<LabTechnician>,
+  ) {}
 
   private readonly users: User[] = [
     {
@@ -162,9 +169,16 @@ export class UsersService {
     },
   ];
 
-  login(email: string, password: string): SafeUser | null {
+  async login(email: string, password: string): Promise<SafeUser | null> {
     const user = this.users.find((item) => item.email === email);
-    if (!user || user.password !== password) {
+    if (!user) {
+      const technician = await this.labTechnicianRepository.findOneBy({
+        email: email.trim().toLowerCase(),
+      });
+      if (!technician || technician.password !== password) return null;
+      return { id: technician.id, name: technician.name, email: technician.email, role: 'labtech' };
+    }
+    if (user.password !== password) {
       return null;
     }
 

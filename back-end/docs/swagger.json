@@ -2332,6 +2332,213 @@
           "Leave Requests"
         ]
       }
+    },
+    "/hospital-branches": {
+      "post": {
+        "operationId": "HospitalBranchController_create",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHospitalBranchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Hospital branch created"
+          },
+          "409": {
+            "description": "Branch email already exists"
+          }
+        },
+        "summary": "Create a hospital branch",
+        "tags": [
+          "Hospital Branches"
+        ]
+      },
+      "get": {
+        "operationId": "HospitalBranchController_findAll",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hospital branch list"
+          }
+        },
+        "summary": "List all hospital branches",
+        "tags": [
+          "Hospital Branches"
+        ]
+      }
+    },
+    "/hospital-branches/{id}": {
+      "get": {
+        "operationId": "HospitalBranchController_findOne",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Hospital branch UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hospital branch found"
+          },
+          "404": {
+            "description": "Hospital branch not found"
+          }
+        },
+        "summary": "Get a hospital branch by ID",
+        "tags": [
+          "Hospital Branches"
+        ]
+      },
+      "patch": {
+        "operationId": "HospitalBranchController_update",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Hospital branch UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHospitalBranchDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Hospital branch updated"
+          }
+        },
+        "summary": "Update a hospital branch",
+        "tags": [
+          "Hospital Branches"
+        ]
+      },
+      "delete": {
+        "operationId": "HospitalBranchController_remove",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Hospital branch UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Hospital branch deleted"
+          }
+        },
+        "summary": "Delete a hospital branch",
+        "tags": [
+          "Hospital Branches"
+        ]
+      }
+    },
+    "/lab-technicians": {
+      "post": {
+        "operationId": "LabTechniciansController_create",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLabTechnicianDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lab technician created"
+          }
+        },
+        "summary": "Create a branch-scoped lab technician account",
+        "tags": [
+          "Lab Technicians"
+        ]
+      }
     }
   },
   "info": {
@@ -3160,6 +3367,133 @@
         },
         "required": [
           "status"
+        ]
+      },
+      "CreateHospitalBranchDto": {
+        "type": "object",
+        "properties": {
+          "hospitalName": {
+            "type": "string",
+            "example": "Medbits Hospitals"
+          },
+          "branchName": {
+            "type": "string",
+            "example": "Banjara Hills"
+          },
+          "address": {
+            "type": "string",
+            "example": "Road No. 12, Banjara Hills"
+          },
+          "city": {
+            "type": "string",
+            "example": "Hyderabad"
+          },
+          "state": {
+            "type": "string",
+            "example": "Telangana"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "500034"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+919876543210"
+          },
+          "email": {
+            "type": "string",
+            "example": "banjarahills@medbits.com"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "default": "active"
+          }
+        },
+        "required": [
+          "hospitalName",
+          "branchName",
+          "address",
+          "city",
+          "state",
+          "pincode",
+          "phone",
+          "email"
+        ]
+      },
+      "UpdateHospitalBranchDto": {
+        "type": "object",
+        "properties": {
+          "hospitalName": {
+            "type": "string",
+            "example": "Medbits Hospitals"
+          },
+          "branchName": {
+            "type": "string",
+            "example": "Banjara Hills"
+          },
+          "address": {
+            "type": "string",
+            "example": "Road No. 12, Banjara Hills"
+          },
+          "city": {
+            "type": "string",
+            "example": "Hyderabad"
+          },
+          "state": {
+            "type": "string",
+            "example": "Telangana"
+          },
+          "pincode": {
+            "type": "string",
+            "example": "500034"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+919876543210"
+          },
+          "email": {
+            "type": "string",
+            "example": "banjarahills@medbits.com"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "default": "active"
+          }
+        }
+      },
+      "CreateLabTechnicianDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Anita Rao"
+          },
+          "email": {
+            "type": "string",
+            "example": "anita.rao@apollo.example"
+          },
+          "password": {
+            "type": "string",
+            "example": "secure-password"
+          },
+          "branchId": {
+            "type": "string",
+            "description": "Hospital branch UUID"
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password",
+          "branchId"
         ]
       }
     }

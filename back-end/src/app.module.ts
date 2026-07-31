@@ -18,6 +18,7 @@ import { WalkInsModule } from './walkins/walkins.module';
 import { LeaveRequestsModule } from './leave-requests/leave-requests.module';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HospitalBranchModule } from './hospital-branch/hospital-branch.module';
+import { LabTechniciansModule } from './lab-technicians/lab-technicians.module';
 
 @Module({
   imports: [
@@ -25,7 +26,9 @@ import { HospitalBranchModule } from './hospital-branch/hospital-branch.module';
       type: 'sqlite',
       database: process.env.HOSPITAL_BRANCH_DB_PATH ?? 'data/hospital-branches.sqlite',
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
+      migrationsRun: true,
+      migrations: [__dirname + '/database/migrations/*{.js,.ts}'],
     }),
     UsersModule,
     PatientsModule,
@@ -41,6 +44,7 @@ import { HospitalBranchModule } from './hospital-branch/hospital-branch.module';
     WalkInsModule,
     LeaveRequestsModule,
     HospitalBranchModule,
+    LabTechniciansModule,
   ],
   controllers: [AppController],
   providers: [
