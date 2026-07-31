@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppointmentsModule } from './appointments/appointments.module';
@@ -16,9 +17,16 @@ import { UsersModule } from './users/users.module';
 import { WalkInsModule } from './walkins/walkins.module';
 import { LeaveRequestsModule } from './leave-requests/leave-requests.module';
 import { RolesGuard } from './common/guards/roles.guard';
+import { HospitalBranchModule } from './hospital-branch/hospital-branch.module';
 
 @Module({
   imports: [
+    TypeOrmModule.forRoot({
+      type: 'sqlite',
+      database: process.env.HOSPITAL_BRANCH_DB_PATH ?? 'data/hospital-branches.sqlite',
+      autoLoadEntities: true,
+      synchronize: true,
+    }),
     UsersModule,
     PatientsModule,
     MedicinesModule,
@@ -32,6 +40,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     FrontdeskModule,
     WalkInsModule,
     LeaveRequestsModule,
+    HospitalBranchModule,
   ],
   controllers: [AppController],
   providers: [
