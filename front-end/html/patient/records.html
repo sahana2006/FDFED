@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEDBITS - Medical Records</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/patient/global.css">
+  <link rel="stylesheet" href="../../css/components/p_sidebar.css">
+  <link rel="stylesheet" href="../../css/components/p_navbar.css">
+  <link rel="stylesheet" href="../../css/patient/records-profile-feedback.css">
+</head>
+<body>
+
+<div id="sidebarMount"></div>
+
+<div class="main-wrap">
+  <div id="navbarMount"></div>
+
+  <main class="content">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Records</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-consults">0</div><div class="stat-label">Consultations</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-labs">0</div><div class="stat-label">Lab Records</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">Medical Records</div>
+      </div>
+
+      <div id="recordsEmptyState" class="text-muted" style="display:none">No medical records found.</div>
+
+      <div id="consultationSection" class="mt-20">
+        <div class="section-title" style="margin-bottom:12px">Consultation</div>
+        <div id="consultationList"></div>
+      </div>
+
+      <div id="treatmentSection" class="mt-20">
+        <div class="section-title" style="margin-bottom:12px">Treatment</div>
+        <div id="treatmentList"></div>
+      </div>
+
+      <div id="labSection" class="mt-20">
+        <div class="section-title" style="margin-bottom:12px">Lab</div>
+        <div id="labList"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<template id="tpl-rec-card">
+  <div class="rec-card">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div class="rec-title"></div>
+        <span class="badge rec-badge"></span>
+      </div>
+      <div class="rec-meta rec-meta-doc"></div>
+      <div class="rec-notes rec-primary-text" style="margin-top:8px"></div>
+      <div class="rec-prescription rec-medicines" style="margin-top:8px;display:none"></div>
+      <div class="rec-notes rec-followup" style="margin-top:8px;display:none"></div>
+    </div>
+  </div>
+</template>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/patient/utils.js"></script>
+<script src="../../js/patient/components.js"></script>
+<script src="../../js/patient/records.js"></script>
+<script>
+  (async () => {
+    await loadComponents('records', 'Medical Records');
+    updateTopbarUser();
+    try {
+      await initializeMedicalRecordsPage();
+    } catch (_error) {
+      showToast('Unable to load medical records from backend', 'error');
+    }
+  })();
+</script>
+</body>
+</html>

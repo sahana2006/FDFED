@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEDBITS - Appointments</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../css/patient/global.css">
+  <link rel="stylesheet" href="../../css/components/p_sidebar.css">
+  <link rel="stylesheet" href="../../css/components/p_navbar.css">
+  <link rel="stylesheet" href="../../css/patient/appointments.css">
+</head>
+<body>
+
+<div id="sidebarMount"></div>
+<div class="main-wrap">
+  <div id="navbarMount"></div>
+  <main class="content">
+
+    <div class="find-form">
+      <h2>Find a Doctor in 2 Easy Steps</h2>
+      <div class="find-form-row">
+        <div class="form-group" style="flex:1">
+          <label>Select Speciality</label>
+          <select id="specSelect" onchange="filterDoctors()">
+            <option value="">Choose a specialty...</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>Preferred Date</label>
+          <input type="date" id="apptDateSearch">
+        </div>
+        <button class="btn btn-accent btn-lg" onclick="filterDoctors()">Search</button>
+      </div>
+    </div>
+
+    <div id="doctorSection" style="display:none">
+      <div id="docSearchWrap" style="display:none">
+        <div class="search-hero" style="padding:20px 28px;margin-bottom:0;border-radius:var(--radius) var(--radius) 0 0">
+          <h2 id="docSearchLabel">Search Doctors</h2>
+          <div class="search-wrap">
+            <input type="text" placeholder="Search by doctor name" oninput="searchDoctors(this.value)">
+          </div>
+        </div>
+      </div>
+      <div class="appt-layout">
+        <div class="card" style="border-radius:0 0 var(--radius) var(--radius)">
+          <div class="doc-list" id="docList"></div>
+        </div>
+        <div class="schedule-panel" id="schedulePanel">
+          <h3>Schedule Appointment</h3>
+          <p class="text-muted">Click a doctor to see available slots.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="appt-two-col mt-20">
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Upcoming Appointments</div>
+        </div>
+        <div id="upcomingList"></div>
+      </div>
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Past Appointments</div>
+        </div>
+        <div id="pastList"></div>
+      </div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="section-header">
+        <div class="section-title">Browse by Specialty</div>
+      </div>
+      <div class="cat-grid" id="specialtyBrowseGrid"></div>
+    </div>
+
+  </main>
+</div>
+
+<template id="tpl-appt-upcoming">
+  <div class="list-item">
+    <div>
+      <div class="list-item-title appt-doctor"></div>
+      <div class="list-item-sub appt-info"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <span class="badge badge-orange">Upcoming</span>
+      <button class="btn btn-outline btn-sm appt-edit-btn" type="button">Edit</button>
+      <button class="btn btn-outline btn-sm appt-cancel-btn" type="button">Cancel</button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-appt-past">
+  <div class="list-item">
+    <div>
+      <div class="list-item-title appt-doctor"></div>
+      <div class="list-item-sub appt-info"></div>
+    </div>
+    <span class="badge badge-blue">Completed</span>
+  </div>
+</template>
+
+<template id="tpl-doc-card">
+  <div class="doc-card">
+    <div class="doc-info">
+      <div class="doc-avatar doc-icon"></div>
+      <div>
+        <div class="doc-name"></div>
+        <div class="doc-sub doc-exp-qual"></div>
+        <div class="doc-sub2 doc-hospital"></div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div class="doc-fee"></div>
+      <button class="btn btn-primary btn-sm">Book</button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-schedule-panel">
+  <h3>Schedule Appointment</h3>
+  <div class="doc-info" style="margin-bottom:16px">
+    <div class="doc-avatar sched-icon"></div>
+    <div>
+      <div class="doc-name sched-name"></div>
+      <div class="doc-sub sched-spec"></div>
+    </div>
+  </div>
+  <div class="form-group mb-16">
+    <label>Select Date</label>
+    <input type="date" id="schedDate" style="background:#eff6ff">
+  </div>
+  <div class="time-section-label">Available Slots</div>
+  <div class="slot-grid mb-16" id="allSlots"></div>
+  <div class="confirm-bar">
+    <div class="confirm-price">Select a slot to book</div>
+    <button class="btn btn-primary" onclick="confirmAppointment()">Confirm Booking</button>
+  </div>
+</template>
+
+<template id="tpl-slot-btn">
+  <button class="slot-btn"></button>
+</template>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">x</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/patient/utils.js"></script>
+<script src="../../js/patient/components.js"></script>
+<script src="../../js/patient/appointments.js"></script>
+<script>
+  (async () => {
+    await loadComponents('appointments', 'Appointments');
+    updateTopbarUser();
+    try {
+      await initializeAppointmentsPage();
+    } catch (_error) {
+      console.error(_error);
+      showToast('Unable to load appointments from backend', 'error');
+    }
+  })();
+</script>
+</body>
+</html>

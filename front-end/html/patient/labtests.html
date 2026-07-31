@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEDBITS - Lab Tests</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/patient/global.css">
+  <link rel="stylesheet" href="../../css/components/p_sidebar.css">
+  <link rel="stylesheet" href="../../css/components/p_navbar.css">
+  <link rel="stylesheet" href="../../css/patient/cart.css">
+</head>
+<body>
+
+<div id="sidebarMount"></div>
+<div class="main-wrap">
+  <div id="navbarMount"></div>
+  <main class="content">
+
+    <div class="search-hero">
+      <h2>Book Lab Tests</h2>
+      <div class="search-wrap">
+        <input type="text" placeholder="Search tests by name..." oninput="searchLabTests(this.value)">
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="section-header">
+        <div class="section-title">Health Check Categories</div>
+        <button class="view-all" onclick="showAllLab()">View All</button>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card" onclick="showLabCategory('Full Body Check Up')">
+          <div class="cat-icon">🧪</div><div class="cat-name">Full Body</div>
+        </div>
+        <div class="cat-card" onclick="showLabCategory('Diabetes')">
+          <div class="cat-icon">🩸</div><div class="cat-name">Diabetes</div>
+        </div>
+        <div class="cat-card" onclick="showLabCategory('Women\'s Health')">
+          <div class="cat-icon">🌸</div><div class="cat-name">Women's Health</div>
+        </div>
+        <div class="cat-card" onclick="showLabCategory('Thyroid')">
+          <div class="cat-icon">🦋</div><div class="cat-name">Thyroid</div>
+        </div>
+        <div class="cat-card" onclick="showLabCategory('Vitamin')">
+          <div class="cat-icon">🌿</div><div class="cat-name">Vitamin</div>
+        </div>
+        <div class="cat-card" onclick="showLabCategory('Blood Studies')">
+          <div class="cat-icon">🔬</div><div class="cat-name">Blood Studies</div>
+        </div>
+        <div class="cat-card" onclick="showLabCategory('Heart')">
+          <div class="cat-icon">🫀</div><div class="cat-name">Heart</div>
+        </div>
+        <div class="cat-card" onclick="showLabCategory('Kidney')">
+          <div class="cat-icon">🧫</div><div class="cat-name">Kidney</div>
+        </div>
+        <div class="cat-card" onclick="showLabCategory('Liver')">
+          <div class="cat-icon">⚗️</div><div class="cat-name">Liver</div>
+        </div>
+        <div class="cat-card" onclick="showLabCategory('Senior Citizen')">
+          <div class="cat-icon">🧓</div><div class="cat-name">Senior Citizen</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="section-header">
+        <div class="section-title" id="labCategoryTitle">Full Body Check Up</div>
+      </div>
+      <div class="product-grid" id="labProductGrid"></div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="section-header">
+        <div class="section-title">Top Booked Tests</div>
+      </div>
+      <div class="product-grid" id="topLabGrid"></div>
+    </div>
+
+    <div class="card mt-20" id="labCartSection" style="display:none">
+      <div class="section-header">
+        <div class="section-title">Your Lab Cart</div>
+        <button class="btn btn-outline btn-sm" onclick="hideLabCart()">Close</button>
+      </div>
+      <div class="cart-empty" id="labCartEmptyState">
+        <div class="empty-icon">🛒</div>
+        <h3>Your lab cart is empty</h3>
+        <p>Add tests to see them here before confirming the booking.</p>
+      </div>
+      <div id="labCartItemsList"></div>
+      <div class="divider"></div>
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <strong id="labCartSubtotal">Rs 0.00</strong>
+      </div>
+      <button class="btn btn-primary btn-full mt-20" id="confirmLabBookingBtn" onclick="confirmLabBooking()">Confirm Booking</button>
+    </div>
+
+    <div class="card mt-20">
+      <div class="section-header">
+        <div class="section-title">My Lab Tests</div>
+      </div>
+      <div id="labOrderList"></div>
+    </div>
+
+  </main>
+</div>
+
+<div class="cart-bar hidden" id="labCartBar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="cart-bar-icon">🛒</div>
+    <div>
+      <div class="cart-bar-price" id="labCartTotal">Rs 0.00</div>
+      <div class="cart-bar-count" id="labCartCount">(0 items)</div>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="showLabCart()">View Cart</button>
+</div>
+
+<template id="tpl-lab-card">
+  <div class="product-card">
+    <div class="product-card-img lab-icon">🧪</div>
+    <div class="product-card-name lab-name"></div>
+    <div class="product-card-sub lab-desc"></div>
+    <div class="product-card-footer">
+      <div class="product-card-price lab-price"></div>
+      <button class="btn-add lab-btn">Add</button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-lab-cart-row">
+  <div class="cart-item">
+    <div class="cart-item-info">
+      <div class="cart-item-icon lab-cart-icon"></div>
+      <div>
+        <div class="cart-item-name lab-cart-name"></div>
+        <div class="cart-item-qty lab-cart-cat"></div>
+      </div>
+    </div>
+    <div class="cart-item-actions">
+      <div class="cart-item-price lab-cart-price"></div>
+      <button class="cart-remove-btn lab-cart-remove" type="button">Remove</button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-lab-order-row">
+  <div class="order-item">
+    <div>
+      <div class="list-item-title lab-order-test"></div>
+      <div class="list-item-sub lab-order-date"></div>
+    </div>
+    <div class="gap-8">
+      <span class="badge badge-green lab-order-badge"></span>
+    </div>
+  </div>
+</template>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">x</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/patient/utils.js"></script>
+<script src="../../js/patient/components.js"></script>
+<script src="../../js/patient/labtests.js"></script>
+<script>
+  (async () => {
+    await loadComponents('labtests', 'Lab Tests');
+    updateTopbarUser();
+    try {
+      await initializeLabTestsPage();
+    } catch (_error) {
+      showToast('Unable to load lab tests from backend', 'error');
+    }
+  })();
+</script>
+</body>
+</html>

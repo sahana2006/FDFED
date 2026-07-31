@@ -1,0 +1,65 @@
+/* slot-management.css */
+
+.slot-legend {
+  display: flex; align-items: center; gap: 18px;
+  flex-wrap: wrap; margin-top: 16px;
+}
+.legend-item { display: flex; align-items: center; gap: 7px; font-size: .8rem; color: var(--text-muted); font-weight: 500; }
+.legend-dot  { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+.available-dot      { background: var(--accent-light); border: 1.5px solid var(--accent); }
+.booked-dot         { background: var(--bg); border: 1.5px solid var(--border); }
+.patient-booked-dot { background: #fef9c3; border: 1.5px solid #ca8a04; }
+.selected-dot       { background: var(--accent); border: 1.5px solid var(--accent); }
+
+/* ── Patient-booked slot (warning yellow) ─────────────────────── */
+.slot-item.patient-booked {
+  border-color: #ca8a04;
+  background: #fef9c3;
+  cursor: not-allowed;
+}
+.slot-item.patient-booked .slot-time   { color: #92400e; font-weight: 700; }
+.slot-item.patient-booked .slot-status { color: #b45309; font-weight: 600; }
+.slot-item.patient-booked .slot-patient {
+  font-size: .7rem;
+  color: #78350f;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unavail-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  background: var(--red-light); border: 1px solid #fca5a5;
+  border-radius: 20px; font-size: .78rem; color: #dc2626; font-weight: 600;
+}
+.unavail-tag button { font-size: 1rem; color: #dc2626; background: none; border: none; cursor: pointer; }
+
+.slot-date-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.slot-date-label {
+  font-family: 'Sora', sans-serif;
+  font-size: .92rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.slot-grid.is-disabled {
+  opacity: .68;
+}
+
+.slot-grid.is-disabled .slot-item {
+  cursor: not-allowed;
+}
+
+.slot-grid.is-disabled .slot-item:not(.booked) {
+  border-style: dashed;
+}

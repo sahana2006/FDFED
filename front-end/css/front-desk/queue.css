@@ -1,0 +1,155 @@
+/* ============================================================
+   QUEUE.CSS — Queue Management styles
+   ============================================================ */
+
+/* Controls bar */
+.queue-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.patient-select-wrapper {
+  width: 100%;
+}
+
+.patient-select {
+  background: var(--color-primary-xlight);
+  border-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.token-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-5);
+}
+
+.generate-token-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* Waiting list */
+.waiting-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.queue-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px var(--space-5);
+  border-radius: var(--radius-md);
+  border-left: 4px solid transparent;
+}
+
+.queue-entry--in-consultation {
+  background: #EFF8FF;
+  border-left-color: var(--color-info);
+}
+
+.queue-entry--confirmed {
+  background: var(--color-success-bg);
+  border-left-color: var(--color-success);
+}
+
+.queue-entry--waiting {
+  background: var(--color-bg);
+  border-left-color: var(--color-primary-xlight);
+}
+
+.queue-entry--pending {
+  background: var(--color-accent-yellow-bg);
+  border-left-color: var(--color-warning);
+}
+
+.queue-entry-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.queue-entry-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-text-primary);
+  margin-bottom: 3px;
+}
+
+.queue-entry-meta {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.queue-entry-meta span::after {
+  content: '|';
+  margin-left: var(--space-2);
+  opacity: 0.4;
+}
+
+.queue-entry-meta span:last-child::after {
+  display: none;
+}
+
+.queue-entry-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.queue-entry-time {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.queue-entry-token {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: var(--color-primary-xlight);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  min-width: 70px;
+  text-align: center;
+}
+
+.queue-entry-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* Token Modal */
+.token-modal-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-2);
+}
+
+.token-display {
+  font-family: var(--font-heading);
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--color-primary);
+  background: var(--color-primary-xlight);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-8);
+  display: inline-block;
+  letter-spacing: 2px;
+}

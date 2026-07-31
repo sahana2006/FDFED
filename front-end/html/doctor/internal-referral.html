@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Internal Referral - MEDBITS Doctor</title>
+  <link rel="stylesheet" href="../../css/doctor/global.css"/>
+  <link rel="stylesheet" href="../../css/doctor/internal-referral.css"/>
+</head>
+<body data-page="internal-referral">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Create Internal Referral</span></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Patient</label>
+            <select class="form-control" id="refPatient">
+              <option value="">- Select Patient -</option>
+              <option value="PAT001">PAT-001 - Ria Sharma</option>
+              <option value="PAT002">PAT-002 - Arun Menon</option>
+              <option value="PAT003">PAT-003 - Farah Ali</option>
+              <option value="PAT004">PAT-004 - Dev Patel</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Refer To (Doctor / Department)</label>
+            <select class="form-control" id="refDoctor">
+              <option value="">- Select -</option>
+              <option value="DOC002">Dr. Ashwini Ray - Dermatology</option>
+              <option value="DOC003">Dr. Sarah Johnson - Cardiology</option>
+              <option value="DOC004">Dr. Ramesh Iyer - Cardiology</option>
+              <option value="DOC005">Dr. Paul Johnson - Pediatrics</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason for Referral</label>
+          <textarea class="form-control" id="refReason" rows="3" placeholder="Describe the reason..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select class="form-control" id="refPriority">
+              <option>Routine</option>
+              <option>Urgent</option>
+              <option>Emergency</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preferred Date</label>
+            <input type="date" class="form-control" id="refDate"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Additional Notes</label>
+          <textarea class="form-control" id="refNotes" rows="2" placeholder="Any additional information..."></textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="btn btn-primary" id="sendReferralBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+            Send Referral
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Previous Referrals</span>
+          <a href="#" class="card-link" id="viewAllReferralsBtn">View All</a>
+        </div>
+        <div id="previousReferralsList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Incoming Referrals</span>
+          <a href="#" class="card-link" id="viewAllIncomingBtn">View All</a>
+        </div>
+        <div id="incomingReferralsList"></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div class="modal-overlay" id="referralModal">
+  <div class="modal-box referral-modal-box">
+    <div class="card-header referral-modal-header">
+      <span class="card-title">All Referral Records</span>
+      <button class="referral-modal-close" id="closeReferralModal" aria-label="Close referral records">&times;</button>
+    </div>
+    <div id="allReferralsList" class="referral-modal-list"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="incomingModal">
+  <div class="modal-box referral-modal-box">
+    <div class="card-header referral-modal-header">
+      <span class="card-title">All Incoming Records</span>
+      <button class="referral-modal-close" id="closeIncomingModal" aria-label="Close incoming records">&times;</button>
+    </div>
+    <div id="allIncomingList" class="referral-modal-list"></div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/doctor/components.js"></script>
+<script src="../../js/doctor/internal-referral.js"></script>
+</body>
+</html>

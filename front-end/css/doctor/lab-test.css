@@ -1,0 +1,66 @@
+/* ── lab-test.css ── */
+
+.patient-select-row {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.lab-layout {
+  display: grid;
+  grid-template-columns: 1fr 290px;
+  gap: 24px;
+}
+.package-panel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: calc(var(--topbar-h) + 28px);
+  box-shadow: var(--shadow);
+}
+.package-panel-title {
+  font-family: 'Sora', sans-serif;
+  font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: 16px;
+}
+.selected-count {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent-light); color: var(--accent);
+  font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.1rem;
+  border-radius: var(--radius-sm); padding: 8px; width: 100%; margin-bottom: 12px;
+}
+
+@media (max-width: 800px) {
+  .lab-layout { grid-template-columns: 1fr; }
+  .package-panel { position: static; }
+}
+
+/* ── Fixed search bar (same as consultation-notes) ── */
+.search-bar-inline {
+  position: relative;
+}
+.search-bar-inline svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+.search-bar-inline .search-input {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: .875rem;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: var(--transition);
+}
+.search-bar-inline .search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(58,125,68,.12);
+  background: var(--white);
+}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEDBITS - Feedback</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/patient/global.css">
+  <link rel="stylesheet" href="../../css/components/p_sidebar.css">
+  <link rel="stylesheet" href="../../css/components/p_navbar.css">
+  <link rel="stylesheet" href="../../css/patient/records-profile-feedback.css">
+</head>
+<body>
+
+<div id="sidebarMount"></div>
+
+<div class="main-wrap">
+  <div id="navbarMount"></div>
+
+  <main class="content">
+    <div class="card">
+      <div class="section-title mb-16">Share Your Experience</div>
+
+      <div class="form-group mb-16">
+        <label>Select Recent Visit</label>
+        <select id="fbDoctor"></select>
+      </div>
+
+      <div class="form-group mb-16">
+        <label>Rate Your Experience</label>
+        <div class="rating-row">
+          <button class="rating-btn rating-bad" onclick="selectRating(this,'Bad')">Bad</button>
+          <button class="rating-btn rating-avg" onclick="selectRating(this,'Average')">Average</button>
+          <button class="rating-btn rating-good" onclick="selectRating(this,'Good')">Good</button>
+          <button class="rating-btn rating-better" onclick="selectRating(this,'Better')">Better</button>
+          <button class="rating-btn rating-excellent" onclick="selectRating(this,'Excellent')">Excellent</button>
+        </div>
+      </div>
+
+      <div class="form-group mb-16">
+        <label>Your Feedback</label>
+        <textarea id="fbComment" placeholder="Share your experience..."></textarea>
+      </div>
+
+      <button class="btn btn-primary btn-full btn-lg" onclick="submitFeedback()">Submit Feedback</button>
+    </div>
+
+    <div class="card mt-20">
+      <div class="section-header">
+        <div class="section-title">Your Past Feedback</div>
+      </div>
+      <div id="fbList"></div>
+    </div>
+  </main>
+</div>
+
+<template id="tpl-fb-card">
+  <div class="fb-card">
+    <div>
+      <div style="font-weight:600" class="fb-doctor"></div>
+      <div class="text-muted text-sm fb-date"></div>
+      <div style="margin-top:6px;font-size:13px" class="fb-comment"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+      <span class="badge fb-badge"></span>
+    </div>
+  </div>
+</template>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/patient/utils.js"></script>
+<script src="../../js/patient/components.js"></script>
+<script src="../../js/patient/feedback.js"></script>
+<script>
+  (async () => {
+    await loadComponents('feedback', 'Feedback');
+    updateTopbarUser();
+    try {
+      await initializeFeedbackPage();
+    } catch (_error) {
+      showToast('Unable to load feedback from backend', 'error');
+    }
+  })();
+</script>
+</body>
+</html>

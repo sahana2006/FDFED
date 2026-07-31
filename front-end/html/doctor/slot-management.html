@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Slot Management - MEDBITS Doctor</title>
+  <link rel="stylesheet" href="../../css/doctor/global.css"/>
+  <link rel="stylesheet" href="../../css/doctor/slot-management.css"/>
+</head>
+<body data-page="slot-management">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Manage Slots</span>
+        </div>
+
+        <div class="slot-date-row">
+          <div class="form-group" style="margin:0;flex:1;">
+            <label class="form-label">Select Date</label>
+            <input type="date" class="form-control" id="slotDate" style="max-width:280px;"/>
+          </div>
+          <button class="btn btn-primary" id="saveSlotBtn" style="display:none;align-self:flex-end;">Save Changes</button>
+        </div>
+
+        <div id="slotSection" style="margin-top:18px;">
+          <div class="slot-date-label" id="slotDateLabel">Choose a date to start managing availability.</div>
+          <div class="slot-grid is-disabled" id="slotGrid"></div>
+          <div class="slot-legend">
+            <div class="legend-item"><div class="legend-dot available-dot"></div>Available</div>
+            <div class="legend-item"><div class="legend-dot booked-dot"></div>Booked</div>
+            <div class="legend-item"><div class="legend-dot selected-dot"></div>Selected / Toggle</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Mark Unavailable Dates</span></div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <input type="date" class="form-control" id="unavailableDate" style="max-width:260px;"/>
+          <button class="btn btn-primary" id="markUnavailableBtn">Mark Unavailable</button>
+        </div>
+        <div id="unavailableList" style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Weekly Availability Overview</span></div>
+        <div class="week-grid" id="weekGrid">
+          <div class="day-card"><div class="day-name">Mon</div><div class="day-slots">8 slots</div></div>
+          <div class="day-card"><div class="day-name">Tue</div><div class="day-slots">8 slots</div></div>
+          <div class="day-card"><div class="day-name">Wed</div><div class="day-slots">8 slots</div></div>
+          <div class="day-card"><div class="day-name">Thu</div><div class="day-slots">8 slots</div></div>
+          <div class="day-card"><div class="day-name">Fri</div><div class="day-slots">8 slots</div></div>
+          <div class="day-card"><div class="day-name">Sat</div><div class="day-slots">8 slots</div></div>
+          <div class="day-card"><div class="day-name">Sun</div><div class="day-slots">8 slots</div></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/doctor/components.js"></script>
+<script src="../../js/doctor/slot-management.js"></script>
+</body>
+</html>

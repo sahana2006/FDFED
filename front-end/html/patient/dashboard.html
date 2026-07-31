@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEDBITS - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/patient/global.css">
+  <link rel="stylesheet" href="../../css/components/p_sidebar.css">
+  <link rel="stylesheet" href="../../css/components/p_navbar.css">
+  <link rel="stylesheet" href="../../css/patient/dashboard.css">
+</head>
+<body>
+
+<div id="sidebarMount"></div>
+
+<div class="main-wrap">
+  <div id="navbarMount"></div>
+
+  <main class="content">
+    <div class="hero-banner">
+      <div class="hero-greeting">MEDBITS PATIENT PORTAL</div>
+      <div class="hero-name">Welcome back, <span id="welcomeName">Patient</span>!</div>
+      <div class="hero-sub">Smart Healthcare at Your Fingertips</div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="upcomingCount">0</div>
+          <div class="hero-stat-label">Upcoming Appts</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="labCount">0</div>
+          <div class="hero-stat-label">Lab Orders</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="recordCount">0</div>
+          <div class="hero-stat-label">Records</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="section-header">
+        <div class="section-title">Quick Actions</div>
+      </div>
+      <div class="quick-grid">
+        <div class="quick-action qa-blue" onclick="location.href='appointments.html'">
+          <div class="qa-icon">📅</div>
+          <div class="qa-label">Book Appointment</div>
+        </div>
+        <div class="quick-action qa-green" onclick="location.href='labtests.html'">
+          <div class="qa-icon">🧪</div>
+          <div class="qa-label">Book Lab Tests</div>
+        </div>
+        <div class="quick-action qa-purple" onclick="location.href='medicines.html'">
+          <div class="qa-icon">💊</div>
+          <div class="qa-label">Order Medicines</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-card-dark mb-16">
+      <div class="section-header">
+        <div class="section-title">Queue Status</div>
+      </div>
+      <div id="queueStatusCard"></div>
+    </div>
+
+    <div class="dash-bottom">
+      <div class="dash-card-dark">
+        <div class="section-header">
+          <div class="section-title">Upcoming Appointments</div>
+          <a class="view-all" href="appointments.html">View All</a>
+        </div>
+        <div id="upcomingList"></div>
+      </div>
+      <div class="dash-card-dark">
+        <div class="section-header">
+          <div class="section-title">Lab Orders</div>
+          <a class="view-all" href="labtests.html">View All</a>
+        </div>
+        <div id="labOrdersList"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<template id="tpl-dash-item">
+  <div class="dash-item">
+    <div>
+      <div class="dash-item-title"></div>
+      <div class="dash-item-sub"></div>
+    </div>
+    <div class="dash-item-meta"></div>
+  </div>
+</template>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/patient/utils.js"></script>
+<script src="../../js/patient/components.js"></script>
+<script src="../../js/patient/dashboard.js"></script>
+<script>
+  (async () => {
+    await loadComponents('dashboard', 'Dashboard');
+    updateTopbarUser();
+    try {
+      await initializeDashboard();
+    } catch (_error) {
+      showToast('Unable to load dashboard from backend', 'error');
+    }
+  })();
+</script>
+</body>
+</html>

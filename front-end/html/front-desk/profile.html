@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile — MEDBITS Frontdesk</title>
+    <link rel="stylesheet" href="../../css/front-desk/base.css" />
+    <link rel="stylesheet" href="../../css/front-desk/profile.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <span class="sidebar-logo-text">MEDBITS</span>
+        </div>
+        <nav class="sidebar-nav" id="sidebar-nav"></nav>
+      </aside>
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1 id="topbar-title-h1">Profile</h1>
+          <span id="topbar-subtitle">Frontdesk Portal</span>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-bell" title="Notifications">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </div>
+          <div class="topbar-user">
+            <div class="topbar-user-icon">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            </div>
+            <div class="topbar-user-info">
+              <span class="topbar-user-name" id="topbar-username"
+                >Loading...</span
+              >
+              <span class="topbar-user-role">Frontdesk</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Profile Header Card -->
+        <div class="profile-header-card card">
+          <div class="profile-avatar" id="profile-avatar">--</div>
+          <div class="profile-header-info">
+            <div class="profile-name-row">
+              <h2 class="profile-name" id="profile-name">Loading...</h2>
+              <span class="profile-age" id="profile-age">-</span>
+            </div>
+            <div class="profile-role" id="profile-role">-</div>
+            <div class="profile-ids">
+              <span class="profile-id-badge" id="profile-empid">EmpID : -</span>
+              <span class="profile-dept-badge" id="profile-dept">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="profile-grid">
+          <!-- Employment Details -->
+          <div class="card profile-section-card">
+            <div class="profile-section-title">Employment Details</div>
+            <div class="profile-detail-row">
+              <div class="profile-detail-box">
+                <div class="profile-detail-label">Date Of Joining</div>
+                <div class="profile-detail-value" id="joining-date">-</div>
+              </div>
+              <div class="profile-detail-box">
+                <div class="profile-detail-label">Reporting Manager</div>
+                <div class="profile-detail-value" id="reporting-manager">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Details -->
+          <div class="card profile-section-card">
+            <div class="profile-section-title">Contact Details</div>
+            <div class="profile-contact-row">
+              <div class="profile-contact-box">
+                <div class="profile-detail-label">Email</div>
+                <div class="profile-detail-value" id="profile-email">-</div>
+              </div>
+              <div class="profile-contact-box">
+                <div class="profile-detail-label">Phone</div>
+                <div class="profile-detail-value" id="profile-phone">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Shift -->
+          <div class="card profile-section-card">
+            <div class="profile-section-title">Current Shift</div>
+            <div class="profile-detail-row">
+              <div class="profile-detail-box">
+                <div class="profile-detail-label">Shift</div>
+                <div class="profile-detail-value" id="shift-name">-</div>
+                <div class="profile-detail-sub" id="shift-time">-</div>
+              </div>
+              <div class="profile-detail-box">
+                <div class="profile-detail-label">Counter</div>
+                <div class="profile-detail-value" id="shift-counter">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- System Access -->
+          <div class="card profile-section-card">
+            <div class="profile-section-title">System Access</div>
+            <div class="profile-access-box">
+              <div class="profile-detail-label">Authorized Modules</div>
+              <div class="profile-detail-value" id="authorized-modules">-</div>
+            </div>
+            <div class="profile-access-box" style="margin-top: var(--space-3)">
+              <div class="profile-detail-label">Last Login</div>
+              <div class="profile-detail-value" id="last-login">-</div>
+            </div>
+          </div>
+
+          <!-- Language Proficiency -->
+          <div class="card profile-section-card profile-section-wide">
+            <div class="profile-section-title">Language Proficiency</div>
+            <div id="language-list" class="language-list"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="../../js/front-desk/shared.js"></script>
+    <script src="../../js/front-desk/profile.js"></script>
+  </body>
+</html>

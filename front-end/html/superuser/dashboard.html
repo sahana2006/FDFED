@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDBITS - Superuser Dashboard</title>
+    <link rel="stylesheet" href="../../css/superuser/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/superuser/components/header.css">
+    <link rel="stylesheet" href="../../css/superuser/dashboard.css">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <script>
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || user.role !== 'admin') {
+        window.location.href = '../login.html';
+      }
+    </script>
+    <div class="container">
+        <!-- Sidebar -->
+        <div id="sidebar-slot"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div id="header-slot"><h2 id="header-page-title">Dashboard</h2></div>
+
+            <!-- Main Content Area -->
+            <main class="content">
+                <!-- Welcome Banner -->
+                <div class="welcome-banner">
+                    <h3>Welcome back, Superuser!</h3>
+                    <p>Manage Staffs, Doctors and Hospital Operations Efficiently.</p>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <h4 class="card-title">Quick Actions</h4>
+                    <div class="quick-actions">
+                        <a href="./DoctorManagement.html"><button class="action-btn">
+                            <i data-lucide="user-cog"></i>
+                            <span>Doctor Management</span>
+                        </button></a>
+
+                        <a href="./FrontdeskManagement.html"><button class="action-btn">
+                            <i data-lucide="door-open"></i>
+                            <span>Front Desk Management</span>
+                        </button></a>
+
+                        <a href="./DoctorLeaveManagement.html"><button class="action-btn">
+                            <i data-lucide="calendar-days"></i>
+                            <span>Doctor Leave Management</span>
+                        </button></a>
+                    </div>
+                </div>
+
+                <!-- Bottom Section -->
+                <div class="bottom-section">
+                    <!-- Today's Appointments -->
+                    <div class="card">
+                        <h4 class="card-title">Today's Appointments Preview</h4>
+                        <div class="appointments">
+                            <div class="appointment-item">
+                                <p class="patient-name">Patient: Rahul Mehtha</p>
+                                <p class="appointment-details">Dr Sarah Johnson - 10:00 AM</p>
+                            </div>
+
+                            <div class="appointment-item">
+                                <p class="patient-name">Patient: Rita Kapoor</p>
+                                <p class="appointment-details">Dr Sharath Joy - 10:30 AM</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications & Alerts -->
+                    <div class="card">
+                        <h4 class="card-title">Notifications & Alerts</h4>
+                        <div class="alerts">
+                            <div class="alert-item">
+                                <i data-lucide="alert-triangle"></i>
+                                <p>Pediatrics department reaching maximum appointment capacity</p>
+                            </div>
+
+                            <div class="alert-item">
+                                <i data-lucide="alert-triangle"></i>
+                                <p>No doctors available in Orthopedics for next 2 hours</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+Promise.all([
+  fetch('./components/sidebar.html').then(r => r.text()),
+  fetch('./components/header.html').then(r => r.text())
+])
+.then(([sidebarHtml, headerHtml]) => {
+
+  // Inject sidebar
+  document.getElementById('sidebar-slot').innerHTML = sidebarHtml;
+
+  // Inject header
+  document.getElementById('header-slot').innerHTML = headerHtml;
+
+  // Active sidebar logic
+  const pageMap = {
+    'dashboard.html': 'dashboard',
+    'doctormanagement.html': 'doctors',
+    'frontdeskmanagement.html': 'frontdesk',
+    'doctorleavemanagement.html': 'leave'
+  };
+  const headerTitleMap = {
+    dashboard: 'Dashboard',
+    doctors: 'Doctor Management',
+    frontdesk: 'Frontdesk Management',
+    leave: 'Frontdesk Leave Management'
+  };
+
+  const currentPage = location.pathname.split('/').pop().toLowerCase();
+  const activeKey = pageMap[currentPage];
+  const headerTitle = document.getElementById('header-page-title');
+
+  if (activeKey) {
+    const activeLink = document.querySelector(`[data-nav="${activeKey}"]`);
+    if (activeLink) activeLink.classList.add('active');
+    if (headerTitle) headerTitle.textContent = headerTitleMap[activeKey] || 'Dashboard';
+  }
+
+  const logoutLink = document.getElementById('superuser-logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('user');
+      window.location.replace('../login.html');
+    });
+  }
+
+  // Load icons AFTER HTML injection
+  lucide.createIcons();
+})
+.catch(err => console.error("Error loading components:", err));
+</script>
+<script>
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('href').includes(currentPage)) {
+            item.classList.add('active');
+        }
+    });
+</script>
+</body>
+</html>

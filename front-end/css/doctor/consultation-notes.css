@@ -1,0 +1,179 @@
+/* consultation-notes.css */
+
+.cn-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.search-bar-inline {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+}
+.search-bar-inline svg.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+.search-bar-inline svg.dropdown-chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+.search-bar-inline .search-input {
+  width: 100%;
+  padding: 10px 34px 10px 40px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: .875rem;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: var(--transition);
+  margin: 0;
+}
+.search-bar-inline .search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(58,125,68,.12);
+  background: var(--white);
+}
+
+.patient-search-shell {
+  min-width: 280px;
+}
+
+.patient-search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  display: none;
+  z-index: 20;
+}
+
+.patient-search-dropdown.open {
+  display: block;
+}
+
+.patient-search-option {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+}
+
+.patient-search-option span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.patient-search-option small {
+  color: var(--text-muted);
+  font-size: .76rem;
+}
+
+.patient-search-option:hover:not(:disabled) {
+  background: var(--accent-light);
+}
+
+.patient-search-option.empty {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.input-error {
+  border-color: var(--red) !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,.15) !important;
+  animation: shake .3s ease;
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.cn-avatar-ag { background: #5c7a60; }
+.cn-avatar-am { background: #7a5c60; }
+.cn-avatar-sr { background: #5c6a7a; }
+
+#recordsList .patient-row.is-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(58,125,68,.12);
+}
+
+.cn-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, .42);
+  padding: 20px;
+  z-index: 200;
+}
+
+.cn-modal.open {
+  display: flex;
+}
+
+.cn-modal-panel {
+  width: min(760px, 100%);
+  max-height: 82vh;
+  overflow: auto;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+}
+
+.cn-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.cn-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 1.35rem;
+}
+
+.cn-modal-close:hover {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+@media (max-width: 600px) {
+  .cn-toolbar { flex-direction: column; align-items: stretch; }
+  .patient-search-shell {
+    min-width: 0;
+    width: 100%;
+  }
+}

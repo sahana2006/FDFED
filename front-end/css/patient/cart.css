@@ -1,0 +1,60 @@
+/* =============================================
+   MEDBITS – cart.css  (medicines2.html)
+============================================= */
+
+.cart-page-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
+
+.cart-empty { text-align: center; padding: 60px 24px; }
+.cart-empty .empty-icon { font-size: 64px; margin-bottom: 16px; }
+.cart-empty h3 { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.cart-empty p  { color: var(--text-muted); margin-bottom: 20px; }
+
+.cart-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; background: var(--accent-light);
+  border-radius: var(--radius-sm); margin-bottom: 10px;
+  border: 1.5px solid transparent; transition: var(--transition);
+}
+.cart-item:hover { border-color: var(--accent); }
+.cart-item-info  { display: flex; align-items: center; gap: 14px; }
+.cart-item-icon  { font-size: 28px; }
+.cart-item-name  { font-weight: 600; font-size: 14px; }
+.cart-item-qty   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.cart-item-price { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 15px; color: var(--navy); }
+.cart-item-actions { display: flex; align-items: center; gap: 10px; }
+.cart-edit-btn,
+.cart-remove-btn {
+  border: 1px solid rgba(11, 31, 58, 0.14);
+  background: #fff;
+  color: var(--navy);
+  border-radius: 999px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.cart-edit-btn:hover,
+.cart-remove-btn:hover { border-color: var(--accent); color: var(--accent); }
+.cart-item-qty-value {
+  min-width: 20px;
+  text-align: center;
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.summary-row  { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+.summary-total { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: var(--navy); }
+
+.promo-wrap { display: flex; gap: 8px; margin-bottom: 16px; }
+.promo-wrap input { flex: 1; }
+
+@media (max-width: 860px) {
+  .cart-page-layout { grid-template-columns: 1fr; }
+  .cart-item { align-items: flex-start; gap: 12px; }
+  .cart-item-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; }
+}

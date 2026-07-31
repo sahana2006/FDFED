@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — MEDBITS Doctor</title>
+  <link rel="stylesheet" href="../../css/doctor/global.css"/>
+  <link rel="stylesheet" href="../../css/doctor/dashboard.css"/>
+</head>
+<body data-page="dashboard">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <!-- Welcome Banner -->
+      <div class="welcome-banner">
+        <div class="banner-text">
+          <div class="banner-title">Welcome back, Doctor!</div>
+          <div class="banner-sub">You have <strong>3 appointments</strong> scheduled for today.</div>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Today's Appointments</div>
+          <div class="stat-value" id="statToday">—</div>
+          <div class="stat-delta positive" id="statTodayDelta">Scheduled today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Completed Appointments</div>
+          <div class="stat-value" id="statCompleted">—</div>
+          <div class="stat-delta positive">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Lab Tests</div>
+          <div class="stat-value">12</div>
+          <div class="stat-delta warning">4 awaiting results</div>
+        </div>
+      </div>
+
+      <!-- Bottom two-column row -->
+      <div class="dash-bottom-row">
+
+        <!-- Upcoming Appointments -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Appointments</span>
+            <a>View All</a>
+          </div>
+          <div id="appointmentsList">
+            <p style="color:var(--text-muted);font-size:.875rem;padding:16px 0;">Loading appointments...</p>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card quick-actions-card">
+          <div class="card-header">
+            <span class="card-title">Quick Actions</span>
+          </div>
+          <div class="quick-actions-list">
+            <a href="consultation-notes.html" class="qa-btn qa-btn-outline">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+              New Consultation Note
+            </a>
+            <a href="lab-test.html" class="qa-btn qa-btn-outline">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+              Create Lab Test Package
+            </a>
+            <a href="treatment-plan.html" class="qa-btn qa-btn-outline">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg>
+              New Treatment Plan
+            </a>
+            <a href="slot-management.html" class="qa-btn qa-btn-outline">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Manage Slots
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <div class="card-header">
+          <span class="card-title">My Queue</span>
+        </div>
+        <div id="doctorQueueList">
+          <p style="color:var(--text-muted);font-size:.875rem;padding:16px 0;">Loading queue...</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/doctor/components.js"></script>
+<script src="../../js/doctor/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+[
+  {
+    "id": "LR1777826449232",
+    "doctorId": "DOC001",
+    "date": "2026-05-20",
+    "type": "Emergency",
+    "reason": "Sick",
+    "status": "approved",
+    "createdAt": "2026-05-03T16:40:49.232Z",
+    "actionedOn": "May 3, 2026, 10:11 PM"
+  },
+  {
+    "id": "LR1777826613232",
+    "doctorId": "DOC001",
+    "date": "2026-05-07",
+    "type": "Casual",
+    "reason": "Requested via portal",
+    "status": "approved",
+    "createdAt": "2026-05-03T16:43:33.232Z",
+    "actionedOn": "May 3, 2026, 10:14 PM"
+  },
+  {
+    "id": "LR1777827075473",
+    "doctorId": "DOC008",
+    "date": "2026-05-09",
+    "type": "Casual",
+    "reason": "Requested via portal",
+    "status": "approved",
+    "createdAt": "2026-05-03T16:51:15.473Z",
+    "actionedOn": "May 3, 2026, 10:21 PM"
+  },
+  {
+    "id": "LR1778216227842",
+    "doctorId": "DOC001",
+    "date": "2026-05-12",
+    "type": "Casual",
+    "reason": "Requested via portal",
+    "status": "approved",
+    "createdAt": "2026-05-08T04:57:07.842Z",
+    "actionedOn": "May 8, 2026, 10:27 AM"
+  },
+  {
+    "id": "LR1778309568364",
+    "doctorId": "DOC001",
+    "date": "2026-05-14",
+    "type": "Casual",
+    "reason": "Requested via portal",
+    "status": "approved",
+    "createdAt": "2026-05-09T06:52:48.364Z",
+    "actionedOn": "May 9, 2026, 12:23 PM"
+  }
+]

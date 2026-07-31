@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Treatment Plan — MEDBITS Doctor</title>
+  <link rel="stylesheet" href="../../css/doctor/global.css"/>
+  <link rel="stylesheet" href="../../css/doctor/treatment-plan.css"/>
+</head>
+<body data-page="treatment-plan">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <!-- Appointment search + history button -->
+      <div class="card">
+        <div class="appointment-select-row">
+          <div class="search-bar-inline appointment-search-shell">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="search-input" id="appointmentSearchInput" placeholder="Search and select an appointment..." autocomplete="off"/>
+            <svg class="dropdown-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            <div class="appointment-search-dropdown" id="appointmentSearchResults"></div>
+          </div>
+          <button class="btn btn-outline" id="viewHistoryBtn" style="white-space:nowrap;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/>
+            </svg>
+            View History
+          </button>
+        </div>
+        <!-- Selected appointment info banner -->
+        <div class="selected-appointment-banner" id="selectedAppointmentBanner" style="display:none;">
+          <div class="selected-appointment-info">
+            <span class="selected-appointment-label">Selected Appointment:</span>
+            <span class="selected-appointment-detail" id="selectedAppointmentDetail"></span>
+          </div>
+          <button class="btn-clear-selection" id="clearSelectionBtn" title="Clear selection">&times;</button>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="card" id="planFormCard">
+        <div class="card-header"><span class="card-title">Treatment Plan Documentation</span></div>
+        <div class="form-error-banner" id="planErrorBanner" role="alert" aria-live="polite"></div>
+
+        <div class="form-group">
+          <label class="form-label">Lifestyle Recommendations</label>
+          <textarea class="form-control" id="lifestyle" rows="3" placeholder="Exercise, sleep, stress management recommendations..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Diet Recommendations</label>
+          <textarea class="form-control" id="diet" rows="3" placeholder="Dietary advice and recommendations"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Treatment Duration</label>
+          <input type="text" class="form-control" id="duration" placeholder="e.g., 2 weeks, 1 month" style="max-width:280px;"/>
+        </div>
+        <button class="btn btn-primary btn-full btn-lg" id="savePlanBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17,21 17,13 7,13"/><polyline points="7,3 7,8 15,8"/>
+          </svg>
+          Save Treatment Plan
+        </button>
+      </div>
+
+      <!-- History modal -->
+      <div class="modal-overlay" id="historyModal">
+        <div class="modal-box">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+            <h2 style="font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;" id="historyModalTitle">Treatment History</h2>
+            <button class="btn btn-outline" id="closeHistoryBtn" style="padding:6px 14px;font-size:.8rem;">Close</button>
+          </div>
+          <div id="historyList"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/doctor/components.js"></script>
+<script src="../../js/doctor/treatment-plan.js"></script>
+</body>
+</html>

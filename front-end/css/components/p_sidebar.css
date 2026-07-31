@@ -1,0 +1,72 @@
+/* =============================================
+   MEDBITS – SIDEBAR CSS
+============================================= */
+
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 200;
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 24px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.brand-icon {
+  width: 36px; height: 36px;
+  background: #fff; color: var(--navy);
+  border-radius: 10px;
+  display: grid; place-items: center;
+  font-size: 18px; font-weight: 700;
+}
+
+.brand-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 22px; font-weight: 700;
+  color: #fff; letter-spacing: 1px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-radius: var(--radius-sm);
+  color: rgba(255,255,255,0.65);
+  font-size: 14.5px; font-weight: 500;
+  cursor: pointer; text-decoration: none;
+  transition: var(--transition); user-select: none;
+}
+.nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-item.active { background: rgba(255,255,255,0.15); color: #fff; }
+.nav-icon { font-size: 17px; width: 22px; text-align: center; flex-shrink: 0; }
+
+.sidebar-bottom {
+  padding: 12px 12px 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.logout-btn { color: rgba(255,100,100,0.8) !important; }
+.logout-btn:hover { background: rgba(255,100,100,0.12) !important; color: #ff8080 !important; }
+
+/* ─── RESPONSIVE SIDEBAR ─── */
+@media (max-width: 860px) {
+  .sidebar { transform: translateX(-260px); width: 260px; }
+  .sidebar.open { transform: translateX(0); }
+}

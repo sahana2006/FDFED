@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile - MEDBITS Doctor</title>
+  <link rel="stylesheet" href="../../css/doctor/global.css"/>
+  <link rel="stylesheet" href="../../css/doctor/profile.css"/>
+</head>
+<body data-page="profile">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <div class="profile-header-card">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar-lg" id="profileAvatarLg">--</div>
+        </div>
+        <div class="profile-meta">
+          <span class="profile-name" id="profileName">Loading...</span>
+          <span class="profile-role" id="profileRole">Loading...</span>
+          <span class="profile-id" id="profileDoctorId"></span>
+        </div>
+        <div style="margin-left:auto;">
+          <button class="btn btn-outline btn-edit-white" id="editProfileBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Edit Profile
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Personal Information</span></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-control" id="firstName" value="" disabled/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-control" id="lastName" value="" disabled/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" value="" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="text" class="form-control" id="phone" value="" inputmode="numeric" maxlength="10" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Specialization</label>
+            <input type="text" class="form-control" id="spec" value="" disabled/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <input type="text" class="form-control" id="dept" value="" disabled/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Qualification</label>
+          <input type="text" class="form-control" id="qual" value="" disabled/>
+        </div>
+        <div id="editActions" class="profile-edit-actions" style="display:none;">
+          <button class="btn btn-outline" id="cancelEditBtn">Cancel</button>
+          <button class="btn btn-primary" id="saveProfileBtn">Save Changes</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Performance Overview</span></div>
+        <div class="performance-grid" id="performanceGrid">
+          <div class="performance-card">
+            <span class="performance-label">Patients Seen</span>
+            <strong class="performance-value" id="patientsSeenValue">148</strong>
+            <span class="performance-note">Update from the shared image if values differ.</span>
+          </div>
+          <div class="performance-card">
+            <span class="performance-label">Appointments Completed</span>
+            <strong class="performance-value" id="appointmentsCompletedValue">96%</strong>
+            <span class="performance-note">Editable in code once image data is available.</span>
+          </div>
+          <div class="performance-card">
+            <span class="performance-label">Patient Satisfaction</span>
+            <strong class="performance-value" id="patientSatisfactionValue">4.8 / 5</strong>
+            <span class="performance-note">Placeholder until the image values are provided.</span>
+          </div>
+          <div class="performance-card">
+            <span class="performance-label">Referral Follow-ups</span>
+            <strong class="performance-value" id="referralFollowUpsValue">24</strong>
+            <span class="performance-note">Replace these stats with the exact image details.</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/doctor/components.js"></script>
+<script src="../../js/doctor/profile.js"></script>
+</body>
+</html>

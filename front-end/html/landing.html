@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedBits – Smart Healthcare Management</title>
+    <link rel="stylesheet" href="../css/landing.css" />
+  </head>
+  <body>
+    <!-- ── NAVBAR ── -->
+    <nav class="nav">
+      <div class="nav-brand">
+        <div class="nav-brand-icon">✚</div>
+        <div class="nav-brand-name">MedBits</div>
+      </div>
+      <div class="nav-links">
+        <a href="#services">Services</a>
+        <a href="#about">About</a>
+        <a href="#testimonials">Reviews</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="nav-cta">
+        <!--
+      FIX 1: landing.html lives at  html/landing.html
+              login.html lives at   html/login.html
+              Both are in the SAME html/ folder → no prefix needed.
+              The original links were already href="login.html" which is correct.
+              If your server serves from the project root, use the paths below as-is.
+    -->
+        <a href="login.html" class="btn-outline-nav">Log In</a>
+        <a href="signup.html" class="btn-filled-nav">Sign Up Free</a>
+      </div>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span></span> Trusted by 50,000+ patients across India
+        </div>
+        <h1>Book Doctor Appointments <em>Easily &amp; Quickly</em></h1>
+        <p>
+          Find top-rated doctors, schedule visits, order medicines and access
+          all your health records — all in one place.
+        </p>
+        <div class="hero-btns">
+          <a href="signup.html" class="btn-hero-primary">Get Started Free</a>
+          <a href="login.html" class="btn-hero-secondary">Sign In →</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-num">500+</div>
+            <div class="stat-lbl">Verified Doctors</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">50K+</div>
+            <div class="stat-lbl">Happy Patients</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">4.9★</div>
+            <div class="stat-lbl">Average Rating</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SERVICES ── -->
+    <section class="services" id="services">
+      <div class="section-badge">Our Services</div>
+      <h2>Health Services For You</h2>
+      <p class="sub">
+        Everything you need for your health journey in one place
+      </p>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="svc-icon svc-blue">📅</div>
+          <h3>Book Appointment</h3>
+          <p>
+            Schedule doctor appointments easily at your preferred time and date
+            with instant confirmation.
+          </p>
+        </div>
+        <div class="service-card">
+          <div class="svc-icon svc-green">🏥</div>
+          <h3>Smart Consultation</h3>
+          <p>
+            In-person consultations with e-prescriptions and complete digital
+            care plans.
+          </p>
+        </div>
+        <div class="service-card">
+          <div class="svc-icon svc-purple">💊</div>
+          <h3>Order Medicines</h3>
+          <p>
+            Get trusted medicines delivered quickly with secure and easy
+            checkout at best prices.
+          </p>
+        </div>
+        <div class="service-card">
+          <div class="svc-icon svc-orange">🧪</div>
+          <h3>Lab Tests</h3>
+          <p>
+            Schedule diagnostic tests at home or lab with precise and timely
+            digital reports.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── ABOUT ── -->
+    <section class="about" id="about">
+      <div class="about-img-wrap">
+        <div class="about-img">🩺</div>
+      </div>
+      <div class="about-text">
+        <div class="section-badge">Why MedBits</div>
+        <h2>Compassionate Care with Digital Convenience</h2>
+        <p class="body">
+          Our platform connects patients with trusted doctors, streamlines
+          appointments, provides digital prescriptions and accurate diagnostic
+          services — all in one seamless experience.
+        </p>
+        <div class="about-points">
+          <div class="about-point">
+            Verified and experienced doctors across 20+ specialties
+          </div>
+          <div class="about-point">
+            Instant appointment confirmation and reminders
+          </div>
+          <div class="about-point">
+            Secure medical records accessible anytime
+          </div>
+          <div class="about-point">
+            24/7 customer support and emergency assistance
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TESTIMONIALS ── -->
+    <section class="testimonials" id="testimonials">
+      <div class="section-badge">Patient Reviews</div>
+      <h2>What Our Patients Say</h2>
+      <p class="sub">Real experiences from real patients</p>
+      <div class="test-grid">
+        <div class="test-card">
+          <div class="test-stars">★★★★★</div>
+          <p>
+            "Booking, consultation and reports — everything felt seamless. The
+            best health portal I've used!"
+          </p>
+          <div class="test-author">
+            <div class="test-avatar">RS</div>
+            <div>
+              <div class="test-name">Rakesh Sharma</div>
+              <div class="test-role">Software Engineer, Chennai</div>
+            </div>
+          </div>
+        </div>
+        <div class="test-card">
+          <div class="test-stars">★★★★★</div>
+          <p>
+            Very reliable service — booked tests, consulted my doctor, and kept
+            all records in one place. Highly recommend!
+          </p>
+          <div class="test-author">
+            <div class="test-avatar">SM</div>
+            <div>
+              <div class="test-name">Samyuktha M</div>
+              <div class="test-role">Teacher, Hyderabad</div>
+            </div>
+          </div>
+        </div>
+        <div class="test-card">
+          <div class="test-stars">★★★★★</div>
+          <p>
+            Excellent experience — appointments were easy, consultation was
+            clear, and digital records were instantly accessible.
+          </p>
+          <div class="test-author">
+            <div class="test-avatar">KV</div>
+            <div>
+              <div class="test-name">Kishore V</div>
+              <div class="test-role">Business Owner, Bangalore</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA STRIP ── -->
+    <section class="cta-strip">
+      <h2>Ready to take control of your health? Start your journey today.</h2>
+      <a href="signup.html" class="btn-cta-white">Create Free Account →</a>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer class="footer" id="contact">
+      <div class="footer-brand">
+        <div class="footer-brand-icon">✚</div>
+        <div class="footer-brand-name">MedBits</div>
+      </div>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact Us</a>
+        <a href="#">Help Center</a>
+      </div>
+      <div class="footer-social">
+        <div class="social-btn">in</div>
+        <div class="social-btn">f</div>
+        <div class="social-btn">tw</div>
+      </div>
+      <div class="footer-copy">
+        © 2026 MedBits Healthcare Pvt. Ltd. All rights reserved.
+      </div>
+    </footer>
+
+    <!--
+  FIX 1 EXPLANATION:
+  landing.html is at: html/landing.html
+  login.html   is at: html/login.html
+  signup.html  is at: html/signup.html
+
+  So href="login.html" and href="signup.html" are correct — same folder.
+  The actual problem causing "jumping to dashboard" was a stale localStorage
+  session from a previous login. The login.html auto-redirects if a session
+  already exists. Clear localStorage (DevTools → Application → Clear All) to
+  reproduce the landing page normally.
+
+  If the links still appear broken, it means your server's root is at
+  HEALTHCAREEVAL3/ not HEALTHCAREEVAL3/front-end/, so adjust to:
+  href="front-end/html/login.html"
+-->
+  </body>
+</html>

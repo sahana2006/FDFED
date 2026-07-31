@@ -1,0 +1,61 @@
+/* ── SIGNUP PAGE CSS ── */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;min-height:100vh;background:#f8fafc;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.auth-topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:0 48px;height:62px;display:flex;align-items:center;justify-content:space-between}
+.auth-brand{display:flex;align-items:center;gap:10px}
+.auth-brand-icon{width:34px;height:34px;background:linear-gradient(135deg,#1e40af,#0891b2);border-radius:9px;display:grid;place-items:center;color:#fff;font-size:17px;font-weight:800}
+.auth-brand-name{font-family:'Sora',sans-serif;font-size:19px;font-weight:800;color:#0f172a}
+.back-link{display:flex;align-items:center;gap:6px;color:#64748b;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;transition:.2s} .back-link:hover{color:#1e40af}
+
+/* MAIN */
+.signup-wrap{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:40px 24px}
+.signup-card{background:#fff;border-radius:20px;border:1px solid #e2e8f0;box-shadow:0 4px 32px rgba(0,0,0,.06);padding:40px 48px;width:100%;max-width:700px}
+
+/* HEADER */
+.signup-header{text-align:center;margin-bottom:28px}
+.signup-header h2{font-family:'Sora',sans-serif;font-size:26px;font-weight:800;color:#0f172a;margin-bottom:6px}
+.signup-header p{color:#64748b;font-size:14px}
+
+/* STEPS INDICATOR */
+.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:32px}
+.step{display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;flex:1}
+.step-circle{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;border:2px solid #e2e8f0;background:#fff;color:#94a3b8;position:relative;z-index:1}
+.step.done .step-circle{background:#1e40af;border-color:#1e40af;color:#fff}
+.step.active .step-circle{background:#fff;border-color:#1e40af;color:#1e40af;box-shadow:0 0 0 4px rgba(30,64,175,.1)}
+.step-label{font-size:11px;color:#94a3b8;font-weight:500;white-space:nowrap}
+.step.active .step-label,.step.done .step-label{color:#1e40af;font-weight:600}
+.step-line{flex:1;height:2px;background:#e2e8f0;margin-top:-14px;position:relative;z-index:0}
+.step-line.done{background:#1e40af}
+
+/* SECTION LABEL */
+.section-label{font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
+
+/* FORM GRID */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:12.5px;font-weight:600;color:#374151}
+.input-wrap{position:relative}
+.input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.form-group input,.form-group select{width:100%;padding:11px 12px 11px 36px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13.5px;font-family:'DM Sans',sans-serif;outline:none;transition:.2s;background:#f8fafc;color:#0f172a}
+.form-group input:focus,.form-group select:focus{border-color:#3b82f6;background:#fff;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.form-group input::placeholder{color:#94a3b8}
+
+/* TERMS */
+.terms-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:20px;font-size:13px;color:#475569;cursor:pointer}
+.terms-row input[type=checkbox]{width:15px;height:15px;accent-color:#1e40af;margin-top:2px;flex-shrink:0}
+.terms-row a{color:#1e40af;font-weight:600}
+
+.btn-signup{width:100%;padding:13px;background:linear-gradient(135deg,#1e40af,#0369a1);color:#fff;border:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.3px}
+.btn-signup:hover{background:linear-gradient(135deg,#1d4ed8,#0284c7);transform:translateY(-1px);box-shadow:0 6px 20px rgba(30,64,175,.35)}
+
+.login-row{text-align:center;font-size:14px;color:#64748b;margin-top:16px}
+.login-row span{color:#1e40af;font-weight:700;cursor:pointer} .login-row span:hover{text-decoration:underline}
+
+.err-box{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:13px;color:#dc2626;margin-bottom:14px;display:none}
+.err-box.show{display:block}
+
+@media(max-width:640px){.form-grid{grid-template-columns:1fr}.signup-card{padding:24px 20px}.auth-topbar{padding:0 20px}}

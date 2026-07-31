@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDBITS - Staff Leave Management</title>
+
+    <!-- Lucide Icons (must load before JS uses lucide.createIcons) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Stylesheet -->
+     <link rel="stylesheet" href="../../css/superuser/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/superuser/components/header.css">
+    <link rel="stylesheet" href="../../css/superuser/DoctorLeaveManagement.css">
+</head>
+<body>
+<script>
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user || user.role !== 'admin') {
+    window.location.href = '../login.html';
+  }
+</script>
+
+<div class="container">
+
+    <!-- ============================= SIDEBAR ============================= -->
+        <div id="sidebar-slot"></div>
+    <!-- ============================= MAIN CONTENT ============================= -->
+    <div class="main-content">
+
+        <!-- Header -->
+            <div id="header-slot"><h2 id="header-page-title">Doctor Leave Management</h2></div>        
+
+        <!-- ================== PAGE: MAIN LEAVE MANAGEMENT ================== -->
+        <div class="page active" id="page-main">
+            <div class="content">
+
+                <h3 class="page-title">Staff Leave Management</h3>
+
+                <!-- Status Summary Cards -->
+                <div class="status-cards">
+
+                    <!-- Pending -->
+                    <div class="status-card status-card-pending">
+                        <div class="status-icon">
+                            <i data-lucide="clock"></i>
+                        </div>
+                        <div class="status-content">
+                            <h4>Pending Requests</h4>
+                            <div class="status-bottom">
+                                <span class="status-count" id="count-pending">6</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Approved -->
+                    <div class="status-card status-card-approved">
+                        <div class="status-icon">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div class="status-content">
+                            <h4>Approved Requests</h4>
+                            <div class="status-bottom">
+                                <span class="status-count" id="count-approved">0</span>
+                                <button class="view-all-link" onclick="showViewAll('approved')">View All →</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rejected -->
+                    <div class="status-card status-card-rejected">
+                        <div class="status-icon">
+                            <i data-lucide="x-circle"></i>
+                        </div>
+                        <div class="status-content">
+                            <h4>Rejected Requests</h4>
+                            <div class="status-bottom">
+                                <span class="status-count" id="count-rejected">0</span>
+                                <button class="view-all-link" onclick="showViewAll('rejected')">View All →</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /status-cards -->
+
+                <!-- Date Filter Bar -->
+                <div class="filter-bar">
+                    <label>
+                        <i data-lucide="calendar"></i>
+                        Filter by Date:
+                    </label>
+                    <input
+                        type="date"
+                        class="date-input"
+                        id="date-filter"
+                        onchange="applyDateFilter()"
+                    >
+                    <button class="clear-btn" onclick="clearFilter()">Clear</button>
+                    <span class="filter-info" id="filter-info" style="display:none"></span>
+                </div>
+
+                <!-- Incoming Requests Table -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <span class="table-title">Incoming Leave Requests</span>
+                        <span class="badge" id="pending-badge">6 pending</span>
+                    </div>
+
+                    <table class="leave-table">
+                        <thead>
+                            <tr>
+                                <th>Doctor Name</th>
+                                <th>Department</th>
+                                <th>Dates</th>
+                                <th>Type</th>
+                                <th>Reason</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leave-table-body">
+                            <!-- Populated by StaffLeaveManagement.js → renderTable() -->
+                        </tbody>
+                    </table>
+
+                    <!-- Empty state shown when filter yields no results -->
+                    <div id="empty-state" class="empty-state" style="display:none">
+                        <i data-lucide="calendar-x"></i>
+                        <p>No pending requests for this date</p>
+                        <small>Try selecting a different date or clear the filter</small>
+                    </div>
+                </div><!-- /table-container -->
+
+            </div><!-- /content -->
+        </div><!-- /page-main -->
+
+        <!-- ================== PAGE: VIEW ALL (Approved / Rejected) ================== -->
+        <div class="page" id="page-viewall">
+            <div class="content">
+
+                <div class="requests-container">
+
+                    <div class="requests-header">
+                        <button class="back-btn" onclick="showPage('main')">
+                            <i data-lucide="chevron-left"></i>
+                        </button>
+                        <h3 class="requests-title" id="viewall-title">Approved Leave Requests</h3>
+                        <span class="status-pill pill-approved" id="viewall-pill">Approved</span>
+                    </div>
+
+                    <table class="requests-table">
+                        <thead>
+                            <tr>
+                                <th>Doctor Name</th>
+                                <th>Department</th>
+                                <th>Dates</th>
+                                <th>Type</th>
+                                <th>Reason</th>
+                                <th>Actioned On</th>
+                            </tr>
+                        </thead>
+                        <tbody id="viewall-table-body">
+                            <!-- Populated by StaffLeaveManagement.js → renderViewAll() -->
+                        </tbody>
+                    </table>
+
+                    <!-- Empty state shown when no requests of this type exist yet -->
+                    <div id="viewall-empty" class="empty-state" style="display:none">
+                        <i data-lucide="inbox"></i>
+                        <p id="viewall-empty-msg">No approved requests yet</p>
+                        <small>Approve leave requests from the main page to see them here</small>
+                    </div>
+
+                </div><!-- /requests-container -->
+
+            </div><!-- /content -->
+        </div><!-- /page-viewall -->
+
+    </div><!-- /main-content -->
+</div><!-- /container -->
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+    <i class="toast-icon" data-lucide="check-circle" id="toast-icon"></i>
+    <span id="toast-msg">Request approved</span>
+</div>
+
+<!-- JavaScript -->
+<script src="../../js/superuser/DoctorLeaveManagement.js"></script>
+<script>
+Promise.all([
+  fetch('./components/sidebar.html').then(r => r.text()),
+  fetch('./components/header.html').then(r => r.text())
+])
+.then(([sidebarHtml, headerHtml]) => {
+
+  // Inject sidebar
+  document.getElementById('sidebar-slot').innerHTML = sidebarHtml;
+
+  // Inject header
+  document.getElementById('header-slot').innerHTML = headerHtml;
+
+  // Active sidebar logic
+  const pageMap = {
+    'admindashboard.html': 'dashboard',
+    'doctormanagement.html': 'doctors',
+    'frontdeskmanagement.html': 'frontdesk',
+    'doctorleavemanagement.html': 'leave'
+  };
+  const headerTitleMap = {
+    dashboard: 'Dashboard',
+    doctors: 'Doctor Management',
+    frontdesk: 'Frontdesk Management',
+    leave: 'Doctor Leave Management'
+  };
+
+  const currentPage = location.pathname.split('/').pop().toLowerCase();
+  const activeKey = pageMap[currentPage];
+  const headerTitle = document.getElementById('header-page-title');
+
+  if (activeKey) {
+    const activeLink = document.querySelector(`[data-nav="${activeKey}"]`);
+    if (activeLink) activeLink.classList.add('active');
+    if (headerTitle) headerTitle.textContent = headerTitleMap[activeKey] || 'Dashboard';
+  }
+
+  const logoutLink = document.getElementById('superuser-logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('user');
+      window.location.replace('../login.html');
+    });
+  }
+
+  // Load icons AFTER HTML injection
+  lucide.createIcons();
+})
+.catch(err => console.error("Error loading components:", err));
+</script>
+<script>
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('href').includes(currentPage)) {
+            item.classList.add('active');
+        }
+    });
+</script>
+
+</body>
+</html>

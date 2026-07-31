@@ -1,0 +1,50 @@
+[
+  {
+    "id": "APT1778309236686",
+    "userId": "PAT001",
+    "doctorId": "DOC001",
+    "date": "2026-05-09",
+    "slot": "10:30",
+    "status": "completed"
+  },
+  {
+    "id": "APT1778215663377",
+    "userId": "PAT001",
+    "doctorId": "DOC001",
+    "date": "2026-05-08",
+    "slot": "10:30",
+    "status": "completed"
+  },
+  {
+    "id": "APT1777873349625",
+    "userId": "PAT002",
+    "doctorId": "DOC001",
+    "date": "2026-05-08",
+    "slot": "11:00",
+    "status": "upcoming"
+  },
+  {
+    "id": "APT1777871288537",
+    "userId": "PAT001",
+    "doctorId": "DOC002",
+    "date": "2026-05-11",
+    "slot": "11:00",
+    "status": "upcoming"
+  },
+  {
+    "id": "APT1777830522671",
+    "userId": "PAT001",
+    "doctorId": "DOC008",
+    "date": "2026-05-08",
+    "slot": "11:00",
+    "status": "upcoming"
+  },
+  {
+    "id": "APT1777824093306",
+    "userId": "PAT001",
+    "doctorId": "DOC001",
+    "date": "2026-05-06",
+    "slot": "11:30",
+    "status": "completed"
+  }
+]

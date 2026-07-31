@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lab Test — MEDBITS Doctor</title>
+  <link rel="stylesheet" href="../../css/doctor/global.css"/>
+  <link rel="stylesheet" href="../../css/doctor/lab-test.css"/>
+</head>
+<body data-page="lab-test">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <!-- Patient dropdown -->
+      <div class="card">
+        <div class="patient-select-row">
+          <select class="form-control" id="patientSelect" style="flex:1;">
+            <option value="">— Select Patient —</option>
+            <option value="PAT001">PAT001 — Ria Sharma</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="lab-layout">
+        <!-- Left: tests -->
+        <div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Lab Test Package Creation</span></div>
+            <!-- Fixed search bar -->
+            <div class="search-bar-inline" style="margin-bottom:14px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="search-input" id="testSearch" placeholder="Search individual tests..."/>
+            </div>
+            <div class="test-grid" id="testGrid"></div>
+          </div>
+        </div>
+
+        <!-- Right: package panel -->
+        <div class="package-panel">
+          <div class="package-panel-title">Test Package</div>
+          <div class="form-group">
+            <label class="form-label">Package Name</label>
+            <input type="text" class="form-control" id="packageName" placeholder="e.g., Cardiac Panel"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Remarks / Notes</label>
+            <textarea class="form-control" id="packageRemarks" rows="3" placeholder="e.g., Patient has high fever."></textarea>
+          </div>
+          <div class="form-label" style="margin-bottom:8px;">Selected Tests</div>
+          <div class="selected-count" id="selectedCount">0</div>
+          <div id="selectedTestsList" style="margin-bottom:14px;"></div>
+          <button class="btn btn-primary btn-full" id="assignBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+             Assign To Patient
+          </button>
+        </div>
+      </div>
+
+      <!-- Assigned packages history -->
+      <div class="card" id="assignedSection" style="display:none;">
+        <div class="card-header">
+          <span class="card-title">Assigned Lab Packages</span>
+        </div>
+        <div id="assignedList"></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/doctor/components.js"></script>
+<script src="../../js/doctor/lab-test.js"></script>
+</body>
+</html>

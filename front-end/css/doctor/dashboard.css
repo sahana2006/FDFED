@@ -1,0 +1,89 @@
+/* ── dashboard.css ── */
+
+.welcome-banner {
+  background: linear-gradient(135deg, var(--accent) 0%, #2d6135 100%);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(58,125,68,.25);
+  animation: fadeUp .4s ease both;
+}
+.banner-title { font-family: 'Sora', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 5px; }
+.banner-sub   { font-size: .9rem; opacity: .9; }
+
+/* ── Stat grid ── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+  animation: fadeUp .45s ease both;
+}
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 24px 26px;
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--border);
+  transition: var(--transition);
+}
+.stat-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.stat-label { font-size: .78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 10px; }
+.stat-value { font-family: 'Sora', sans-serif; font-size: 2.2rem; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 8px; }
+.stat-delta { font-size: .8rem; font-weight: 600; }
+.stat-delta.positive { color: var(--accent); }
+.stat-delta.warning  { color: var(--orange); }
+
+/* ── Bottom row ── */
+.dash-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  animation: fadeUp .5s ease both;
+}
+
+/* ── Quick actions ── */
+.quick-actions-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.qa-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 18px;
+  border-radius: var(--radius-sm);
+  font-size: .875rem; font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  cursor: pointer;
+}
+.qa-btn-primary {
+  background: var(--accent); color: #fff;
+  border: 2px solid var(--accent);
+}
+.qa-btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+.qa-btn-outline {
+  background: var(--white); color: var(--accent);
+  border: 2px solid var(--accent);
+}
+.qa-btn-outline:hover { background: var(--accent-light); }
+
+/* ── Confirm badge variants ── */
+.badge-confirm-outline {
+  padding: 3px 12px; border-radius: 20px; font-size: .72rem; font-weight: 700;
+  background: var(--accent-light); color: var(--accent); border: 1.5px solid var(--accent);
+}
+.badge-confirm-outline-blue {
+  padding: 3px 12px; border-radius: 20px; font-size: .72rem; font-weight: 700;
+  background: var(--teal-light); color: var(--teal); border: 1.5px solid var(--teal);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .dash-bottom-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 500px) {
+  .stat-grid { grid-template-columns: 1fr; }
+}

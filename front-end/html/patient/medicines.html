@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEDBITS - Medicines</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="../../css/patient/global.css">
+  <link rel="stylesheet" href="../../css/components/p_sidebar.css">
+  <link rel="stylesheet" href="../../css/components/p_navbar.css">
+  <link rel="stylesheet" href="../../css/patient/cart.css">
+</head>
+<body>
+
+<div id="sidebarMount"></div>
+<div class="main-wrap">
+  <div id="navbarMount"></div>
+  <main class="content">
+
+    <div class="search-hero">
+      <h2>Buy Medicines &amp; Essentials</h2>
+      <div class="search-wrap">
+        <input type="text" placeholder="Search medicines by name..." oninput="searchMedicines(this.value)">
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="section-header">
+        <div class="section-title">Browse by Health Condition</div>
+        <button class="view-all" onclick="showAllMeds()">View All</button>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card" onclick="showMedCategory('Cardiac Care')">
+          <div class="cat-icon"><i class="fa-solid fa-heart-pulse"></i></div><div class="cat-name">Cardiac Care</div>
+        </div>
+        <div class="cat-card" onclick="showMedCategory('Diabetes Care')">
+          <div class="cat-icon"><i class="fa-solid fa-syringe"></i></div><div class="cat-name">Diabetes Care</div>
+        </div>
+        <div class="cat-card" onclick="showMedCategory('Stomach Care')">
+          <div class="cat-icon"><i class="fa-solid fa-pills"></i></div><div class="cat-name">Stomach Care</div>
+        </div>
+        <div class="cat-card" onclick="showMedCategory('Pain Relief')">
+          <div class="cat-icon"><i class="fa-solid fa-bandage"></i></div><div class="cat-name">Pain Relief</div>
+        </div>
+        <div class="cat-card" onclick="showMedCategory('Oral Care')">
+          <div class="cat-icon"><i class="fa-solid fa-tooth"></i></div><div class="cat-name">Oral Care</div>
+        </div>
+        <div class="cat-card" onclick="showMedCategory('Respiratory')">
+          <div class="cat-icon"><i class="fa-solid fa-wind"></i></div><div class="cat-name">Respiratory</div>
+        </div>
+        <div class="cat-card" onclick="showMedCategory('Sexual Health')">
+          <div class="cat-icon"><i class="fa-solid fa-capsules"></i></div><div class="cat-name">Sexual Health</div>
+        </div>
+        <div class="cat-card" onclick="showMedCategory('Cold and Immunity')">
+          <div class="cat-icon"><i class="fa-solid fa-shield-heart"></i></div><div class="cat-name">Cold &amp; Immunity</div>
+        </div>
+        <div class="cat-card" onclick="showMedCategory('Liver Care')">
+          <div class="cat-icon"><i class="fa-solid fa-flask"></i></div><div class="cat-name">Liver Care</div>
+        </div>
+        <div class="cat-card" onclick="showMedCategory('Elderly Care')">
+          <div class="cat-icon"><i class="fa-solid fa-user"></i></div><div class="cat-name">Elderly Care</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="section-header">
+        <div class="section-title" id="medCategoryTitle">Pain Relief</div>
+        <button class="view-all" onclick="showAllMeds()">View All</button>
+      </div>
+      <div class="product-grid" id="medProductGrid"></div>
+    </div>
+
+    <div class="card mt-20" id="cartSection" style="display:none">
+      <div class="section-header">
+        <div class="section-title">Your Cart</div>
+        <button class="btn btn-outline btn-sm" onclick="hideCart()"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+      <div class="cart-empty" id="cartEmptyState">
+        <div class="empty-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+        <h3>Your cart is empty</h3>
+        <p>Add medicines to see them here before placing your order.</p>
+      </div>
+      <div id="cartItemsList"></div>
+      <div class="divider"></div>
+      <div class="summary-row">
+        <span>Subtotal</span>
+        <strong id="cartSubtotal">Rs 0.00</strong>
+      </div>
+      <button class="btn btn-primary btn-full mt-20" id="placeOrderBtn" onclick="placeOrder()">Place Order</button>
+    </div>
+
+    <div class="card mt-20">
+      <div class="section-header">
+        <div class="section-title">Order History</div>
+      </div>
+      <div id="medOrderList"></div>
+    </div>
+
+  </main>
+</div>
+
+<div class="cart-bar hidden" id="medCartBar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="cart-bar-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+    <div>
+      <div class="cart-bar-price" id="cartTotal">Rs 0.00</div>
+      <div class="cart-bar-count" id="cartCount">(0 items)</div>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="showCart()">View Cart</button>
+</div>
+
+<template id="tpl-med-card">
+  <div class="product-card">
+    <div class="product-card-img med-icon"></div>
+    <div class="product-card-name med-name"></div>
+    <div class="product-card-sub med-desc"></div>
+    <div class="product-card-footer">
+      <div class="product-card-price med-price"></div>
+      <button class="btn-add med-btn">Add</button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-cart-row">
+  <div class="cart-item">
+    <div class="cart-item-info">
+      <div class="cart-item-icon"></div>
+      <div>
+        <div class="cart-item-name"></div>
+        <div class="cart-item-qty"></div>
+      </div>
+    </div>
+    <div class="cart-item-actions">
+      <button class="cart-edit-btn cart-minus" type="button"><i class="fa-solid fa-minus"></i></button>
+      <span class="cart-item-qty-value">1</span>
+      <button class="cart-edit-btn cart-plus" type="button"><i class="fa-solid fa-plus"></i></button>
+      <div class="cart-item-price"></div>
+      <button class="cart-remove-btn cart-remove" type="button"><i class="fa-solid fa-trash"></i></button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-order-row">
+  <div class="order-item">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="cart-item-icon order-icon"></div>
+      <div>
+        <div class="list-item-title order-id"></div>
+        <div class="list-item-sub order-name"></div>
+        <div class="list-item-sub order-info"></div>
+      </div>
+    </div>
+    <div class="badge badge-green order-total"></div>
+  </div>
+</template>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/patient/utils.js"></script>
+<script src="../../js/patient/components.js"></script>
+<script src="../../js/patient/medicines.js"></script>
+<script>
+  (async () => {
+    await loadComponents('medicines', 'Medicines');
+    updateTopbarUser();
+    try {
+      await initializeMedicinesPage();
+    } catch (_error) {
+      showToast('Unable to load medicines from backend', 'error');
+    }
+  })();
+</script>
+</body>
+</html>

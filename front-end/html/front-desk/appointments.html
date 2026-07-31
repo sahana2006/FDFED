@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Appointment Management — MEDBITS Frontdesk</title>
+    <link rel="stylesheet" href="../../css/front-desk/base.css" />
+    <link rel="stylesheet" href="../../css/front-desk/appointments.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <span class="sidebar-logo-text">MEDBITS</span>
+        </div>
+        <nav class="sidebar-nav" id="sidebar-nav"></nav>
+      </aside>
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1 id="topbar-title-h1">Appointment Management</h1>
+          <span id="topbar-subtitle">Frontdesk Portal</span>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-bell" title="Notifications">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </div>
+          <div class="topbar-user">
+            <div class="topbar-user-icon">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            </div>
+            <div class="topbar-user-info">
+              <span class="topbar-user-name" id="topbar-username"
+                >Loading...</span
+              >
+              <span class="topbar-user-role">Frontdesk</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- ===== STEP 1: Patient Selection + Upcoming Consultations ===== -->
+        <div id="step-patient" class="appt-step">
+          <!-- Patient Selection Card -->
+          <div class="card step-card">
+            <div class="step-header">
+              <h2 class="section-title">Select Existing Patient</h2>
+              <a href="walkin.html" class="btn btn-primary btn-sm"
+                >Register New patient</a
+              >
+            </div>
+            <div class="search-bar" style="margin-top: var(--space-4)">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                id="appt-patient-search"
+                placeholder="Enter phone number or patient ID"
+                autocomplete="off"
+              />
+            </div>
+            <div
+              id="appt-search-results"
+              class="search-results hidden"
+              style="margin-top: var(--space-2)"
+            ></div>
+
+            <div
+              id="selected-patient-badge"
+              class="selected-patient-badge hidden"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span id="selected-patient-name">Patient Selected</span>
+              <button id="clear-patient-btn" class="clear-btn">&times;</button>
+            </div>
+
+            <div style="text-align: right; margin-top: var(--space-5)">
+              <button class="btn btn-primary" id="new-appointment-btn">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                New Appointment
+              </button>
+            </div>
+          </div>
+
+          <!-- Upcoming Consultations -->
+          <div class="card" style="margin-top: var(--space-5)">
+            <div class="section-header">
+              <span class="section-title">Upcoming Consultations</span>
+              <button class="btn-view-all" id="toggle-consultations-btn">
+                View All
+              </button>
+            </div>
+            <div id="upcoming-consultations" class="consultations-list"></div>
+          </div>
+        </div>
+
+        <!-- ===== STEP 2: Browse Specialties ===== -->
+        <div id="step-specialty" class="appt-step hidden">
+          <div class="card">
+            <div class="search-bar" style="margin-bottom: var(--space-6)">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                id="specialty-search-input"
+                placeholder="Search Speciality"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="section-header">
+              <span class="section-title">Browse by Specialties</span>
+              <button class="btn-view-all" id="view-all-specialties">
+                View All
+              </button>
+            </div>
+
+            <div id="specialty-grid" class="specialty-grid"></div>
+
+            <div style="margin-top: var(--space-5)">
+              <button class="btn btn-outline" id="back-to-patient-btn">
+                ← Back
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== STEP 3: Select Doctor ===== -->
+        <div id="step-doctor" class="appt-step hidden">
+          <div class="card">
+            <div class="specialty-dropdown-bar">
+              <span id="selected-specialty-label">Select a specialty</span>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+
+            <div class="search-bar" style="margin: var(--space-4) 0">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                id="doctor-search-input"
+                placeholder="Search Doctor"
+                autocomplete="off"
+              />
+              <button class="btn-view-all" style="flex-shrink: 0">
+                View All
+              </button>
+            </div>
+
+            <div id="doctor-grid" class="doctor-grid"></div>
+
+            <div style="margin-top: var(--space-5)">
+              <button class="btn btn-outline" id="back-to-specialty-btn">
+                ← Back
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== STEP 4: Select Slot ===== -->
+        <div id="step-slot" class="appt-step hidden">
+          <div class="card">
+            <div id="slot-doctor-info">
+              <h3 class="slot-doctor-name" id="slot-doctor-name">
+                Select a doctor
+              </h3>
+              <p class="slot-doctor-spec" id="slot-doctor-spec">Choose a specialty to continue</p>
+            </div>
+
+            <!-- Date Selector -->
+            <div class="date-nav">
+              <button class="date-nav-btn" id="prev-dates-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+              <div id="date-strip" class="date-strip"></div>
+              <button class="date-nav-btn" id="next-dates-btn">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Time Slots -->
+            <div class="slots-section">
+              <div class="slot-group">
+                <div class="slot-group-title">Morning</div>
+                <div class="slot-row" id="slots-morning"></div>
+              </div>
+              <div class="slot-group">
+                <div class="slot-group-title">Afternoon</div>
+                <div class="slot-row" id="slots-afternoon"></div>
+              </div>
+              <div class="slot-group">
+                <div class="slot-group-title">Evening</div>
+                <div class="slot-row" id="slots-evening"></div>
+              </div>
+            </div>
+
+            <div class="slot-actions">
+              <button class="btn btn-outline" id="back-to-doctor-btn">
+                ← Back
+              </button>
+              <button class="btn btn-primary" id="confirm-appointment-btn">
+                Confirm Appointment
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modify Appointment Modal -->
+    <div class="modal-overlay hidden" id="modify-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <span class="modal-title">Modify Appointment</span>
+            <p class="modal-subtitle">
+              Update the appointment date and time for the selected patient.
+            </p>
+          </div>
+          <button class="modal-close" id="close-modify-modal">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div id="modify-modal-body"></div>
+        <div
+          style="display: flex; gap: var(--space-3); margin-top: var(--space-5)"
+        >
+          <button class="btn btn-primary" id="save-modify-btn">
+            Save Changes
+          </button>
+          <button class="btn btn-outline" id="cancel-modify-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cancel Confirmation Modal -->
+    <div class="modal-overlay hidden" id="cancel-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title">Cancel Appointment</span>
+          <button class="modal-close" id="close-cancel-modal">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <p
+          style="
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            margin-bottom: var(--space-5);
+          "
+        >
+          Are you sure you want to cancel this appointment?
+        </p>
+        <div
+          id="cancel-modal-body"
+          style="
+            background: var(--color-danger-bg);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            font-size: 14px;
+            margin-bottom: var(--space-5);
+          "
+        ></div>
+        <div style="display: flex; gap: var(--space-3)">
+          <button class="btn btn-danger" id="confirm-cancel-btn">
+            Yes, Cancel
+          </button>
+          <button class="btn btn-outline" id="abort-cancel-btn">
+            Keep Appointment
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../../js/front-desk/shared.js"></script>
+    <script src="../../js/front-desk/appointments.js"></script>
+  </body>
+</html>

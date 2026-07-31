@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDBITS - Front Desk Management</title>
+    <link rel="stylesheet" href="../../css/superuser/components/sidebar.css">
+    <link rel="stylesheet" href="../../css/superuser/components/header.css">
+    <link rel="stylesheet" href="../../css/superuser/FrontdeskManagement.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .delete-btn {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 0.35rem;
+            padding: 0.3rem 0.85rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-family: inherit;
+        }
+        .delete-btn:hover { background-color: #b91c1c; }
+    </style>
+</head>
+<body>
+<script>
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user || user.role !== 'admin') {
+    window.location.href = '../login.html';
+  }
+</script>
+<div class="container">
+    <!-- SIDEBAR -->
+    <div id="sidebar-slot"></div>
+ 
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        
+        <div id="header-slot"><h2 id="header-page-title">Front Desk Management</h2></div>
+ 
+        <main class="content">
+ 
+            <!-- ===== PAGE: VIEW STAFF ===== -->
+            <div id="page-view" class="page active">
+                <div class="quick-actions-card">
+                    <h3 class="section-title">Quick Actions</h3>
+                    <div class="quick-actions">
+                        <button class="action-btn action-btn-active" onclick="showPage('view')"><i data-lucide="search"></i><span>View Staff</span></button>
+                        <button class="action-btn" onclick="showPage('add')"><i data-lucide="user-plus"></i><span>Add Staff</span></button>
+                        <button class="action-btn" onclick="showPage('edit')"><i data-lucide="edit"></i><span>Edit Staff Profile</span></button>
+                    </div>
+                </div>
+ 
+                <div class="search-container">
+                    <div class="search-box">
+                        <i data-lucide="search"></i>
+                        <input type="text" placeholder="Search Staff by Name" class="search-input" id="viewSearchInput">
+                    </div>
+                </div>
+ 
+                <div class="table-container">
+                    <h3 class="table-title">Staff Details</h3>
+                    <table class="staff-table">
+                        <thead>
+                            <tr>
+                                <th>Staff Name</th>
+                                <th>Counter</th>
+                                <th>Language Proficiency</th>
+                                <th>Contact Number</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+ 
+            <!-- ===== PAGE: VIEW ALL (DETAIL VIEW) ===== -->
+            <div id="page-viewall" class="page">
+                <div class="quick-actions-card">
+                    <h3 class="section-title">Quick Actions</h3>
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="showPage('view')"><i data-lucide="search"></i><span>View Staff</span></button>
+                        <button class="action-btn" onclick="showPage('add')"><i data-lucide="user-plus"></i><span>Add Staff</span></button>
+                        <button class="action-btn" id="viewAllEditBtn" onclick="goEditFromView()"><i data-lucide="edit"></i><span>Edit Staff Profile</span></button>
+                    </div>
+                </div>
+ 
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <button class="back-btn" onclick="showPage('view')"><i data-lucide="chevron-left"></i></button>
+                        <h3 class="profile-title" id="profileTitle">Staff Details</h3>
+                    </div>
+ 
+                    <div class="info-section">
+                        <h4 class="info-section-title">Personal Information</h4>
+                        <div class="info-grid" id="personalGrid"></div>
+                    </div>
+ 
+                    <div class="info-section">
+                        <h4 class="info-section-title">Professional Details</h4>
+                        <div class="info-grid" id="professionalGrid"></div>
+                    </div>
+ 
+                    <div class="info-section">
+                        <h4 class="info-section-title">Availability Details</h4>
+                        <div class="info-grid" id="availabilityGrid"></div>
+                    </div>
+                </div>
+            </div>
+ 
+            <!-- ===== PAGE: ADD STAFF ===== -->
+            <div id="page-add" class="page">
+                <div class="quick-actions-card">
+                    <h3 class="section-title">Quick Actions</h3>
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="showPage('view')"><i data-lucide="search"></i><span>View Staff</span></button>
+                        <button class="action-btn action-btn-active" onclick="showPage('add')"><i data-lucide="user-plus"></i><span>Add Staff</span></button>
+                        <button class="action-btn" onclick="showPage('edit')"><i data-lucide="edit"></i><span>Edit Staff Profile</span></button>
+                    </div>
+                </div>
+ 
+                <div class="form-container">
+                    <h3 class="form-title">Add New Staff Profile</h3>
+                    <form id="addStaffForm" novalidate>
+ 
+                        <div class="form-section">
+                            <h4 class="form-section-title">Personal Information</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="add_firstName">First Name</label>
+                                    <input type="text" id="add_firstName" name="firstName" placeholder="e.g. Ananya" autocomplete="off">
+                                    <span class="field-hint">One word, letters only</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add_lastName">Last Name</label>
+                                    <input type="text" id="add_lastName" name="lastName" placeholder="e.g. Sharma" autocomplete="off">
+                                    <span class="field-hint">One word, letters only</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add_dob">Date of Birth</label>
+                                    <input type="date" id="add_dob" name="dob" max="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="add_email">E-Mail Id</label>
+                                    <input type="email" id="add_email" name="email" placeholder="e.g. staff@medbits.com" autocomplete="off">
+                                </div>
+                                <div class="form-group">
+                                    <label for="add_password">Password</label>
+                                    <input type="password" id="add_password" name="password" placeholder="Set login password" autocomplete="new-password">
+                                </div>
+                                <div class="form-group">
+                                    <label for="add_gender">Gender</label>
+                                    <select id="add_gender" name="gender" class="form-select">
+                                        <option value="">-- Select Gender --</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="add_contact">Contact No</label>
+                                    <input type="tel" id="add_contact" name="contact" placeholder="10-digit number" maxlength="10">
+                                    <span class="field-hint">Exactly 10 digits</span>
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div class="form-section">
+                            <h4 class="form-section-title">Professional Details</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="add_reportingManagerId">Reporting Manager ID</label>
+                                    <input type="text" id="add_reportingManagerId" name="reportingManagerId" placeholder="e.g. AH101" autocomplete="off">
+                                    <span class="field-hint">One word / ID, no spaces</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>Language Proficiency</label>
+                                    <div class="lang-count-row">
+                                        <input type="number" id="add_languageCount" name="languageCount" min="1" max="3" placeholder="1–3">
+                                        <button type="button" class="generate-btn" id="add_generateLangBtn">Generate</button>
+                                    </div>
+                                    <span class="field-hint">Enter number of languages (max 3), then click Generate</span>
+                                    <div class="language-boxes" id="add_languageBoxes"></div>
+                                    <input type="hidden" name="languageCountHidden" id="add_languageCountHidden">
+                                </div>
+                                <div class="form-group">
+                                    <label for="add_dateJoining">Date of Joining</label>
+                                    <input type="date" id="add_dateJoining" name="dateJoining" max="">
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div class="form-section">
+                            <h4 class="form-section-title">Availability Details</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="add_counter">Counter Number</label>
+                                    <input type="number" id="add_counter" name="counter" placeholder="e.g. 3" min="1" max="50">
+                                    <span class="field-hint">Enter counter number</span>
+                                </div>
+                                <div class="form-group shift-group">
+                                    <label>Current Shift</label>
+                                    <div class="time-range">
+                                        <div class="time-input-wrap">
+                                            <span class="time-label">From</span>
+                                            <input type="time" id="add_shiftStart" name="shiftStart">
+                                        </div>
+                                        <span class="time-sep">to</span>
+                                        <div class="time-input-wrap">
+                                            <span class="time-label">To</span>
+                                            <input type="time" id="add_shiftEnd" name="shiftEnd">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-save">Save</button>
+                            <button type="button" class="btn btn-cancel" id="add_cancelBtn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+ 
+            <!-- ===== PAGE: EDIT STAFF ===== -->
+            <div id="page-edit" class="page">
+                <div class="quick-actions-card">
+                    <h3 class="section-title">Quick Actions</h3>
+                    <div class="quick-actions">
+                        <button class="action-btn" onclick="showPage('view')"><i data-lucide="search"></i><span>View Staff</span></button>
+                        <button class="action-btn" onclick="showPage('add')"><i data-lucide="user-plus"></i><span>Add Staff</span></button>
+                        <button class="action-btn action-btn-active" onclick="showPage('edit')"><i data-lucide="edit"></i><span>Edit Staff Profile</span></button>
+                    </div>
+                </div>
+ 
+                <div class="form-container">
+                    <div class="form-header">
+                        <h3 class="form-title">Edit Staff Profile</h3>
+                        <div class="search-box edit-search-box" style="position:relative;">
+                            <i data-lucide="search"></i>
+                            <input type="text" placeholder="Search staff name..." class="search-input" id="editSearchInput" autocomplete="off">
+                        </div>
+                    </div>
+ 
+                    <form id="editStaffForm" novalidate>
+ 
+                        <div class="form-section">
+                            <h4 class="form-section-title">Personal Information</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="edit_firstName">First Name</label>
+                                    <input type="text" id="edit_firstName" name="firstName" placeholder="e.g. Ananya" autocomplete="off">
+                                    <span class="field-hint">One word, letters only</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_lastName">Last Name</label>
+                                    <input type="text" id="edit_lastName" name="lastName" placeholder="e.g. Sharma" autocomplete="off">
+                                    <span class="field-hint">One word, letters only</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_dob">Date of Birth</label>
+                                    <input type="date" id="edit_dob" name="dob" max="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_email">E-Mail Id</label>
+                                    <input type="email" id="edit_email" name="email" placeholder="e.g. staff@medbits.com" autocomplete="off">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_gender">Gender</label>
+                                    <select id="edit_gender" name="gender" class="form-select">
+                                        <option value="">-- Select Gender --</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_contact">Contact No</label>
+                                    <input type="tel" id="edit_contact" name="contact" placeholder="10-digit number" maxlength="10">
+                                    <span class="field-hint">Exactly 10 digits</span>
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div class="form-section">
+                            <h4 class="form-section-title">Professional Details</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="edit_reportingManagerId">Reporting Manager ID</label>
+                                    <input type="text" id="edit_reportingManagerId" name="reportingManagerId" placeholder="e.g. AH101" autocomplete="off">
+                                    <span class="field-hint">One word / ID, no spaces</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>Language Proficiency</label>
+                                    <div class="lang-count-row">
+                                        <input type="number" id="edit_languageCount" name="languageCount" min="1" max="3" placeholder="1–3">
+                                        <button type="button" class="generate-btn" id="edit_generateLangBtn">Generate</button>
+                                    </div>
+                                    <span class="field-hint">Enter number of languages (max 3), then click Generate</span>
+                                    <div class="language-boxes" id="edit_languageBoxes"></div>
+                                    <input type="hidden" name="languageCountHidden" id="edit_languageCountHidden">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_dateJoining">Date of Joining</label>
+                                    <input type="date" id="edit_dateJoining" name="dateJoining" max="">
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div class="form-section">
+                            <h4 class="form-section-title">Availability Details</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="edit_counter">Counter Number</label>
+                                    <input type="number" id="edit_counter" name="counter" placeholder="e.g. 3" min="1" max="50">
+                                    <span class="field-hint">Enter counter number</span>
+                                </div>
+                                <div class="form-group shift-group">
+                                    <label>Current Shift</label>
+                                    <div class="time-range">
+                                        <div class="time-input-wrap">
+                                            <span class="time-label">From</span>
+                                            <input type="time" id="edit_shiftStart" name="shiftStart">
+                                        </div>
+                                        <span class="time-sep">to</span>
+                                        <div class="time-input-wrap">
+                                            <span class="time-label">To</span>
+                                            <input type="time" id="edit_shiftEnd" name="shiftEnd">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-save">Save</button>
+                            <button type="button" class="btn btn-cancel" id="edit_cancelBtn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+ 
+        </main>
+    </div>
+</div>
+ 
+<script>lucide.createIcons();</script>
+<script src="../../js/superuser/FrontdeskManagement.js"></script>
+<script>
+Promise.all([
+  fetch('./components/sidebar.html').then(r => r.text()),
+  fetch('./components/header.html').then(r => r.text())
+])
+.then(([sidebarHtml, headerHtml]) => {
+ 
+  // Inject sidebar
+  document.getElementById('sidebar-slot').innerHTML = sidebarHtml;
+ 
+  // Inject header
+  document.getElementById('header-slot').innerHTML = headerHtml;
+ 
+  // Active sidebar logic
+  const pageMap = {
+    'admindashboard.html': 'dashboard',
+    'doctormanagement.html': 'doctors',
+    'frontdeskmanagement.html': 'frontdesk',
+    'doctorleavemanagement.html': 'leave'
+  };
+  const headerTitleMap = {
+    dashboard: 'Dashboard',
+    doctors: 'Doctor Management',
+    frontdesk: 'Frontdesk Management',
+    leave: 'Frontdesk Leave Management'
+  };
+ 
+  const currentPage = location.pathname.split('/').pop().toLowerCase();
+  const activeKey = pageMap[currentPage];
+  const headerTitle = document.getElementById('header-page-title');
+ 
+  if (activeKey) {
+    const activeLink = document.querySelector(`[data-nav="${activeKey}"]`);
+    if (activeLink) activeLink.classList.add('active');
+    if (headerTitle) headerTitle.textContent = headerTitleMap[activeKey] || 'Dashboard';
+  }
+
+  const logoutLink = document.getElementById('superuser-logout');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('user');
+      window.location.replace('../login.html');
+    });
+  }
+ 
+  // Load icons AFTER HTML injection
+  lucide.createIcons();
+})
+.catch(err => console.error("Error loading components:", err));
+</script>
+<script>
+    const currentPage = window.location.pathname.split('/').pop();
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.getAttribute('href').includes(currentPage)) {
+            item.classList.add('active');
+        }
+    });
+</script>
+</body>
+</html>
+ 

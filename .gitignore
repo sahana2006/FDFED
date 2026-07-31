@@ -1,0 +1,61 @@
+# -------------------------
+# Node.js
+# -------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# -------------------------
+# Backend (NestJS)
+# -------------------------
+back-end/node_modules/
+back-end/dist/
+back-end/.env
+back-end/.env.*
+back-end/coverage/
+
+# -------------------------
+# Frontend (Vanilla / Static)
+# -------------------------
+front-end/node_modules/
+
+# -------------------------
+# Logs
+# -------------------------
+logs
+*.log
+
+# -------------------------
+# OS Files
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# IDE / Editor
+# -------------------------
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+.idea/
+
+# -------------------------
+# Environment Variables
+# -------------------------
+.env
+.env.*
+
+# -------------------------
+# Build / Temp
+# -------------------------
+dist/
+build/
+.tmp/
+.temp/
+
+# -------------------------
+# Cache
+# -------------------------
+.cache/

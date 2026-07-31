@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedBits – Sign In</title>
+  <link rel="stylesheet" href="../css/login.css">
+  <style>
+    /* Hide body until session check completes — prevents the 1-second flash */
+    body { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="auth-topbar">
+  <a href="landing.html" class="back-link">← Back</a>
+  <div class="auth-brand">
+    <div class="auth-brand-icon">✚</div>
+    <div class="auth-brand-name">MedBits</div>
+  </div>
+  <a href="signup.html" style="font-size:13px;color:#1e40af;font-weight:600;text-decoration:none">
+    New here? Sign Up
+  </a>
+</div>
+
+<div class="auth-layout">
+
+  <div class="auth-left">
+    <div class="left-content">
+      <div class="left-tag"><span class="left-dot"></span> Smart Healthcare Platform</div>
+      <h1>Your Health,<br>Our <span>Priority</span></h1>
+      <p>Sign in to access your medical records, book appointments, order medicines and manage your complete health journey.</p>
+      <div class="left-features">
+        <div class="feature-row"><div class="feature-dot">📅</div><span>Book doctor appointments in seconds</span></div>
+        <div class="feature-row"><div class="feature-dot">📋</div><span>Access all your medical records</span></div>
+        <div class="feature-row"><div class="feature-dot">💊</div><span>Order medicines with home delivery</span></div>
+        <div class="feature-row"><div class="feature-dot">🔒</div><span>Your data is private and secure</span></div>
+      </div>
+      <div class="left-bottom">
+        <div class="mini-stat"><div class="num">500+</div><div class="lbl">Doctors</div></div>
+        <div class="mini-stat"><div class="num">50K+</div><div class="lbl">Patients</div></div>
+        <div class="mini-stat"><div class="num">4.9★</div><div class="lbl">Rating</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="login-card">
+      <h2>Welcome Back 👋</h2>
+      <p class="subtitle">Sign in to your account to continue</p>
+      <div class="divider-line"></div>
+
+      <div class="hint-box">
+        <strong>Demo Credentials</strong><br>
+        Admin &nbsp;&nbsp;&nbsp;&nbsp;— admin@medbits.com / admin123<br>
+        Patient &nbsp;— ria@medbits.com / patient123<br>
+        Doctor &nbsp;&nbsp;— madhuri@medbits.com / doctor123<br>
+        Front Desk — frontdesk@medbits.com / desk123
+      </div>
+
+      <div class="err-box" id="errBox"></div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <div class="input-wrap">
+          <span class="input-icon">📧</span>
+          <input type="text" id="loginId" placeholder="your.email@example.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔑</span>
+          <input type="password" id="loginPass" placeholder="Enter your password" autocomplete="current-password">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="remember"><input type="checkbox"> Remember me</label>
+        <span class="forgot">Forgot Password?</span>
+      </div>
+
+      <button class="btn-login" id="loginBtn" onclick="doLogin()">Sign In</button>
+
+      <div class="signup-row">
+        Don't have an account? <span onclick="location.href='signup.html'">Create one free</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- auth.js must load first — it defines getSession() and handleLogin() -->
+<script src="../js/auth.js"></script>
+
+<script>
+  (function() {
+    var session = getSession();
+    if (!session) {
+      document.body.style.display = 'flex';
+      return;
+    }
+
+    redirectByRole(session);
+  })();
+
+  async function doLogin() {
+    var id   = document.getElementById('loginId').value.trim();
+    var pass = document.getElementById('loginPass').value;
+    var err  = document.getElementById('errBox');
+
+    if (!id || !pass) {
+      err.textContent = 'Please enter your email and password.';
+      err.classList.add('show');
+      return;
+    }
+
+    err.classList.remove('show');
+
+    var btn = document.getElementById('loginBtn');
+    btn.textContent = 'Signing in…';
+    btn.disabled    = true;
+
+    var result = await handleLogin(id, pass);
+    if (result) {
+      err.textContent = result;
+      err.classList.add('show');
+      btn.textContent = 'Sign In';
+      btn.disabled    = false;
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+
+</body>
+</html>

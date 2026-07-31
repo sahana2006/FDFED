@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedBits – Create Account</title>
+  <link rel="stylesheet" href="../css/signup.css">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="auth-topbar">
+  <a href="login.html" class="back-link">← Back to Sign In</a>
+  <div class="auth-brand">
+    <div class="auth-brand-icon">✚</div>
+    <div class="auth-brand-name">MedBits</div>
+  </div>
+  <a href="login.html" style="font-size:13px;color:#64748b;text-decoration:none">Already registered? <strong style="color:#1e40af">Sign In</strong></a>
+</div>
+
+<!-- MAIN -->
+<div class="signup-wrap">
+  <div class="signup-card">
+
+    <div class="signup-header">
+      <h2>Create Your Patient Account</h2>
+      <p>Join 50,000+ patients managing their health on MedBits</p>
+    </div>
+
+    <!-- Progress steps -->
+    <div class="steps">
+      <div class="step done" id="step1">
+        <div class="step-circle">1</div>
+        <div class="step-label">Personal Info</div>
+      </div>
+      <div class="step-line done"></div>
+      <div class="step active" id="step2">
+        <div class="step-circle">2</div>
+        <div class="step-label">Health Details</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Security</div>
+      </div>
+    </div>
+
+    <div class="err-box" id="errBox"></div>
+
+    <!-- SECTION 1: Personal Info -->
+    <div class="section-label">Personal Information</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>First Name *</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input id="su-fn" placeholder="Enter first name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Last Name *</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input id="su-ln" placeholder="Enter last name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email Address *</label>
+        <div class="input-wrap">
+          <span class="input-icon">📧</span>
+          <input type="email" id="su-email" placeholder="your.email@example.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Phone Number *</label>
+        <div class="input-wrap">
+          <span class="input-icon">📱</span>
+          <input type="tel" id="su-phone" placeholder="10-digit mobile number" maxlength="10">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Health Details -->
+    <div class="section-label">Health Information</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Date of Birth</label>
+        <div class="input-wrap">
+          <span class="input-icon">📆</span>
+          <input id="su-dob" placeholder="dd-mm-yyyy">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <div class="input-wrap">
+          <span class="input-icon">⚧</span>
+          <select id="su-gender" style="padding-left:36px">
+            <option value="">Select Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Blood Group</label>
+        <div class="input-wrap">
+          <span class="input-icon">🩸</span>
+          <select id="su-blood" style="padding-left:36px">
+            <option value="">Select Blood Group</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+            <option>O+</option><option>O-</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Guardian / Emergency Contact</label>
+        <div class="input-wrap">
+          <span class="input-icon">👨‍👩‍👧</span>
+          <input id="su-guardian" placeholder="Guardian full name">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Security -->
+    <div class="section-label">Account Security</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Password *</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔑</span>
+          <input type="password" id="su-pass" placeholder="Min. 6 characters">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Confirm Password *</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="su-confirm" placeholder="Re-enter password">
+        </div>
+      </div>
+    </div>
+
+    <!-- Terms -->
+    <label class="terms-row">
+      <input type="checkbox" id="su-terms">
+      I agree to MedBits' <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+    </label>
+
+    <button class="btn-signup" id="signupBtn" onclick="doSignup()">Create My Account</button>
+
+    <div class="login-row">
+      Already have an account? <span onclick="location.href='login.html'">Sign in here</span>
+    </div>
+
+  </div>
+</div>
+
+<script src="../js/auth.js"></script>
+<script>
+  async function doSignup() {
+    const g   = id => document.getElementById(id).value.trim();
+    const err = document.getElementById('errBox');
+
+    // Required fields
+    const fn   = g('su-fn'), ln = g('su-ln'), email = g('su-email'), phone = g('su-phone');
+    const pass = g('su-pass'), confirm = g('su-confirm');
+
+    if (!fn || !ln || !email || !phone || !pass) {
+      err.textContent = 'Please fill in all required fields (marked with *).';
+      err.classList.add('show'); return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      err.textContent = 'Please enter a valid email address.';
+      err.classList.add('show'); return;
+    }
+    if (phone.length !== 10 || isNaN(phone)) {
+      err.textContent = 'Phone number must be exactly 10 digits.';
+      err.classList.add('show'); return;
+    }
+    if (pass.length < 6) {
+      err.textContent = 'Password must be at least 6 characters.';
+      err.classList.add('show'); return;
+    }
+    if (pass !== confirm) {
+      err.textContent = 'Passwords do not match. Please re-enter.';
+      err.classList.add('show'); return;
+    }
+    if (!document.getElementById('su-terms').checked) {
+      err.textContent = 'Please accept the Terms of Service to continue.';
+      err.classList.add('show'); return;
+    }
+
+    err.classList.remove('show');
+    const btn = document.getElementById('signupBtn');
+    btn.textContent = 'Creating account…';
+    btn.disabled = true;
+
+    const result = await handleSignup({
+      firstName: fn,
+      lastName: ln,
+      email,
+      phone,
+      dob: g('su-dob'),
+      gender: g('su-gender'),
+      bloodGroup: g('su-blood'),
+      guardianName: g('su-guardian'),
+      password: pass
+    });
+
+    if (result) {
+      err.textContent = result;
+      err.classList.add('show');
+      btn.textContent = 'Create My Account';
+      btn.disabled = false;
+      return;
+    }
+
+    window.location.replace('login.html');
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') void doSignup(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Queue Management — MEDBITS Frontdesk</title>
+    <link rel="stylesheet" href="../../css/front-desk/base.css" />
+    <link rel="stylesheet" href="../../css/front-desk/queue.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <span class="sidebar-logo-text">MEDBITS</span>
+        </div>
+        <nav class="sidebar-nav" id="sidebar-nav"></nav>
+      </aside>
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1 id="topbar-title-h1">Queue Management</h1>
+          <span id="topbar-subtitle">Frontdesk Portal</span>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-bell" title="Notifications">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </div>
+          <div class="topbar-user">
+            <div class="topbar-user-icon">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            </div>
+            <div class="topbar-user-info">
+              <span class="topbar-user-name" id="topbar-username"
+                >Loading...</span
+              >
+              <span class="topbar-user-role">Frontdesk</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Patient Dropdown + Generate Token -->
+        <div class="queue-controls card">
+          <div class="patient-select-wrapper">
+            <select class="input-field patient-select" id="patient-select">
+              <option value="">Select Patient...</option>
+            </select>
+          </div>
+
+          <div class="token-controls">
+            <div class="form-group" style="flex: 1">
+              <label class="form-label">Select Doctor</label>
+              <select class="input-field" id="doctor-select">
+                <option value="">All Doctors</option>
+              </select>
+            </div>
+            <div class="generate-token-group">
+              <label class="form-label">Check In</label>
+              <button class="btn btn-primary" id="generate-token-btn">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Generate Token
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Queue List -->
+        <div class="card" style="margin-top: var(--space-5)">
+          <div class="section-header">
+            <span class="section-title">Doctor Queue</span>
+            <span class="queue-count badge badge-purple" id="queue-count"
+              >0 patients</span
+            >
+          </div>
+          <div id="waiting-list-container" class="waiting-list"></div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Token Generated Toast/Modal -->
+    <div class="modal-overlay hidden" id="token-modal">
+      <div class="modal" style="text-align: center">
+        <div class="token-modal-icon">
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <h3
+          class="modal-title"
+          style="margin: var(--space-3) 0; font-size: 20px"
+        >
+          Token Generated!
+        </h3>
+        <div class="token-display" id="token-display">GP-029</div>
+        <div
+          id="token-modal-details"
+          style="
+            margin: var(--space-4) 0;
+            font-size: 14px;
+            color: var(--color-text-secondary);
+          "
+        ></div>
+        <button
+          class="btn btn-primary"
+          id="close-token-modal"
+          style="width: 100%"
+        >
+          Done
+        </button>
+      </div>
+    </div>
+
+    <script src="../../js/front-desk/shared.js"></script>
+    <script src="../../js/front-desk/queue.js"></script>
+  </body>
+</html>

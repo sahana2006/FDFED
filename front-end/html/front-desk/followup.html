@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Follow-Up & Referral Coordination — MEDBITS Frontdesk</title>
+    <link rel="stylesheet" href="../../css/front-desk/base.css" />
+    <link rel="stylesheet" href="../../css/front-desk/followup.css" />
+  </head>
+  <body>
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <span class="sidebar-logo-text">MEDBITS</span>
+        </div>
+        <nav class="sidebar-nav" id="sidebar-nav"></nav>
+      </aside>
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1 id="topbar-title-h1">Follow-Up & Referral Coordination</h1>
+          <span id="topbar-subtitle">Frontdesk Portal</span>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-bell" title="Notifications">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </div>
+          <div class="topbar-user">
+            <div class="topbar-user-icon">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <line x1="8" y1="21" x2="16" y2="21" />
+                <line x1="12" y1="17" x2="12" y2="21" />
+              </svg>
+            </div>
+            <div class="topbar-user-info">
+              <span class="topbar-user-name" id="topbar-username"
+                >Loading...</span
+              >
+              <span class="topbar-user-role">Frontdesk</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Find Patient Search -->
+        <div class="card followup-search-card">
+          <div class="followup-search-header">
+            <span class="section-title">Find Patient</span>
+          </div>
+          <div class="search-bar">
+            <input
+              type="text"
+              id="followup-search"
+              placeholder="Enter patient's 10 digit phone number"
+              maxlength="10"
+              autocomplete="off"
+            />
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Referrals List -->
+        <div class="followup-search-header" style="margin-top: 24px; margin-bottom: 12px;">
+          <span class="section-title">Referrals</span>
+        </div>
+        <div id="referral-list" class="followup-list"></div>
+        <div id="referral-empty" class="empty-state hidden">
+          <p>No referrals found</p>
+        </div>
+
+        <!-- Follow-Up List -->
+        <div class="followup-search-header" style="margin-top: 24px; margin-bottom: 12px;">
+          <span class="section-title">Follow-Ups</span>
+        </div>
+        <div id="followup-list" class="followup-list"></div>
+        <div id="followup-empty" class="empty-state hidden">
+          <p>No follow-ups found</p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Book Follow-up Modal -->
+    <div class="modal-overlay hidden" id="followup-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title">Book Follow-Up</span>
+          <button class="modal-close" id="close-followup-modal">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div id="followup-modal-body"></div>
+        <div
+          style="display: flex; gap: var(--space-3); margin-top: var(--space-5)"
+        >
+          <button class="btn btn-primary" id="confirm-followup-btn">
+            Confirm Booking
+          </button>
+          <button class="btn btn-outline" id="cancel-followup-modal-btn">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../../js/front-desk/shared.js"></script>
+    <script src="../../js/front-desk/followup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Consultation Notes - MEDBITS Doctor</title>
+  <link rel="stylesheet" href="../../css/doctor/global.css"/>
+  <link rel="stylesheet" href="../../css/doctor/consultation-notes.css"/>
+</head>
+<body data-page="consultation-notes">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <div id="listView">
+        <div class="card">
+          <div class="cn-toolbar">
+            <div class="search-bar-inline patient-search-shell">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" class="search-input" id="searchInput" placeholder="Search and select appointment..." autocomplete="off"/>
+              <svg class="dropdown-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <div class="patient-search-dropdown" id="patientSearchResults"></div>
+            </div>
+            <button class="btn btn-primary" id="createNoteBtn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create Note
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Upcoming Appointments</span>
+          </div>
+          <div id="upcomingAppointmentsList"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Patient Consultation Records</span>
+            <a href="#" class="card-link" id="viewAllRecordsLink">View All</a>
+          </div>
+          <div id="recordsList"></div>
+        </div>
+      </div>
+
+      <div id="noteDetailView" style="display:none;">
+        <div style="margin-bottom:16px;">
+          <button class="btn btn-outline" id="backBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15,18 9,12 15,6"/></svg>
+            Back
+          </button>
+        </div>
+
+        <div class="patient-detail-header">
+          <div class="avatar" id="detailAvatar">?</div>
+          <div>
+            <div class="patient-name" id="detailName">Patient Name</div>
+            <div class="patient-meta" id="detailMeta">Age | Gender</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control" id="noteDate" style="max-width:220px;" readonly/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Consultation Notes</label>
+            <textarea class="form-control" id="noteText" rows="4" placeholder="Enter consultation notes..."></textarea>
+          </div>
+
+          <div class="note-form-section">
+            <div class="note-form-section-title">Prescription</div>
+            <div id="medicineList"></div>
+            <span class="add-link" id="addMedBtn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Medicine
+            </span>
+          </div>
+
+          <div class="note-form-section">
+            <div class="note-form-section-title">Lab Test</div>
+            <div id="labList"></div>
+            <span class="add-link" id="addLabBtn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Lab Test
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Follow Up</label>
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+              <span style="font-size:.85rem;color:var(--text-muted);">Recommend Follow Up</span>
+              <input type="date" class="form-control" id="followUpDate" style="max-width:200px;"/>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+            <button class="btn btn-outline" id="cancelNoteBtn">Cancel</button>
+            <button class="btn btn-primary" id="saveNoteBtn">Save</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<div class="cn-modal" id="recordsModal" aria-hidden="true">
+  <div class="cn-modal-panel">
+    <div class="cn-modal-header">
+      <span class="card-title">All Consultation Records</span>
+      <button class="cn-modal-close" id="closeRecordsModal" aria-label="Close">&times;</button>
+    </div>
+    <div id="allRecordsList"></div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/doctor/components.js"></script>
+<script src="../../js/doctor/consultation-notes.js"></script>
+</body>
+</html>

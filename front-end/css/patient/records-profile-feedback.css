@@ -1,0 +1,73 @@
+/* =============================================
+   MEDBITS – RECORDS, PROFILE, FEEDBACK CSS
+============================================= */
+
+/* ─── PROFILE ─── */
+.profile-banner {
+  background: var(--navy); border-radius: var(--radius);
+  padding: 28px 32px; margin-bottom: 24px; color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.profile-banner-left { display: flex; align-items: center; gap: 18px; }
+.profile-avatar-lg {
+  width: 64px; height: 64px; background: rgba(255,255,255,0.2);
+  border-radius: 50%; display: grid; place-items: center;
+  font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700;
+  color: #fff; border: 2px solid rgba(255,255,255,0.4);
+}
+.profile-banner h2 { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; }
+.profile-banner p { opacity: 0.75; font-size: 13px; margin-top: 4px; }
+
+/* ─── MEDICAL RECORDS ─── */
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--navy); border-radius: var(--radius);
+  padding: 22px 24px; color: #fff; text-align: center;
+}
+.stat-card .stat-num { font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 700; }
+.stat-card .stat-label { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+
+.rec-card {
+  background: var(--accent-light); border-radius: var(--radius-sm);
+  padding: 18px 20px; margin-bottom: 12px;
+  display: grid; grid-template-columns: 1fr auto; gap: 16px;
+  border: 1.5px solid transparent; transition: var(--transition);
+}
+.rec-card:hover { border-color: var(--accent); }
+.rec-title { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+.rec-meta { font-size: 12.5px; color: var(--text-muted); }
+.rec-prescription { font-size: 13px; margin-top: 6px; }
+.rec-prescription strong { color: var(--text-muted); }
+.rec-notes { margin-top: 8px; font-size: 12.5px; color: var(--text-muted); }
+.rec-notes strong { color: var(--text); }
+.rec-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+
+.editable-field { display: flex; align-items: center; gap: 8px; }
+.edit-indicator { font-size: 11px; color: var(--accent); }
+
+/* ─── FEEDBACK ─── */
+.rating-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.rating-btn {
+  padding: 8px 22px; border-radius: 24px; border: none;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: var(--transition); opacity: 0.7;
+}
+.rating-btn.selected { opacity: 1; transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.rating-bad { background: #dc2626; color: #fff; }
+.rating-avg { background: #ea580c; color: #fff; }
+.rating-good { background: #16a34a; color: #fff; }
+.rating-better { background: #15803d; color: #fff; }
+.rating-excellent { background: #166534; color: #fff; }
+
+.fb-card {
+  background: var(--accent-light); border-radius: var(--radius-sm);
+  padding: 14px 18px; margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 16px; border: 1.5px solid transparent; transition: var(--transition);
+}
+.fb-card:hover { border-color: var(--accent); }
+
+@media (max-width: 860px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .profile-banner { flex-direction: column; gap: 16px; align-items: flex-start; }
+}
