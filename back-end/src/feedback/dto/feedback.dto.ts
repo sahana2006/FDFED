@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateFeedbackDto {
@@ -21,4 +21,9 @@ export class CreateFeedbackDto {
   @IsString()
   @IsOptional()
   comment?: string;
+
+  @ApiPropertyOptional({ example: '00000000-0000-4000-8000-000000000001', description: "Hospital branch UUID. Defaults to the doctor's branch." })
+  @IsUUID()
+  @IsOptional()
+  branchId?: string;
 }

@@ -1,10 +1,26 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, OnModuleInit } from '@nestjs/common';
 import { PatientsService } from '../patients/patients.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LabTechnician } from '../lab-technicians/entities/lab-technician.entity';
+import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
+import { BranchAdminEntity } from './entities/branch-admin.entity';
+import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
 
-export type UserRole = 'admin' | 'patient' | 'doctor' | 'frontdesk' | 'labtech';
+export enum Role {
+  SUPER_ADMIN = 'super_admin',
+  BRANCH_ADMIN = 'branch_admin',
+  /** @deprecated Branch administrators now use BRANCH_ADMIN. */
+  ADMIN = 'admin',
+  PATIENT = 'patient',
+  DOCTOR = 'doctor',
+  FRONTDESK = 'frontdesk',
+  LABTECH = 'labtech',
+}
+
+// Keep string literals supported for existing @Roles(...) calls and user data.
+export type UserRole = `${Role}`;
 
 export type User = {
   id: string;
@@ -12,6 +28,7 @@ export type User = {
   email: string;
   password: string;
   role: UserRole;
+  branchId?: string;
 };
 
 type SafeUser = Omit<User, 'password'> & {
@@ -54,16 +71,31 @@ export type UpdateFrontdeskUserInput = {
   email?: string;
 };
 
+export type CreateBranchAdminUserInput = {
+  name: string;
+  email: string;
+  password: string;
+  branchId: string;
+};
+
+const scrypt = promisify(scryptCallback);
+const DEFAULT_SUPER_ADMIN_EMAIL = 'superadmin@medbits.com';
+const DEFAULT_SUPER_ADMIN_PASSWORD = 'SuperAdmin@123';
+const DEFAULT_BRANCH_ID = '00000000-0000-4000-8000-000000000001';
+
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
   constructor(
     private readonly patientsService: PatientsService,
     @InjectRepository(LabTechnician)
     private readonly labTechnicianRepository: Repository<LabTechnician>,
+    @InjectRepository(BranchAdminEntity)
+    private readonly branchAdminRepository: Repository<BranchAdminEntity>,
+    private readonly hospitalBranchService: HospitalBranchService,
   ) {}
 
   private readonly users: User[] = [
-    { id: 'ADM001', name: 'Admin User', email: 'admin@medbits.com', password: 'admin123', role: 'admin' },
+    { id: 'ADM001', name: 'Admin User', email: 'admin@medbits.com', password: 'admin123', role: Role.BRANCH_ADMIN, branchId: DEFAULT_BRANCH_ID },
     { id: 'PAT001', name: 'Ria Sharma', email: 'ria@medbits.com', password: 'patient123', role: 'patient' },
     { id: 'PAT002', name: 'Arun Menon', email: 'arun.menon@medbits.com', password: 'patient123', role: 'patient' },
     { id: 'PAT003', name: 'Farah Ali', email: 'farah.ali@medbits.com', password: 'patient123', role: 'patient' },
@@ -80,6 +112,35 @@ export class UsersService {
     { id: 'FD001', name: 'Priya Nair', email: 'frontdesk@medbits.com', password: 'desk123', role: 'frontdesk' },
   ];
 
+  async onModuleInit(): Promise<void> {
+    await this.seedDefaultBranchAdmin();
+
+    const email = (process.env.SUPER_ADMIN_EMAIL ?? DEFAULT_SUPER_ADMIN_EMAIL)
+      .trim()
+      .toLowerCase();
+    if (this.users.some((user) => user.email.toLowerCase() === email)) return;
+
+    const password = process.env.SUPER_ADMIN_PASSWORD ?? DEFAULT_SUPER_ADMIN_PASSWORD;
+    this.users.push({
+      id: 'SADM001',
+      name: 'Super Admin',
+      email,
+      password: await this.hashPassword(password),
+      role: Role.SUPER_ADMIN,
+    });
+  }
+
+  private async seedDefaultBranchAdmin(): Promise<void> {
+    const userId = 'ADM001';
+    const existingAssignment = await this.branchAdminRepository.findOneBy({ userId });
+    if (existingAssignment) return;
+
+    const branch = await this.hospitalBranchService.findOne(DEFAULT_BRANCH_ID);
+    await this.branchAdminRepository.save(
+      this.branchAdminRepository.create({ userId, branchId: branch.id, branch }),
+    );
+  }
+
   async login(email: string, password: string): Promise<SafeUser | null> {
     const user = this.users.find((item) => item.email === email);
     if (!user) {
@@ -87,7 +148,10 @@ export class UsersService {
       if (!technician || technician.password !== password) return null;
       return { id: technician.id, name: technician.name, email: technician.email, role: 'labtech' };
     }
-    if (user.password !== password) return null;
+    const passwordMatches = user.password.startsWith('scrypt$')
+      ? await this.verifyPassword(password, user.password)
+      : user.password === password;
+    if (!passwordMatches) return null;
 
     const { password: _password, ...safeUser } = user;
     if (safeUser.role !== 'patient') return safeUser;
@@ -177,6 +241,35 @@ export class UsersService {
     return { id: user.id, name: user.name, email: user.email, role: user.role };
   }
 
+  async createBranchAdminUser(input: CreateBranchAdminUserInput): Promise<SafeUser> {
+    const name = input.name.trim();
+    const email = input.email.trim().toLowerCase();
+    const branchId = input.branchId.trim();
+    if (!name || !email || !input.password || !branchId) {
+      throw new BadRequestException('name, email, password and branchId are required');
+    }
+    if (this.users.some((user) => user.email.toLowerCase() === email)) {
+      throw new ConflictException('Email is already registered');
+    }
+
+    const branch = await this.hospitalBranchService.findOne(branchId);
+    const user: User = {
+      id: this.generateNextBranchAdminId(),
+      name,
+      email,
+      password: await this.hashPassword(input.password),
+      role: Role.BRANCH_ADMIN,
+      branchId,
+    };
+
+    await this.branchAdminRepository.save(
+      this.branchAdminRepository.create({ userId: user.id, branchId, branch }),
+    );
+    this.users.push(user);
+    const { password: _password, ...safeUser } = user;
+    return safeUser;
+  }
+
   private generateNextPatientId(): string {
     const patientIds = this.users
       .filter((item) => item.role === 'patient')
@@ -202,5 +295,30 @@ export class UsersService {
       .filter((value) => Number.isFinite(value));
     const nextNumber = (frontdeskIds.length ? Math.max(...frontdeskIds) : 0) + 1;
     return `FD${nextNumber.toString().padStart(3, '0')}`;
+  }
+
+  private generateNextBranchAdminId(): string {
+    const branchAdminIds = this.users
+      .filter((user) => user.role === Role.BRANCH_ADMIN)
+      .map((user) => Number.parseInt(user.id.replace('BAD', ''), 10))
+      .filter((value) => Number.isFinite(value));
+    const nextNumber = (branchAdminIds.length ? Math.max(...branchAdminIds) : 0) + 1;
+    return `BAD${nextNumber.toString().padStart(3, '0')}`;
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    const salt = randomBytes(16).toString('hex');
+    const hash = await scrypt(password, salt, 64) as Buffer;
+    return `scrypt$${salt}$${hash.toString('hex')}`;
+  }
+
+  private async verifyPassword(password: string, storedHash: string): Promise<boolean> {
+    const [algorithm, salt, hash] = storedHash.split('$');
+    if (algorithm !== 'scrypt' || !salt || !hash) return false;
+
+    const derivedHash = await scrypt(password, salt, 64) as Buffer;
+    const storedHashBuffer = Buffer.from(hash, 'hex');
+    return storedHashBuffer.length === derivedHash.length
+      && timingSafeEqual(storedHashBuffer, derivedHash);
   }
 }

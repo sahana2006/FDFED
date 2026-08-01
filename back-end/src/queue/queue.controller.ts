@@ -23,6 +23,7 @@ export class QueueController {
     return this.queueService.createQueueToken({
       doctorId: body.doctorId.trim(),
       userId: body.userId.trim(),
+      branchId: body.branchId?.trim(),
     });
   }
 

@@ -1,5 +1,5 @@
-import { IsIn, IsNotEmpty, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsIn, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateQueueDto {
   @ApiProperty({ example: 'DOC001' })
@@ -11,6 +11,11 @@ export class CreateQueueDto {
   @IsString()
   @IsNotEmpty()
   userId!: string;
+
+  @ApiPropertyOptional({ example: '00000000-0000-4000-8000-000000000001', description: 'Hospital branch UUID. Defaults to the selected doctor\'s branch.' })
+  @IsUUID()
+  @IsOptional()
+  branchId?: string;
 }
 
 export class UpdateQueueDto {

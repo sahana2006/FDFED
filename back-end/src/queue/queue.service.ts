@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DoctorsService } from '../doctors/doctors.service';
 import { PatientsService } from '../patients/patients.service';
+import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
+import { HospitalBranch } from '../hospital-branch/entities/hospital-branch.entity';
 
 export type QueueStatus = 'waiting' | 'in-consultation' | 'done';
 
@@ -10,11 +12,14 @@ export type QueueItem = {
   userId: string;
   tokenNumber: number;
   status: QueueStatus;
+  branchId: string;
+  branch?: HospitalBranch;
 };
 
 export type CreateQueueInput = {
   doctorId: string;
   userId: string;
+  branchId?: string;
 };
 
 export type UpdateQueueInput = {
@@ -23,6 +28,8 @@ export type UpdateQueueInput = {
 
 @Injectable()
 export class QueueService {
+  private static readonly DEFAULT_BRANCH_ID = '00000000-0000-4000-8000-000000000001';
+
   private readonly queue: QueueItem[] = [
     {
       id: 'QUE001',
@@ -30,6 +37,7 @@ export class QueueService {
       userId: 'PAT001',
       tokenNumber: 1,
       status: 'in-consultation',
+      branchId: QueueService.DEFAULT_BRANCH_ID,
     },
     {
       id: 'QUE002',
@@ -37,6 +45,7 @@ export class QueueService {
       userId: 'PAT002',
       tokenNumber: 2,
       status: 'waiting',
+      branchId: QueueService.DEFAULT_BRANCH_ID,
     },
     {
       id: 'QUE003',
@@ -44,24 +53,35 @@ export class QueueService {
       userId: 'PAT003',
       tokenNumber: 1,
       status: 'waiting',
+      branchId: QueueService.DEFAULT_BRANCH_ID,
     },
   ];
 
   constructor(
     private readonly doctorsService: DoctorsService,
     private readonly patientsService: PatientsService,
+    private readonly hospitalBranchService: HospitalBranchService,
   ) {}
 
-  createQueueToken(input: CreateQueueInput) {
+  async createQueueToken(input: CreateQueueInput) {
     if (!input.doctorId || !input.userId) {
       throw new BadRequestException('doctorId and userId are required');
     }
 
-    this.doctorsService.getDoctorById(input.doctorId);
+    const doctor = this.doctorsService.getDoctorById(input.doctorId);
+    const branchId = input.branchId?.trim() || doctor.branchId;
+    const branch = await this.hospitalBranchService.findOne(branchId);
+    const patient = this.patientsService.getPatientByUserId(input.userId);
+    if (doctor.branchId !== branchId) {
+      throw new BadRequestException('Doctor does not belong to the selected hospital branch');
+    }
+    if (patient.branchId !== branchId) {
+      throw new BadRequestException('Patient does not belong to the selected hospital branch');
+    }
 
     const nextTokenNumber =
       this.queue
-        .filter((item) => item.doctorId === input.doctorId)
+        .filter((item) => item.doctorId === input.doctorId && item.branchId === branchId)
         .reduce((max, item) => Math.max(max, item.tokenNumber), 0) + 1;
 
     const queueItem: QueueItem = {
@@ -70,6 +90,8 @@ export class QueueService {
       userId: input.userId,
       tokenNumber: nextTokenNumber,
       status: 'waiting',
+      branchId,
+      branch,
     };
 
     this.queue.push(queueItem);

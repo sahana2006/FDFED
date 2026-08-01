@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { DoctorsService } from '../doctors/doctors.service';
+import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
+import { HospitalBranch } from '../hospital-branch/entities/hospital-branch.entity';
 
 export type Feedback = {
   id: string;
@@ -8,6 +10,8 @@ export type Feedback = {
   doctorId: string;
   rating: string;
   comment: string;
+  branchId: string;
+  branch?: HospitalBranch;
 };
 
 export type CreateFeedbackInput = {
@@ -15,6 +19,7 @@ export type CreateFeedbackInput = {
   doctorId: string;
   rating: string;
   comment: string;
+  branchId?: string;
 };
 
 @Injectable()
@@ -24,13 +29,21 @@ export class FeedbackService {
   constructor(
     private readonly appointmentsService: AppointmentsService,
     private readonly doctorsService: DoctorsService,
+    private readonly hospitalBranchService: HospitalBranchService,
   ) {}
 
-  createFeedback(input: CreateFeedbackInput) {
+  async createFeedback(input: CreateFeedbackInput) {
     if (!input.userId || !input.doctorId || !input.rating || !input.comment) {
       throw new BadRequestException(
         'userId, doctorId, rating and comment are required',
       );
+    }
+
+    const doctor = this.doctorsService.getDoctorById(input.doctorId);
+    const branchId = input.branchId?.trim() || doctor.branchId;
+    const branch = await this.hospitalBranchService.findOne(branchId);
+    if (doctor.branchId !== branchId) {
+      throw new BadRequestException('Doctor does not belong to the selected hospital branch');
     }
 
     if (
@@ -60,6 +73,8 @@ export class FeedbackService {
       doctorId: input.doctorId,
       rating: input.rating,
       comment: input.comment,
+      branchId,
+      branch,
     };
 
     this.feedbacks.unshift(feedback);

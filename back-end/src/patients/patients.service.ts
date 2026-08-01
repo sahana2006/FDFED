@@ -18,7 +18,10 @@ export type PatientProfile = {
   guardianName: string;
 };
 
-export type CreatePatientProfileInput = Omit<PatientProfile, 'userId'>;
+// Profiles created during user signup already have a user id; patient creation
+// generates one internally via `createPatient`.
+export type CreatePatientProfileInput = PatientProfile;
+export type CreatePatientInput = Omit<PatientProfile, 'userId' | 'branch'>;
 export type UpdatePatientProfileInput = Partial<Omit<PatientProfile, 'userId'>>;
 
 @Injectable()
@@ -52,7 +55,7 @@ export class PatientsService {
     return { ...patient };
   }
 
-  async createPatient(input: CreatePatientProfileInput): Promise<PatientProfile> {
+  async createPatient(input: CreatePatientInput): Promise<PatientProfile> {
     const branchId = input.branchId?.trim();
     const normalizedPatient: PatientProfile = {
       userId: this.generateNextPatientId(),

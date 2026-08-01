@@ -23,6 +23,7 @@ export class FeedbackController {
       doctorId: body.doctorId.trim(),
       rating: body.rating.trim(),
       comment: body.comment?.trim() ?? '',
+      branchId: body.branchId?.trim(),
     });
   }
 

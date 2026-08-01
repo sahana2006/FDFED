@@ -19,6 +19,7 @@ import { LeaveRequestsModule } from './leave-requests/leave-requests.module';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HospitalBranchModule } from './hospital-branch/hospital-branch.module';
 import { LabTechniciansModule } from './lab-technicians/lab-technicians.module';
+import { DepartmentsModule } from './departments/departments.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { LabTechniciansModule } from './lab-technicians/lab-technicians.module';
     LeaveRequestsModule,
     HospitalBranchModule,
     LabTechniciansModule,
+    DepartmentsModule,
   ],
   controllers: [AppController],
   providers: [
