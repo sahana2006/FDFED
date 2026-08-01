@@ -2,6 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { DoctorsService } from '../doctors/doctors.service';
+import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
+import { HospitalBranch } from '../hospital-branch/entities/hospital-branch.entity';
 import { PatientsService } from '../patients/patients.service';
 
 export type AppointmentStatus = 'upcoming' | 'completed';
@@ -10,6 +12,8 @@ export type Appointment = {
   id: string;
   userId: string;
   doctorId: string;
+  branchId: string;
+  branch?: HospitalBranch;
   date: string;
   slot: string;
   status: AppointmentStatus;
@@ -18,6 +22,7 @@ export type Appointment = {
 export type CreateAppointmentInput = {
   userId: string;
   doctorId: string;
+  branchId: string;
   date: string;
   slot: string;
 };
@@ -48,6 +53,7 @@ export class AppointmentsService {
   constructor(
     private readonly doctorsService: DoctorsService,
     private readonly patientsService: PatientsService,
+    private readonly hospitalBranchService: HospitalBranchService,
   ) {
     this.loadPersistedAppointments();
   }
@@ -81,14 +87,30 @@ export class AppointmentsService {
     );
   }
 
-  createAppointment(input: CreateAppointmentInput) {
-    if (!input.userId || !input.doctorId || !input.date || !input.slot) {
+  async createAppointment(input: CreateAppointmentInput) {
+    if (!input.userId || !input.doctorId || !input.branchId || !input.date || !input.slot) {
       throw new BadRequestException(
-        'userId, doctorId, date and slot are required',
+        'userId, doctorId, branchId, date and slot are required',
       );
     }
 
+    const branchId = input.branchId.trim();
+    if (!branchId) {
+      throw new BadRequestException('branchId is required');
+    }
+
+    const branch = await this.hospitalBranchService.findOne(branchId);
     const doctor = this.doctorsService.getDoctorById(input.doctorId);
+    const patient = this.patientsService.getPatientByUserId(input.userId);
+
+    if (doctor.branchId !== branchId) {
+      throw new BadRequestException('Doctor does not belong to the selected hospital branch');
+    }
+
+    if (patient.branchId !== branchId) {
+      throw new BadRequestException('Patient does not belong to the selected hospital branch');
+    }
+
     if (!doctor.slots.includes(input.slot)) {
       throw new BadRequestException('Invalid doctor slot');
     }
@@ -123,6 +145,8 @@ export class AppointmentsService {
       id: `APT${Date.now()}`,
       userId: input.userId,
       doctorId: input.doctorId,
+      branchId,
+      branch,
       date: input.date,
       slot: input.slot,
       status: 'upcoming',
@@ -318,6 +342,10 @@ export class AppointmentsService {
         department: '',
       };
     }
+
+    const branchId = appointment.branchId || doctor?.branchId || '';
+    const branch: HospitalBranch | undefined = appointment.branch;
+
     let patient: Record<string, string> | null = null;
 
     try {
@@ -341,6 +369,8 @@ export class AppointmentsService {
 
     return {
       ...appointment,
+      branchId,
+      branch,
       doctor,
       patient,
     };

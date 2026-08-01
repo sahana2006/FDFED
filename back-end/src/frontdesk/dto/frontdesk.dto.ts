@@ -1,4 +1,4 @@
-import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateFrontdeskDto {
@@ -16,6 +16,11 @@ export class CreateFrontdeskDto {
   @IsString()
   @IsNotEmpty()
   password!: string;
+
+  @ApiProperty({ example: '00000000-0000-4000-8000-000000000001', description: 'Hospital branch UUID' })
+  @IsUUID()
+  @IsNotEmpty()
+  branchId!: string;
 
   @ApiPropertyOptional({ example: '1234567890' })
   @IsString()
@@ -64,6 +69,11 @@ export class UpdateFrontdeskDto {
   @IsEmail()
   @IsOptional()
   email?: string;
+
+  @ApiPropertyOptional({ example: '00000000-0000-4000-8000-000000000001', description: 'Hospital branch UUID' })
+  @IsUUID()
+  @IsOptional()
+  branchId?: string;
 
   @ApiPropertyOptional({ example: '1234567890' })
   @IsString()

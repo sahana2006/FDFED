@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class LoginDto {
@@ -48,6 +48,11 @@ export class SignupDto {
   @IsString()
   @IsNotEmpty()
   bloodGroup!: string;
+
+  @ApiProperty({ example: '00000000-0000-4000-8000-000000000001', description: 'Hospital branch UUID' })
+  @IsUUID()
+  @IsNotEmpty()
+  branchId!: string;
 
   @ApiPropertyOptional({ example: 'Jane Doe' })
   @IsString()

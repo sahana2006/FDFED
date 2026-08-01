@@ -45,6 +45,7 @@ export class AppointmentsController {
     return this.appointmentsService.createAppointment({
       userId: body.userId.trim(),
       doctorId: body.doctorId.trim(),
+      branchId: body.branchId.trim(),
       date: body.date.trim(),
       slot: body.slot.trim(),
     });

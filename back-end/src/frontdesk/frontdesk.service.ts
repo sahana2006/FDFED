@@ -1,8 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
+import { HospitalBranch } from '../hospital-branch/entities/hospital-branch.entity';
 import { UsersService } from '../users/users.service';
 
 export type Frontdesk = {
   userId: string;
+  branchId: string;
+  branch?: HospitalBranch;
   name: string;
   email: string;
   phone: string;
@@ -18,6 +22,7 @@ export type CreateFrontdeskInput = {
   name: string;
   email: string;
   password: string;
+  branchId: string;
   phone?: string;
   gender?: string;
   reportingManagerId?: string;
@@ -27,15 +32,16 @@ export type CreateFrontdeskInput = {
   shiftEnd?: string;
 };
 
-export type UpdateFrontdeskInput = Partial<
-  Omit<CreateFrontdeskInput, 'password'>
->;
+export type UpdateFrontdeskInput = Partial<Omit<CreateFrontdeskInput, 'password'>>;
+
+const DEFAULT_BRANCH_ID = '00000000-0000-4000-8000-000000000001';
 
 @Injectable()
 export class FrontdeskService {
   private readonly frontdesks: Frontdesk[] = [
     {
       userId: 'FD001',
+      branchId: DEFAULT_BRANCH_ID,
       name: 'Priya Nair',
       email: 'frontdesk@medbits.com',
       phone: '9876541010',
@@ -48,7 +54,10 @@ export class FrontdeskService {
     },
   ];
 
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly hospitalBranchService: HospitalBranchService,
+  ) {}
 
   findAll(): Frontdesk[] {
     return this.frontdesks.map((frontdesk) => ({
@@ -66,13 +75,19 @@ export class FrontdeskService {
     return { ...frontdesk, languages: [...frontdesk.languages] };
   }
 
-  createFrontdesk(input: CreateFrontdeskInput): Frontdesk {
+  async createFrontdesk(input: CreateFrontdeskInput): Promise<Frontdesk> {
     const name = input.name?.trim();
     const email = input.email?.trim();
+    const branchId = input.branchId?.trim();
 
     if (!name || !email || !input.password) {
       throw new BadRequestException('name, email and password are required');
     }
+    if (!branchId) {
+      throw new BadRequestException('branchId is required');
+    }
+
+    const branch = await this.hospitalBranchService.findOne(branchId);
 
     const user = this.usersService.createFrontdeskUser({
       name,
@@ -82,6 +97,8 @@ export class FrontdeskService {
 
     const frontdesk: Frontdesk = {
       userId: user.id,
+      branchId,
+      branch,
       name: user.name,
       email: user.email,
       phone: input.phone?.trim() || '',
@@ -97,7 +114,7 @@ export class FrontdeskService {
     return { ...frontdesk, languages: [...frontdesk.languages] };
   }
 
-  updateFrontdesk(userId: string, input: UpdateFrontdeskInput): Frontdesk {
+  async updateFrontdesk(userId: string, input: UpdateFrontdeskInput): Promise<Frontdesk> {
     const frontdesk = this.frontdesks.find((item) => item.userId === userId);
     if (!frontdesk) {
       throw new NotFoundException('Frontdesk profile not found');
@@ -114,6 +131,15 @@ export class FrontdeskService {
       frontdesk.email = user.email;
     }
 
+    if (input.branchId !== undefined) {
+      const branchId = input.branchId.trim();
+      if (!branchId) {
+        throw new BadRequestException('branchId is required');
+      }
+      frontdesk.branchId = branchId;
+      frontdesk.branch = await this.hospitalBranchService.findOne(branchId);
+    }
+
     if (input.phone !== undefined) frontdesk.phone = input.phone.trim();
     if (input.gender !== undefined) frontdesk.gender = input.gender.trim();
     if (input.reportingManagerId !== undefined) {
@@ -126,7 +152,9 @@ export class FrontdeskService {
     if (input.shiftStart !== undefined) {
       frontdesk.shiftStart = input.shiftStart.trim();
     }
-    if (input.shiftEnd !== undefined) frontdesk.shiftEnd = input.shiftEnd.trim();
+    if (input.shiftEnd !== undefined) {
+      frontdesk.shiftEnd = input.shiftEnd.trim();
+    }
 
     return { ...frontdesk, languages: [...frontdesk.languages] };
   }

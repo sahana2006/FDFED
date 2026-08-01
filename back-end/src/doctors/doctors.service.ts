@@ -2,12 +2,16 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { UsersService } from '../users/users.service';
+import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
+import { HospitalBranch } from '../hospital-branch/entities/hospital-branch.entity';
 
 export type Doctor = {
   id: string;
   userId: string;
   name: string;
   specialization: string;
+  branchId: string;
+  branch?: HospitalBranch;
   department: string;
   qualification: string;
   experience: number; // years
@@ -53,6 +57,7 @@ export type CreateDoctorInput = {
   email: string;
   password: string;
   specialization: string;
+  branchId: string;
   slots: string[];
   department?: string;
   qualification?: string;
@@ -81,6 +86,8 @@ const UNAVAILABLE_DATES_FILE = join(
   'data',
   'unavailable-dates.json',
 );
+
+const DEFAULT_BRANCH_ID = '00000000-0000-4000-8000-000000000001';
 
 @Injectable()
 export class DoctorsService {
@@ -229,14 +236,17 @@ export class DoctorsService {
       bio: 'Experienced general physician managing acute and chronic conditions with emphasis on holistic patient care.',
       slots: ['10:00', '10:30', '11:00', '11:30', '12:00'],
     },
-  ];
+  ] as Doctor[];
 
   // ─── In-memory slot management stores ───────────────────────────────────────
 
   private slotBlocks: SlotBlock[] = [];
   private unavailableDates: UnavailableDate[] = [];
 
-  constructor(private readonly usersService: UsersService) {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly hospitalBranchService: HospitalBranchService,
+  ) {
     this.loadSlotBlocks();
     this.loadUnavailableDates();
   }
@@ -251,7 +261,7 @@ export class DoctorsService {
         )
       : this.doctors;
 
-    return doctors.map((doctor) => ({ ...doctor, slots: [...doctor.slots] }));
+    return doctors.map((doctor) => ({ ...doctor, branchId: doctor.branchId ?? DEFAULT_BRANCH_ID, slots: [...doctor.slots] }));
   }
 
   getDoctorById(doctorId: string): Doctor {
@@ -262,13 +272,14 @@ export class DoctorsService {
       throw new NotFoundException('Doctor not found');
     }
 
-    return { ...doctor, slots: [...doctor.slots] };
+    return { ...doctor, branchId: doctor.branchId ?? DEFAULT_BRANCH_ID, slots: [...doctor.slots] };
   }
 
-  createDoctor(input: CreateDoctorInput): Doctor {
+  async createDoctor(input: CreateDoctorInput): Promise<Doctor> {
     const name = input.name?.trim();
     const email = input.email?.trim();
     const specialization = input.specialization?.trim();
+    const branchId = input.branchId?.trim();
     const slots = this.normalizeSlots(input.slots);
 
     if (!name || !email || !input.password || !specialization) {
@@ -281,6 +292,12 @@ export class DoctorsService {
       throw new BadRequestException('At least one slot is required');
     }
 
+    if (!branchId) {
+      throw new BadRequestException('branchId is required');
+    }
+
+    const branch = await this.hospitalBranchService.findOne(branchId);
+
     const user = this.usersService.createDoctorUser({
       name,
       email,
@@ -292,6 +309,8 @@ export class DoctorsService {
       userId: user.id,
       name,
       specialization,
+      branchId,
+      branch,
       department: input.department?.trim() || specialization,
       qualification: input.qualification?.trim() || '',
       experience: Number(input.experience) || 0,
@@ -305,10 +324,10 @@ export class DoctorsService {
     };
 
     this.doctors.push(doctor);
-    return { ...doctor, slots: [...doctor.slots] };
+    return { ...doctor, branchId: doctor.branchId ?? DEFAULT_BRANCH_ID, slots: [...doctor.slots] };
   }
 
-  updateDoctor(userId: string, input: UpdateDoctorInput): Doctor {
+  async updateDoctor(userId: string, input: UpdateDoctorInput): Promise<Doctor> {
     const doctor = this.doctors.find((item) => item.userId === userId);
     if (!doctor) {
       throw new NotFoundException('Doctor not found');
@@ -352,6 +371,16 @@ export class DoctorsService {
     if (input.bio !== undefined) {
       doctor.bio = input.bio.trim();
     }
+    if (input.branchId !== undefined) {
+      const branchId = input.branchId.trim();
+      if (!branchId) {
+        throw new BadRequestException('branchId is required');
+      }
+
+      const branch = await this.hospitalBranchService.findOne(branchId);
+      doctor.branchId = branchId;
+      doctor.branch = branch;
+    }
     if (input.slots !== undefined) {
       const slots = this.normalizeSlots(input.slots);
       if (slots.length === 0) {
@@ -360,7 +389,7 @@ export class DoctorsService {
       doctor.slots = slots;
     }
 
-    return { ...doctor, slots: [...doctor.slots] };
+    return { ...doctor, branchId: doctor.branchId ?? DEFAULT_BRANCH_ID, slots: [...doctor.slots] };
   }
 
   // ─── Slot Blocks ─────────────────────────────────────────────────────────────
@@ -617,3 +646,6 @@ export class DoctorsService {
       .sort((a, b) => a.localeCompare(b));
   }
 }
+
+
+

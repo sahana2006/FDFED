@@ -36,11 +36,12 @@ export class FrontdeskController {
   @ApiResponse({ status: 400, description: 'Invalid input or duplicate email' })
   @Roles('admin')
   @Post()
-  addFrontdesk(@Body() body: CreateFrontdeskDto) {
+  async addFrontdesk(@Body() body: CreateFrontdeskDto) {
     return this.frontdeskService.createFrontdesk({
       name: body.name.trim(),
       email: body.email.trim(),
       password: body.password,
+      branchId: body.branchId.trim(),
       phone: body.phone?.trim(),
       gender: body.gender?.trim(),
       reportingManagerId: body.reportingManagerId?.trim(),
@@ -58,13 +59,14 @@ export class FrontdeskController {
   @ApiResponse({ status: 404, description: 'Frontdesk profile not found' })
   @Roles('admin')
   @Put(':userId')
-  updateFrontdesk(
+  async updateFrontdesk(
     @Param('userId') userId: string,
     @Body() body: UpdateFrontdeskDto,
   ) {
     return this.frontdeskService.updateFrontdesk(userId, {
       name: body.name?.trim(),
       email: body.email?.trim(),
+      branchId: body.branchId?.trim(),
       phone: body.phone?.trim(),
       gender: body.gender?.trim(),
       reportingManagerId: body.reportingManagerId?.trim(),
@@ -75,4 +77,3 @@ export class FrontdeskController {
     });
   }
 }
-

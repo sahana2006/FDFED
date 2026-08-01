@@ -1,11 +1,14 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { DoctorsModule } from '../doctors/doctors.module';
+import { HospitalBranchModule } from '../hospital-branch/hospital-branch.module';
 import { PatientsModule } from '../patients/patients.module';
 import { AppointmentsController } from './appointments.controller';
 import { AppointmentsService } from './appointments.service';
+import { AppointmentEntity } from './entities/appointment.entity';
 
 @Module({
-  imports: [forwardRef(() => DoctorsModule), PatientsModule],
+  imports: [TypeOrmModule.forFeature([AppointmentEntity]), forwardRef(() => DoctorsModule), PatientsModule, HospitalBranchModule],
   controllers: [AppointmentsController],
   providers: [AppointmentsService],
   exports: [AppointmentsService],
