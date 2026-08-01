@@ -141,6 +141,18 @@ export class UsersService implements OnModuleInit {
     );
   }
 
+  async getBranchAdminBranchId(userId: string): Promise<string | null> {
+    const assignment = await this.branchAdminRepository.findOne({ where: { userId } });
+    if (assignment?.branchId) {
+      return assignment.branchId;
+    }
+
+    const inMemoryUser = this.users.find(
+      (user) => user.id === userId && user.role === Role.BRANCH_ADMIN,
+    );
+    return inMemoryUser?.branchId ?? null;
+  }
+
   async login(email: string, password: string): Promise<SafeUser | null> {
     const user = this.users.find((item) => item.email === email);
     if (!user) {

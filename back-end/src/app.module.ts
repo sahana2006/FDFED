@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -16,6 +16,8 @@ import { QueueModule } from './queue/queue.module';
 import { UsersModule } from './users/users.module';
 import { WalkInsModule } from './walkins/walkins.module';
 import { LeaveRequestsModule } from './leave-requests/leave-requests.module';
+import { CommonModule } from './common/common.module';
+import { RequestContextMiddleware } from './common/request-context.middleware';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HospitalBranchModule } from './hospital-branch/hospital-branch.module';
 import { LabTechniciansModule } from './lab-technicians/lab-technicians.module';
@@ -31,6 +33,7 @@ import { DepartmentsModule } from './departments/departments.module';
       migrationsRun: true,
       migrations: [__dirname + '/database/migrations/*{.js,.ts}'],
     }),
+    CommonModule,
     UsersModule,
     PatientsModule,
     MedicinesModule,
@@ -51,10 +54,16 @@ import { DepartmentsModule } from './departments/departments.module';
   controllers: [AppController],
   providers: [
     AppService,
+    RequestContextMiddleware,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestContextMiddleware).forRoutes('*');
+  }
+}
+

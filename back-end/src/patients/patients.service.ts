@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
 import { HospitalBranch } from '../hospital-branch/entities/hospital-branch.entity';
+import { RequestContextService } from '../common/request-context.service';
 
 const DEFAULT_BRANCH_ID = '00000000-0000-4000-8000-000000000001';
 
@@ -33,21 +34,44 @@ export class PatientsService {
     { userId: 'PAT004', branchId: DEFAULT_BRANCH_ID, firstName: 'Dev', lastName: 'Patel', dob: '1992-07-19', gender: 'Male', bloodGroup: 'AB+', phone: '9012345678', email: 'dev.patel@medbits.com', guardianName: 'Kiran Patel' },
   ];
 
-  constructor(private readonly hospitalBranchService: HospitalBranchService) {}
+  constructor(
+    private readonly hospitalBranchService: HospitalBranchService,
+    private readonly requestContextService: RequestContextService,
+  ) {}
+
+  private getScopedBranchId(): string | undefined {
+    return this.requestContextService.getContext()?.branchId;
+  }
 
   getPatientByUserId(userId: string): PatientProfile {
     const patient = this.patients.find((item) => item.userId === userId);
     if (!patient) throw new NotFoundException('Patient profile not found');
+
+    const scopedBranchId = this.getScopedBranchId();
+    if (scopedBranchId && patient.branchId !== scopedBranchId) {
+      throw new ForbiddenException('Access denied for this hospital branch');
+    }
+
     return { ...patient };
   }
 
   getAllPatients(): PatientProfile[] {
-    return this.patients.map((patient) => ({ ...patient }));
+    const scopedBranchId = this.getScopedBranchId();
+    const patients = scopedBranchId
+      ? this.patients.filter((patient) => patient.branchId === scopedBranchId)
+      : this.patients;
+
+    return patients.map((patient) => ({ ...patient }));
   }
 
   async createPatientProfile(profile: CreatePatientProfileInput): Promise<PatientProfile> {
     const branchId = profile.branchId?.trim();
     if (!branchId) throw new BadRequestException('branchId is required');
+
+    const scopedBranchId = this.getScopedBranchId();
+    if (scopedBranchId && branchId !== scopedBranchId) {
+      throw new ForbiddenException('Access denied for this hospital branch');
+    }
 
     const branch = await this.hospitalBranchService.findOne(branchId);
     const patient: PatientProfile = { ...profile, branchId, branch };
@@ -56,7 +80,12 @@ export class PatientsService {
   }
 
   async createPatient(input: CreatePatientInput): Promise<PatientProfile> {
-    const branchId = input.branchId?.trim();
+    const scopedBranchId = this.getScopedBranchId();
+    const branchId = scopedBranchId ?? input.branchId?.trim();
+    if (scopedBranchId && input.branchId?.trim() && input.branchId.trim() !== scopedBranchId) {
+      throw new ForbiddenException('Access denied for this hospital branch');
+    }
+
     const normalizedPatient: PatientProfile = {
       userId: this.generateNextPatientId(),
       branchId: branchId || '',
@@ -84,9 +113,18 @@ export class PatientsService {
     const patientIndex = this.patients.findIndex((item) => item.userId === userId);
     if (patientIndex === -1) throw new NotFoundException('Patient profile not found');
 
-    const nextPatient = { ...this.patients[patientIndex], ...updates, userId } as PatientProfile;
+    const scopedBranchId = this.getScopedBranchId();
+    const existingPatient = this.patients[patientIndex];
+    if (scopedBranchId && existingPatient.branchId !== scopedBranchId) {
+      throw new ForbiddenException('Access denied for this hospital branch');
+    }
+
+    const nextPatient = { ...existingPatient, ...updates, userId } as PatientProfile;
     if (updates.branchId !== undefined) {
       const branchId = updates.branchId.trim();
+      if (scopedBranchId && branchId && branchId !== scopedBranchId) {
+        throw new ForbiddenException('Access denied for this hospital branch');
+      }
       if (branchId) {
         nextPatient.branchId = branchId;
         nextPatient.branch = await this.hospitalBranchService.findOne(branchId);

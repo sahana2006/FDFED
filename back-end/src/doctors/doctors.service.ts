@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { RequestContextService } from '../common/request-context.service';
 import { UsersService } from '../users/users.service';
 import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
 import { HospitalBranch } from '../hospital-branch/entities/hospital-branch.entity';
@@ -246,14 +247,31 @@ export class DoctorsService {
   constructor(
     private readonly usersService: UsersService,
     private readonly hospitalBranchService: HospitalBranchService,
+    private readonly requestContextService: RequestContextService,
   ) {
     this.loadSlotBlocks();
     this.loadUnavailableDates();
   }
 
-  // ─── Doctor lookup ───────────────────────────────────────────────────────────
+  private getScopedBranchId(): string | undefined {
+    return this.requestContextService.getContext()?.branchId;
+  }
+
+  private getDoctorBranchId(doctor: Doctor): string {
+    return doctor.branchId ?? DEFAULT_BRANCH_ID;
+  }
+
+  private ensureBranchAccess(branchId: string): void {
+    const scopedBranchId = this.getScopedBranchId();
+    if (scopedBranchId && branchId !== scopedBranchId) {
+      throw new ForbiddenException('Access denied for this hospital branch');
+    }
+  }
+
+  // â”€â”€â”€ Doctor lookup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   findAll(specialization?: string): Doctor[] {
+    const scopedBranchId = this.getScopedBranchId();
     const normalizedSpecialization = specialization?.trim();
     const doctors = normalizedSpecialization
       ? this.doctors.filter(
@@ -261,7 +279,11 @@ export class DoctorsService {
         )
       : this.doctors;
 
-    return doctors.map((doctor) => ({ ...doctor, branchId: doctor.branchId ?? DEFAULT_BRANCH_ID, slots: [...doctor.slots] }));
+    const scopedDoctors = scopedBranchId
+      ? doctors.filter((doctor) => this.getDoctorBranchId(doctor) === scopedBranchId)
+      : doctors;
+
+    return scopedDoctors.map((doctor) => ({ ...doctor, branchId: this.getDoctorBranchId(doctor), slots: [...doctor.slots] }));
   }
 
   getDoctorById(doctorId: string): Doctor {
@@ -272,7 +294,9 @@ export class DoctorsService {
       throw new NotFoundException('Doctor not found');
     }
 
-    return { ...doctor, branchId: doctor.branchId ?? DEFAULT_BRANCH_ID, slots: [...doctor.slots] };
+    this.ensureBranchAccess(this.getDoctorBranchId(doctor));
+
+    return { ...doctor, branchId: this.getDoctorBranchId(doctor), slots: [...doctor.slots] };
   }
 
   async createDoctor(input: CreateDoctorInput): Promise<Doctor> {
@@ -292,11 +316,17 @@ export class DoctorsService {
       throw new BadRequestException('At least one slot is required');
     }
 
-    if (!branchId) {
+    const scopedBranchId = this.getScopedBranchId();
+    const effectiveBranchId = scopedBranchId ?? branchId;
+    if (scopedBranchId && branchId && branchId !== scopedBranchId) {
+      throw new ForbiddenException('Access denied for this hospital branch');
+    }
+
+    if (!effectiveBranchId) {
       throw new BadRequestException('branchId is required');
     }
 
-    const branch = await this.hospitalBranchService.findOne(branchId);
+    const branch = await this.hospitalBranchService.findOne(effectiveBranchId);
 
     const user = this.usersService.createDoctorUser({
       name,
@@ -309,7 +339,7 @@ export class DoctorsService {
       userId: user.id,
       name,
       specialization,
-      branchId,
+      branchId: effectiveBranchId,
       branch,
       department: input.department?.trim() || specialization,
       qualification: input.qualification?.trim() || '',
@@ -324,7 +354,7 @@ export class DoctorsService {
     };
 
     this.doctors.push(doctor);
-    return { ...doctor, branchId: doctor.branchId ?? DEFAULT_BRANCH_ID, slots: [...doctor.slots] };
+    return { ...doctor, branchId: this.getDoctorBranchId(doctor), slots: [...doctor.slots] };
   }
 
   async updateDoctor(userId: string, input: UpdateDoctorInput): Promise<Doctor> {
@@ -332,6 +362,8 @@ export class DoctorsService {
     if (!doctor) {
       throw new NotFoundException('Doctor not found');
     }
+
+    this.ensureBranchAccess(this.getDoctorBranchId(doctor));
 
     const nextName = input.name?.trim();
     const nextEmail = input.email?.trim();
@@ -376,6 +408,8 @@ export class DoctorsService {
       if (!branchId) {
         throw new BadRequestException('branchId is required');
       }
+
+      this.ensureBranchAccess(branchId);
 
       const branch = await this.hospitalBranchService.findOne(branchId);
       doctor.branchId = branchId;

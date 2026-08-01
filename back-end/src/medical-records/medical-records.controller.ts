@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+﻿import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBody } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { DoctorsService } from '../doctors/doctors.service';
+import { PatientsService } from '../patients/patients.service';
 import { MedicalRecordsService } from './medical-records.service';
 import { CreateMedicalRecordDto } from './dto/medical-records.dto';
 
@@ -10,13 +12,18 @@ import { CreateMedicalRecordDto } from './dto/medical-records.dto';
 @Controller('medical-records')
 @UseGuards(RolesGuard)
 export class MedicalRecordsController {
-  constructor(private readonly medicalRecordsService: MedicalRecordsService) {}
+  constructor(
+    private readonly medicalRecordsService: MedicalRecordsService,
+    private readonly doctorsService: DoctorsService,
+    private readonly patientsService: PatientsService,
+  ) {}
 
   @Roles('doctor', 'admin')
   @Get('doctor/:doctorId')
   @ApiOperation({ summary: 'Get medical records by doctor ID' })
   @ApiResponse({ status: 200, description: 'List of doctor medical records' })
   getRecordsByDoctorId(@Param('doctorId') doctorId: string) {
+    this.doctorsService.getDoctorById(doctorId);
     return this.medicalRecordsService.getRecordsByDoctorId(doctorId);
   }
 
@@ -25,6 +32,7 @@ export class MedicalRecordsController {
   @ApiOperation({ summary: 'Get medical records by patient ID' })
   @ApiResponse({ status: 200, description: 'List of patient medical records' })
   getRecordsByPatientId(@Param('patientId') patientId: string) {
+    this.patientsService.getPatientByUserId(patientId);
     return this.medicalRecordsService.getRecordsByPatientId(patientId);
   }
 
