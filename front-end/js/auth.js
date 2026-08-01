@@ -16,6 +16,7 @@ function clearSession() {
 
 function redirectByRole(user) {
   const routes = {
+    super_admin: 'superuser/dashboard.html',
     admin: 'superuser/dashboard.html',
     patient: 'patient/dashboard.html',
     doctor: 'doctor/dashboard.html',
@@ -75,3 +76,4 @@ async function handleSignup(payload) {
     return 'Unable to reach server. Ensure backend is running on port 3000.';
   }
 }
+

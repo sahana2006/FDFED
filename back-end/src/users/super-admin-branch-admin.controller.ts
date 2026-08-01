@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+﻿import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SuperAdminOnly } from '../common/decorators/roles.decorator';
 import { CreateBranchAdminDto } from './dto/create-branch-admin.dto';
@@ -21,6 +21,7 @@ export class SuperAdminBranchAdminController {
     return this.usersService.createBranchAdminUser({
       name: input.name.trim(),
       email: input.email.trim(),
+      phone: input.phone.trim(),
       password: input.password,
       branchId: input.branchId.trim(),
     });

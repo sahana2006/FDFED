@@ -22,6 +22,7 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { HospitalBranchModule } from './hospital-branch/hospital-branch.module';
 import { LabTechniciansModule } from './lab-technicians/lab-technicians.module';
 import { DepartmentsModule } from './departments/departments.module';
+import { SuperAdminDashboardModule } from './super-admin-dashboard/super-admin-dashboard.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { DepartmentsModule } from './departments/departments.module';
     HospitalBranchModule,
     LabTechniciansModule,
     DepartmentsModule,
+    SuperAdminDashboardModule,
   ],
   controllers: [AppController],
   providers: [
@@ -66,4 +68,5 @@ export class AppModule implements NestModule {
     consumer.apply(RequestContextMiddleware).forRoutes('*');
   }
 }
+
 

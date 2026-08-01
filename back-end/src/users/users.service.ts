@@ -29,6 +29,7 @@ export type User = {
   password: string;
   role: UserRole;
   branchId?: string;
+  phone?: string;
 };
 
 type SafeUser = Omit<User, 'password'> & {
@@ -76,6 +77,7 @@ export type CreateBranchAdminUserInput = {
   email: string;
   password: string;
   branchId: string;
+  phone: string;
 };
 
 const scrypt = promisify(scryptCallback);
@@ -95,7 +97,7 @@ export class UsersService implements OnModuleInit {
   ) {}
 
   private readonly users: User[] = [
-    { id: 'ADM001', name: 'Admin User', email: 'admin@medbits.com', password: 'admin123', role: Role.BRANCH_ADMIN, branchId: DEFAULT_BRANCH_ID },
+    { id: 'ADM001', name: 'Admin User', email: 'admin@medbits.com', password: 'admin123', role: Role.BRANCH_ADMIN, branchId: DEFAULT_BRANCH_ID, phone: '' },
     { id: 'PAT001', name: 'Ria Sharma', email: 'ria@medbits.com', password: 'patient123', role: 'patient' },
     { id: 'PAT002', name: 'Arun Menon', email: 'arun.menon@medbits.com', password: 'patient123', role: 'patient' },
     { id: 'PAT003', name: 'Farah Ali', email: 'farah.ali@medbits.com', password: 'patient123', role: 'patient' },
@@ -137,7 +139,14 @@ export class UsersService implements OnModuleInit {
 
     const branch = await this.hospitalBranchService.findOne(DEFAULT_BRANCH_ID);
     await this.branchAdminRepository.save(
-      this.branchAdminRepository.create({ userId, branchId: branch.id, branch }),
+      this.branchAdminRepository.create({
+        userId,
+        branchId: branch.id,
+        name: 'Admin User',
+        email: 'admin@medbits.com',
+        phone: '',
+        branch,
+      }),
     );
   }
 
@@ -151,6 +160,54 @@ export class UsersService implements OnModuleInit {
       (user) => user.id === userId && user.role === Role.BRANCH_ADMIN,
     );
     return inMemoryUser?.branchId ?? null;
+  }
+
+  async getBranchAdminByBranchId(branchId: string): Promise<{
+    userId: string;
+    name: string;
+    email: string;
+    phone: string;
+    branchId: string;
+    branchName: string;
+    status: string;
+  } | null> {
+    const assignment = await this.branchAdminRepository.findOne({ where: { branchId }, relations: { branch: true } });
+    if (!assignment) {
+      return null;
+    }
+
+    return {
+      userId: assignment.userId,
+      name: assignment.name,
+      email: assignment.email,
+      phone: assignment.phone,
+      branchId: assignment.branchId,
+      branchName: assignment.branch.branchName,
+      status: assignment.branch.status,
+    };
+  }
+
+  async listBranchAdminSummaries(): Promise<Array<{
+    userId: string;
+    name: string;
+    email: string;
+    phone: string;
+    branchId: string;
+    branchName: string;
+    branchStatus: string;
+    createdAt: Date;
+  }>> {
+    const assignments = await this.branchAdminRepository.find({ relations: { branch: true }, order: { createdAt: 'DESC' } });
+    return assignments.map((assignment) => ({
+      userId: assignment.userId,
+      name: assignment.name,
+      email: assignment.email,
+      phone: assignment.phone,
+      branchId: assignment.branchId,
+      branchName: assignment.branch.branchName,
+      branchStatus: assignment.branch.status,
+      createdAt: assignment.createdAt,
+    }));
   }
 
   async login(email: string, password: string): Promise<SafeUser | null> {
@@ -256,12 +313,18 @@ export class UsersService implements OnModuleInit {
   async createBranchAdminUser(input: CreateBranchAdminUserInput): Promise<SafeUser> {
     const name = input.name.trim();
     const email = input.email.trim().toLowerCase();
+    const phone = input.phone.trim();
     const branchId = input.branchId.trim();
-    if (!name || !email || !input.password || !branchId) {
-      throw new BadRequestException('name, email, password and branchId are required');
+    if (!name || !email || !phone || !input.password || !branchId) {
+      throw new BadRequestException('name, email, phone, password and branchId are required');
     }
     if (this.users.some((user) => user.email.toLowerCase() === email)) {
       throw new ConflictException('Email is already registered');
+    }
+
+    const existingBranchAdmin = await this.branchAdminRepository.findOne({ where: { branchId } });
+    if (existingBranchAdmin) {
+      throw new ConflictException('This branch already has an active Branch Admin');
     }
 
     const branch = await this.hospitalBranchService.findOne(branchId);
@@ -269,13 +332,14 @@ export class UsersService implements OnModuleInit {
       id: this.generateNextBranchAdminId(),
       name,
       email,
+      phone,
       password: await this.hashPassword(input.password),
       role: Role.BRANCH_ADMIN,
       branchId,
     };
 
     await this.branchAdminRepository.save(
-      this.branchAdminRepository.create({ userId: user.id, branchId, branch }),
+      this.branchAdminRepository.create({ userId: user.id, branchId, name, email, phone, branch }),
     );
     this.users.push(user);
     const { password: _password, ...safeUser } = user;

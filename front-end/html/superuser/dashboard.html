@@ -1,157 +1,195 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEDBITS - Superuser Dashboard</title>
-    <link rel="stylesheet" href="../../css/superuser/components/sidebar.css">
-    <link rel="stylesheet" href="../../css/superuser/components/header.css">
-    <link rel="stylesheet" href="../../css/superuser/dashboard.css">
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEDBITS - Super Admin Dashboard</title>
+  <link rel="stylesheet" href="../../css/superuser/components/sidebar.css">
+  <link rel="stylesheet" href="../../css/superuser/components/header.css">
+  <link rel="stylesheet" href="../../css/superuser/dashboard.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-    <script>
-      const user = JSON.parse(localStorage.getItem('user'));
-      if (!user || user.role !== 'admin') {
-        window.location.href = '../login.html';
-      }
-    </script>
-    <div class="container">
-        <!-- Sidebar -->
-        <div id="sidebar-slot"></div>
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || (user.role !== 'super_admin' && user.role !== 'admin')) {
+      window.location.href = '../login.html';
+    }
+  </script>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <div id="header-slot"><h2 id="header-page-title">Dashboard</h2></div>
+  <div class="container">
+    <div id="sidebar-slot"></div>
 
-            <!-- Main Content Area -->
-            <main class="content">
-                <!-- Welcome Banner -->
-                <div class="welcome-banner">
-                    <h3>Welcome back, Superuser!</h3>
-                    <p>Manage Staffs, Doctors and Hospital Operations Efficiently.</p>
-                </div>
+    <div class="main-content">
+      <div id="header-slot"></div>
 
-                <!-- Quick Actions -->
-                <div class="card">
-                    <h4 class="card-title">Quick Actions</h4>
-                    <div class="quick-actions">
-                        <a href="./DoctorManagement.html"><button class="action-btn">
-                            <i data-lucide="user-cog"></i>
-                            <span>Doctor Management</span>
-                        </button></a>
+      <main class="content dashboard-content">
+        <section class="hero-card">
+          <div class="hero-copy">
+            <span class="eyebrow">Super Admin Control Room</span>
+            <h1>Hospital Branch Dashboard</h1>
+            <p>Track branch health, monitor operational volume, and assign branch admins directly from live backend data.</p>
+          </div>
+          <button class="refresh-btn" id="refresh-dashboard-btn" type="button">
+            <i data-lucide="refresh-cw"></i>
+            <span>Refresh data</span>
+          </button>
+        </section>
 
-                        <a href="./FrontdeskManagement.html"><button class="action-btn">
-                            <i data-lucide="door-open"></i>
-                            <span>Front Desk Management</span>
-                        </button></a>
+        <section class="summary-grid" id="summary-grid"></section>
 
-                        <a href="./DoctorLeaveManagement.html"><button class="action-btn">
-                            <i data-lucide="calendar-days"></i>
-                            <span>Doctor Leave Management</span>
-                        </button></a>
-                    </div>
-                </div>
+        <section class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h2>Branch Management</h2>
+              <p>View branch status, volume, and branch admin assignments.</p>
+            </div>
+            <label class="search-field" for="branch-search-input">
+              <i data-lucide="search"></i>
+              <input id="branch-search-input" type="search" placeholder="Search by branch, city, state, or admin">
+            </label>
+          </div>
 
-                <!-- Bottom Section -->
-                <div class="bottom-section">
-                    <!-- Today's Appointments -->
-                    <div class="card">
-                        <h4 class="card-title">Today's Appointments Preview</h4>
-                        <div class="appointments">
-                            <div class="appointment-item">
-                                <p class="patient-name">Patient: Rahul Mehtha</p>
-                                <p class="appointment-details">Dr Sarah Johnson - 10:00 AM</p>
-                            </div>
-
-                            <div class="appointment-item">
-                                <p class="patient-name">Patient: Rita Kapoor</p>
-                                <p class="appointment-details">Dr Sharath Joy - 10:30 AM</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Notifications & Alerts -->
-                    <div class="card">
-                        <h4 class="card-title">Notifications & Alerts</h4>
-                        <div class="alerts">
-                            <div class="alert-item">
-                                <i data-lucide="alert-triangle"></i>
-                                <p>Pediatrics department reaching maximum appointment capacity</p>
-                            </div>
-
-                            <div class="alert-item">
-                                <i data-lucide="alert-triangle"></i>
-                                <p>No doctors available in Orthopedics for next 2 hours</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
+          <div class="table-wrap">
+            <table class="branch-table">
+              <thead>
+                <tr>
+                  <th>Branch Name</th>
+                  <th>City</th>
+                  <th>State</th>
+                  <th>Status</th>
+                  <th>Total Doctors</th>
+                  <th>Total Patients</th>
+                  <th>Total Appointments</th>
+                  <th>Branch Admin</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="branch-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
     </div>
+  </div>
 
-    <script>
-Promise.all([
-  fetch('./components/sidebar.html').then(r => r.text()),
-  fetch('./components/header.html').then(r => r.text())
-])
-.then(([sidebarHtml, headerHtml]) => {
+  <div class="modal-overlay hidden" id="view-modal" aria-hidden="true">
+    <div class="modal-card modal-lg">
+      <div class="modal-header-row">
+        <div>
+          <span class="modal-kicker">Branch Overview</span>
+          <h3 id="view-modal-title">Branch details</h3>
+        </div>
+        <button class="icon-btn" type="button" data-close-modal="view" aria-label="Close view modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
 
-  // Inject sidebar
-  document.getElementById('sidebar-slot').innerHTML = sidebarHtml;
+      <div class="detail-grid" id="view-modal-details"></div>
+      <div class="admin-panel" id="view-modal-admin"></div>
+      <div class="stats-strip" id="view-modal-stats"></div>
+    </div>
+  </div>
 
-  // Inject header
-  document.getElementById('header-slot').innerHTML = headerHtml;
+  <div class="modal-overlay hidden" id="edit-modal" aria-hidden="true">
+    <div class="modal-card modal-lg">
+      <div class="modal-header-row">
+        <div>
+          <span class="modal-kicker">Edit Branch</span>
+          <h3 id="edit-modal-title">Update hospital branch</h3>
+        </div>
+        <button class="icon-btn" type="button" data-close-modal="edit" aria-label="Close edit modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
 
-  // Active sidebar logic
-  const pageMap = {
-    'dashboard.html': 'dashboard',
-    'doctormanagement.html': 'doctors',
-    'frontdeskmanagement.html': 'frontdesk',
-    'doctorleavemanagement.html': 'leave'
-  };
-  const headerTitleMap = {
-    dashboard: 'Dashboard',
-    doctors: 'Doctor Management',
-    frontdesk: 'Frontdesk Management',
-    leave: 'Frontdesk Leave Management'
-  };
+      <form id="edit-branch-form" class="stack-form" novalidate>
+        <input type="hidden" id="edit-branch-id">
+        <div class="form-grid-2">
+          <label class="field">
+            <span>Hospital Name</span>
+            <input id="edit-hospital-name" type="text" required>
+          </label>
+          <label class="field">
+            <span>Branch Name</span>
+            <input id="edit-branch-name" type="text" required>
+          </label>
+          <label class="field field-wide">
+            <span>Address</span>
+            <textarea id="edit-address" rows="3" required></textarea>
+          </label>
+          <label class="field">
+            <span>City</span>
+            <input id="edit-city" type="text" required>
+          </label>
+          <label class="field">
+            <span>State</span>
+            <input id="edit-state" type="text" required>
+          </label>
+          <label class="field">
+            <span>Pincode</span>
+            <input id="edit-pincode" type="text" maxlength="10" required>
+          </label>
+          <label class="field">
+            <span>Phone</span>
+            <input id="edit-phone" type="text" maxlength="20" required>
+          </label>
+          <label class="field field-wide">
+            <span>Email</span>
+            <input id="edit-email" type="email" required>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button class="primary-btn" type="submit">Save changes</button>
+          <button class="secondary-btn" type="button" data-close-modal="edit">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  const currentPage = location.pathname.split('/').pop().toLowerCase();
-  const activeKey = pageMap[currentPage];
-  const headerTitle = document.getElementById('header-page-title');
+  <div class="modal-overlay hidden" id="assign-modal" aria-hidden="true">
+    <div class="modal-card modal-lg">
+      <div class="modal-header-row">
+        <div>
+          <span class="modal-kicker">Assign Branch Admin</span>
+          <h3 id="assign-modal-title">Create branch admin</h3>
+        </div>
+        <button class="icon-btn" type="button" data-close-modal="assign" aria-label="Close assign modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
 
-  if (activeKey) {
-    const activeLink = document.querySelector(`[data-nav="${activeKey}"]`);
-    if (activeLink) activeLink.classList.add('active');
-    if (headerTitle) headerTitle.textContent = headerTitleMap[activeKey] || 'Dashboard';
-  }
+      <div class="branch-target" id="assign-branch-target"></div>
 
-  const logoutLink = document.getElementById('superuser-logout');
-  if (logoutLink) {
-    logoutLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      localStorage.removeItem('user');
-      window.location.replace('../login.html');
-    });
-  }
+      <form id="assign-admin-form" class="stack-form" novalidate>
+        <input type="hidden" id="assign-branch-id">
+        <div class="form-grid-2">
+          <label class="field">
+            <span>Name</span>
+            <input id="assign-name" type="text" required>
+          </label>
+          <label class="field">
+            <span>Email</span>
+            <input id="assign-email" type="email" required>
+          </label>
+          <label class="field">
+            <span>Phone Number</span>
+            <input id="assign-phone" type="text" maxlength="20" required>
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="assign-password" type="password" minlength="8" required>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button class="primary-btn" type="submit">Create Branch Admin</button>
+          <button class="secondary-btn" type="button" data-close-modal="assign">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  // Load icons AFTER HTML injection
-  lucide.createIcons();
-})
-.catch(err => console.error("Error loading components:", err));
-</script>
-<script>
-    const currentPage = window.location.pathname.split('/').pop();
-    document.querySelectorAll('.nav-item').forEach(item => {
-        if (item.getAttribute('href').includes(currentPage)) {
-            item.classList.add('active');
-        }
-    });
-</script>
+  <div id="toast-host"></div>
+  <script src="../../js/superuser/dashboard.js"></script>
 </body>
 </html>

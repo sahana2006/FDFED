@@ -2946,6 +2946,31 @@
           "Departments"
         ]
       }
+    },
+    "/super-admin/dashboard": {
+      "get": {
+        "operationId": "SuperAdminDashboardController_getDashboard",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "Must be super_admin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard snapshot"
+          }
+        },
+        "summary": "Get super admin dashboard summary and branch table data",
+        "tags": [
+          "Super Admin - Dashboard"
+        ]
+      }
     }
   },
   "info": {
@@ -3051,6 +3076,10 @@
             "type": "string",
             "example": "branch.admin@medbits.com"
           },
+          "phone": {
+            "type": "string",
+            "example": "9876543210"
+          },
           "password": {
             "type": "string",
             "example": "SecurePassword@123"
@@ -3064,6 +3093,7 @@
         "required": [
           "name",
           "email",
+          "phone",
           "password",
           "branchId"
         ]

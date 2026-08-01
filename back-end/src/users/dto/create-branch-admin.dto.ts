@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+﻿import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class CreateBranchAdminDto {
@@ -12,6 +12,12 @@ export class CreateBranchAdminDto {
   @IsEmail()
   @IsNotEmpty()
   email!: string;
+
+  @ApiProperty({ example: '9876543210' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(20)
+  phone!: string;
 
   @ApiProperty({ example: 'SecurePassword@123' })
   @IsString()
