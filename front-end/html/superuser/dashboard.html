@@ -12,7 +12,7 @@
 <body>
   <script>
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || (user.role !== 'super_admin' && user.role !== 'admin')) {
+    if (!user || user.role !== 'super_admin') {
       window.location.href = '../login.html';
     }
   </script>
@@ -27,8 +27,8 @@
         <section class="hero-card">
           <div class="hero-copy">
             <span class="eyebrow">Super Admin Control Room</span>
-            <h1>Hospital Branch Dashboard</h1>
-            <p>Track branch health, monitor operational volume, and assign branch admins directly from live backend data.</p>
+            <h1>Branch setup and access management</h1>
+            <p>Create a new hospital branch, assign its branch admin, and keep both records connected to the live backend.</p>
           </div>
           <button class="refresh-btn" id="refresh-dashboard-btn" type="button">
             <i data-lucide="refresh-cw"></i>
@@ -36,13 +36,99 @@
           </button>
         </section>
 
-        <section class="summary-grid" id="summary-grid"></section>
+        <section class="panel-grid">
+          <section class="panel-card">
+            <div class="panel-header">
+              <div>
+                <h2>Create Branch</h2>
+                <p>Store a new branch directly in the backend database.</p>
+              </div>
+            </div>
+
+            <form id="create-branch-form" class="stack-form" novalidate>
+              <div class="form-grid-2">
+                <label class="field">
+                  <span>Hospital Name</span>
+                  <input id="create-hospital-name" type="text" required>
+                </label>
+                <label class="field">
+                  <span>Branch Name</span>
+                  <input id="create-branch-name" type="text" required>
+                </label>
+                <label class="field field-wide">
+                  <span>Address</span>
+                  <textarea id="create-address" rows="3" required></textarea>
+                </label>
+                <label class="field">
+                  <span>City</span>
+                  <input id="create-city" type="text" required>
+                </label>
+                <label class="field">
+                  <span>State</span>
+                  <input id="create-state" type="text" required>
+                </label>
+                <label class="field">
+                  <span>Pincode</span>
+                  <input id="create-pincode" type="text" maxlength="10" required>
+                </label>
+                <label class="field">
+                  <span>Phone</span>
+                  <input id="create-phone" type="text" maxlength="20" required>
+                </label>
+                <label class="field field-wide">
+                  <span>Email</span>
+                  <input id="create-email" type="email" required>
+                </label>
+              </div>
+              <div class="modal-actions">
+                <button class="primary-btn" type="submit">Create Branch</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel-card">
+            <div class="panel-header">
+              <div>
+                <h2>Assign Branch Admin</h2>
+                <p>Create the branch admin account and link it to an unassigned branch.</p>
+              </div>
+            </div>
+
+            <form id="assign-admin-form" class="stack-form" novalidate>
+              <label class="field field-wide">
+                <span>Branch</span>
+                <select id="assign-branch-id" required></select>
+              </label>
+              <div class="form-grid-2">
+                <label class="field">
+                  <span>Name</span>
+                  <input id="assign-name" type="text" required>
+                </label>
+                <label class="field">
+                  <span>Email</span>
+                  <input id="assign-email" type="email" required>
+                </label>
+                <label class="field">
+                  <span>Phone Number</span>
+                  <input id="assign-phone" type="text" maxlength="20" required>
+                </label>
+                <label class="field">
+                  <span>Password</span>
+                  <input id="assign-password" type="password" minlength="8" required>
+                </label>
+              </div>
+              <div class="modal-actions">
+                <button class="primary-btn" type="submit">Create Branch Admin</button>
+              </div>
+            </form>
+          </section>
+        </section>
 
         <section class="panel-card">
           <div class="panel-header">
             <div>
-              <h2>Branch Management</h2>
-              <p>View branch status, volume, and branch admin assignments.</p>
+              <h2>Live Branch Registry</h2>
+              <p>All branch records and their assigned admins are loaded from the backend.</p>
             </div>
             <label class="search-field" for="branch-search-input">
               <i data-lucide="search"></i>
@@ -62,7 +148,6 @@
                   <th>Total Patients</th>
                   <th>Total Appointments</th>
                   <th>Branch Admin</th>
-                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="branch-table-body"></tbody>
@@ -70,122 +155,6 @@
           </div>
         </section>
       </main>
-    </div>
-  </div>
-
-  <div class="modal-overlay hidden" id="view-modal" aria-hidden="true">
-    <div class="modal-card modal-lg">
-      <div class="modal-header-row">
-        <div>
-          <span class="modal-kicker">Branch Overview</span>
-          <h3 id="view-modal-title">Branch details</h3>
-        </div>
-        <button class="icon-btn" type="button" data-close-modal="view" aria-label="Close view modal">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
-
-      <div class="detail-grid" id="view-modal-details"></div>
-      <div class="admin-panel" id="view-modal-admin"></div>
-      <div class="stats-strip" id="view-modal-stats"></div>
-    </div>
-  </div>
-
-  <div class="modal-overlay hidden" id="edit-modal" aria-hidden="true">
-    <div class="modal-card modal-lg">
-      <div class="modal-header-row">
-        <div>
-          <span class="modal-kicker">Edit Branch</span>
-          <h3 id="edit-modal-title">Update hospital branch</h3>
-        </div>
-        <button class="icon-btn" type="button" data-close-modal="edit" aria-label="Close edit modal">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
-
-      <form id="edit-branch-form" class="stack-form" novalidate>
-        <input type="hidden" id="edit-branch-id">
-        <div class="form-grid-2">
-          <label class="field">
-            <span>Hospital Name</span>
-            <input id="edit-hospital-name" type="text" required>
-          </label>
-          <label class="field">
-            <span>Branch Name</span>
-            <input id="edit-branch-name" type="text" required>
-          </label>
-          <label class="field field-wide">
-            <span>Address</span>
-            <textarea id="edit-address" rows="3" required></textarea>
-          </label>
-          <label class="field">
-            <span>City</span>
-            <input id="edit-city" type="text" required>
-          </label>
-          <label class="field">
-            <span>State</span>
-            <input id="edit-state" type="text" required>
-          </label>
-          <label class="field">
-            <span>Pincode</span>
-            <input id="edit-pincode" type="text" maxlength="10" required>
-          </label>
-          <label class="field">
-            <span>Phone</span>
-            <input id="edit-phone" type="text" maxlength="20" required>
-          </label>
-          <label class="field field-wide">
-            <span>Email</span>
-            <input id="edit-email" type="email" required>
-          </label>
-        </div>
-        <div class="modal-actions">
-          <button class="primary-btn" type="submit">Save changes</button>
-          <button class="secondary-btn" type="button" data-close-modal="edit">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="modal-overlay hidden" id="assign-modal" aria-hidden="true">
-    <div class="modal-card modal-lg">
-      <div class="modal-header-row">
-        <div>
-          <span class="modal-kicker">Assign Branch Admin</span>
-          <h3 id="assign-modal-title">Create branch admin</h3>
-        </div>
-        <button class="icon-btn" type="button" data-close-modal="assign" aria-label="Close assign modal">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
-
-      <div class="branch-target" id="assign-branch-target"></div>
-
-      <form id="assign-admin-form" class="stack-form" novalidate>
-        <input type="hidden" id="assign-branch-id">
-        <div class="form-grid-2">
-          <label class="field">
-            <span>Name</span>
-            <input id="assign-name" type="text" required>
-          </label>
-          <label class="field">
-            <span>Email</span>
-            <input id="assign-email" type="email" required>
-          </label>
-          <label class="field">
-            <span>Phone Number</span>
-            <input id="assign-phone" type="text" maxlength="20" required>
-          </label>
-          <label class="field">
-            <span>Password</span>
-            <input id="assign-password" type="password" minlength="8" required>
-          </label>
-        </div>
-        <div class="modal-actions">
-          <button class="primary-btn" type="submit">Create Branch Admin</button>
-          <button class="secondary-btn" type="button" data-close-modal="assign">Cancel</button>
-        </div>
-      </form>
     </div>
   </div>
 

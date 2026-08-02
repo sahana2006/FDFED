@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEDBITS - Branch Admin Dashboard</title>
+  <link rel="stylesheet" href="../../css/branch-admin/dashboard.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || (user.role !== 'branch_admin' && user.role !== 'admin')) {
+      window.location.href = '../login.html';
+    }
+  </script>
+
+  <main class="branch-admin-shell">
+    <section class="branch-admin-card hero-card">
+      <div>
+        <span class="eyebrow">Branch Admin Portal</span>
+        <h1 id="welcome-title">Welcome</h1>
+        <p id="welcome-copy">Loading your branch details from the backend.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="refresh-btn" id="refresh-btn" type="button">
+          <i data-lucide="refresh-cw"></i>
+          <span>Refresh</span>
+        </button>
+        <button class="logout-btn" id="logout-btn" type="button">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="branch-admin-card">
+      <div class="card-header">
+        <div>
+          <h2>Your Branch</h2>
+          <p>Details for the branch linked to your login account.</p>
+        </div>
+      </div>
+      <div class="branch-grid" id="branch-grid"></div>
+    </section>
+
+    <section class="branch-admin-card">
+      <div class="card-header">
+        <div>
+          <h2>Account Details</h2>
+          <p>Use these credentials to access your dashboard.</p>
+        </div>
+      </div>
+      <div class="account-grid" id="account-grid"></div>
+    </section>
+  </main>
+
+  <div id="toast-host"></div>
+  <script src="../../js/branch-admin/dashboard.js"></script>
+</body>
+</html>
