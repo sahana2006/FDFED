@@ -83,6 +83,9 @@ export type CreateBranchAdminUserInput = {
 const scrypt = promisify(scryptCallback);
 const DEFAULT_SUPER_ADMIN_EMAIL = 'superadmin@medbits.com';
 const DEFAULT_SUPER_ADMIN_PASSWORD = 'SuperAdmin@123';
+const DEFAULT_BRANCH_ADMIN_EMAIL = 'admin@medbits.com';
+const DEFAULT_BRANCH_ADMIN_NAME = 'Admin User';
+const DEFAULT_BRANCH_ADMIN_PASSWORD = 'admin123';
 const DEFAULT_BRANCH_ID = '00000000-0000-4000-8000-000000000001';
 
 @Injectable()
@@ -116,6 +119,7 @@ export class UsersService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     await this.seedDefaultBranchAdmin();
+    await this.hydrateBranchAdmins();
 
     const email = (process.env.SUPER_ADMIN_EMAIL ?? DEFAULT_SUPER_ADMIN_EMAIL)
       .trim()
@@ -134,20 +138,49 @@ export class UsersService implements OnModuleInit {
 
   private async seedDefaultBranchAdmin(): Promise<void> {
     const userId = 'ADM001';
-    const existingAssignment = await this.branchAdminRepository.findOneBy({ userId });
-    if (existingAssignment) return;
+    const existingAssignment = await this.branchAdminRepository.findOne({ where: { branchId: DEFAULT_BRANCH_ID } });
+    if (existingAssignment) {
+      if (existingAssignment.userId === userId && !existingAssignment.password) {
+        existingAssignment.password = await this.hashPassword(DEFAULT_BRANCH_ADMIN_PASSWORD);
+        await this.branchAdminRepository.save(existingAssignment);
+      }
+      return;
+    }
 
     const branch = await this.hospitalBranchService.findOne(DEFAULT_BRANCH_ID);
     await this.branchAdminRepository.save(
       this.branchAdminRepository.create({
         userId,
         branchId: branch.id,
-        name: 'Admin User',
-        email: 'admin@medbits.com',
+        name: DEFAULT_BRANCH_ADMIN_NAME,
+        email: DEFAULT_BRANCH_ADMIN_EMAIL,
+        password: await this.hashPassword(DEFAULT_BRANCH_ADMIN_PASSWORD),
         phone: '',
         branch,
       }),
     );
+  }
+
+  private async hydrateBranchAdmins(): Promise<void> {
+    const assignments = await this.branchAdminRepository.find();
+    for (const assignment of assignments) {
+      const user: User = {
+        id: assignment.userId,
+        name: assignment.name,
+        email: assignment.email,
+        password: assignment.password ?? '',
+        role: Role.BRANCH_ADMIN,
+        branchId: assignment.branchId,
+        phone: assignment.phone,
+      };
+
+      const existingIndex = this.users.findIndex((item) => item.id === assignment.userId || item.email.toLowerCase() === assignment.email.toLowerCase());
+      if (existingIndex >= 0) {
+        this.users[existingIndex] = user;
+      } else {
+        this.users.push(user);
+      }
+    }
   }
 
   async getBranchAdminBranchId(userId: string): Promise<string | null> {
@@ -339,7 +372,7 @@ export class UsersService implements OnModuleInit {
     };
 
     await this.branchAdminRepository.save(
-      this.branchAdminRepository.create({ userId: user.id, branchId, name, email, phone, branch }),
+      this.branchAdminRepository.create({ userId: user.id, branchId, name, email, password: user.password, phone, branch }),
     );
     this.users.push(user);
     const { password: _password, ...safeUser } = user;
@@ -398,3 +431,6 @@ export class UsersService implements OnModuleInit {
       && timingSafeEqual(storedHashBuffer, derivedHash);
   }
 }
+
+
+

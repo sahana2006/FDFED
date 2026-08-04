@@ -1,4 +1,4 @@
-﻿import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { HospitalBranch } from '../../hospital-branch/entities/hospital-branch.entity';
 
 @Entity({ name: 'branch_admins' })
@@ -16,6 +16,9 @@ export class BranchAdminEntity {
   @Column({ type: 'varchar', length: 254 })
   email!: string;
 
+  @Column({ type: 'varchar', length: 255, default: '' })
+  password!: string;
+
   @Column({ type: 'varchar', length: 20, default: '' })
   phone!: string;
 
@@ -26,3 +29,6 @@ export class BranchAdminEntity {
   @CreateDateColumn()
   createdAt!: Date;
 }
+
+
+
