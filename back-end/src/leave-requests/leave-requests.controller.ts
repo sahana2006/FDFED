@@ -40,7 +40,7 @@ export class LeaveRequestsController {
 
   @ApiOperation({ summary: 'Get all leave requests' })
   @ApiResponse({ status: 200, description: 'List of all leave requests' })
-  @Roles('admin', 'doctor', 'frontdesk')
+  @Roles('admin', 'branch_admin', 'doctor', 'frontdesk')
   @Get()
   getLeaveRequests() {
     return this.leaveRequestsService.getAllRequests();
@@ -50,7 +50,7 @@ export class LeaveRequestsController {
   @ApiParam({ name: 'id', description: 'Leave Request ID' })
   @ApiBody({ type: UpdateLeaveRequestStatusDto })
   @ApiResponse({ status: 200, description: 'Status updated successfully' })
-  @Roles('admin')
+  @Roles('admin', 'branch_admin')
   @Put(':id')
   updateRequestStatus(
     @Param('id') id: string,

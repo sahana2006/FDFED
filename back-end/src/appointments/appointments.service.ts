@@ -58,13 +58,13 @@ export class AppointmentsService {
     this.loadPersistedAppointments();
   }
 
-  getAvailableSlots(doctorId: string, date: string): string[] {
+  async getAvailableSlots(doctorId: string, date: string): Promise<string[]> {
     // If the doctor has marked the entire date as unavailable, return nothing
     if (this.doctorsService.isDateUnavailable(doctorId, date)) {
       return [];
     }
 
-    const doctor = this.doctorsService.getDoctorById(doctorId);
+    const doctor = await this.doctorsService.getDoctorById(doctorId);
 
     // Collect slots already booked by patients
     const bookedSlots = new Set(
@@ -100,7 +100,7 @@ export class AppointmentsService {
     }
 
     const branch = await this.hospitalBranchService.findOne(branchId);
-    const doctor = this.doctorsService.getDoctorById(input.doctorId);
+    const doctor = await this.doctorsService.getDoctorById(input.doctorId);
     const patient = this.patientsService.getPatientByUserId(input.userId);
 
     if (doctor.branchId !== branchId) {
@@ -157,13 +157,15 @@ export class AppointmentsService {
     return this.toAppointmentDetails(appointment);
   }
 
-  getUpcomingAppointments() {
-    return this.appointments
-      .filter((appointment) => appointment.status === 'upcoming')
-      .map((appointment) => this.toAppointmentDetails(appointment));
+  async getUpcomingAppointments() {
+    return Promise.all(
+      this.appointments
+        .filter((appointment) => appointment.status === 'upcoming')
+        .map((appointment) => this.toAppointmentDetails(appointment))
+    );
   }
 
-  listAppointments(input: ListAppointmentsInput = {}) {
+  async listAppointments(input: ListAppointmentsInput = {}) {
     const normalizedStatus =
       input.status === 'upcoming' || input.status === 'completed'
         ? input.status
@@ -171,47 +173,53 @@ export class AppointmentsService {
     const normalizedUserId = input.userId?.trim();
     const normalizedDoctorId = input.doctorId?.trim();
 
-    return this.appointments
-      .filter((appointment) => {
-        if (normalizedUserId && appointment.userId !== normalizedUserId) {
-          return false;
-        }
+    return Promise.all(
+      this.appointments
+        .filter((appointment) => {
+          if (normalizedUserId && appointment.userId !== normalizedUserId) {
+            return false;
+          }
 
-        if (normalizedDoctorId && appointment.doctorId !== normalizedDoctorId) {
-          return false;
-        }
+          if (normalizedDoctorId && appointment.doctorId !== normalizedDoctorId) {
+            return false;
+          }
 
-        if (normalizedStatus && appointment.status !== normalizedStatus) {
-          return false;
-        }
+          if (normalizedStatus && appointment.status !== normalizedStatus) {
+            return false;
+          }
 
-        return true;
-      })
-      .map((appointment) => this.toAppointmentDetails(appointment));
+          return true;
+        })
+        .map((appointment) => this.toAppointmentDetails(appointment))
+    );
   }
 
-  getAppointmentsByUserId(userId: string, status?: string) {
+  async getAppointmentsByUserId(userId: string, status?: string) {
     const normalizedStatus =
       status === 'upcoming' || status === 'completed' ? status : undefined;
 
-    return this.appointments
-      .filter((appointment) => {
-        if (appointment.userId !== userId) {
-          return false;
-        }
+    return Promise.all(
+      this.appointments
+        .filter((appointment) => {
+          if (appointment.userId !== userId) {
+            return false;
+          }
 
-        return normalizedStatus ? appointment.status === normalizedStatus : true;
-      })
-      .map((appointment) => this.toAppointmentDetails(appointment));
+          return normalizedStatus ? appointment.status === normalizedStatus : true;
+        })
+        .map((appointment) => this.toAppointmentDetails(appointment))
+    );
   }
 
-  getCompletedAppointmentsByUserId(userId: string) {
-    return this.appointments
-      .filter(
-        (appointment) =>
-          appointment.userId === userId && appointment.status === 'completed',
-      )
-      .map((appointment) => this.toAppointmentDetails(appointment));
+  async getCompletedAppointmentsByUserId(userId: string) {
+    return Promise.all(
+      this.appointments
+        .filter(
+          (appointment) =>
+            appointment.userId === userId && appointment.status === 'completed',
+        )
+        .map((appointment) => this.toAppointmentDetails(appointment))
+    );
   }
 
   getAppointmentsByDoctorId(doctorId: string) {
@@ -241,7 +249,7 @@ export class AppointmentsService {
     );
   }
 
-  completeAppointment(appointmentId: string) {
+  async completeAppointment(appointmentId: string) {
     const appointment = this.appointments.find((item) => item.id === appointmentId);
     if (!appointment) {
       throw new BadRequestException('Appointment not found');
@@ -252,7 +260,7 @@ export class AppointmentsService {
     return this.toAppointmentDetails(appointment);
   }
 
-  updateAppointment(appointmentId: string, input: UpdateAppointmentInput) {
+  async updateAppointment(appointmentId: string, input: UpdateAppointmentInput) {
     const appointment = this.appointments.find((item) => item.id === appointmentId);
     if (!appointment) {
       throw new BadRequestException('Appointment not found');
@@ -268,7 +276,7 @@ export class AppointmentsService {
       throw new BadRequestException('date and slot are required');
     }
 
-    const doctor = this.doctorsService.getDoctorById(appointment.doctorId);
+    const doctor = await this.doctorsService.getDoctorById(appointment.doctorId);
     if (!doctor.slots.includes(nextSlot)) {
       throw new BadRequestException('Invalid doctor slot');
     }
@@ -291,7 +299,7 @@ export class AppointmentsService {
     return this.toAppointmentDetails(appointment);
   }
 
-  cancelAppointment(appointmentId: string) {
+  async cancelAppointment(appointmentId: string) {
     const appointmentIndex = this.appointments.findIndex(
       (item) => item.id === appointmentId,
     );
@@ -330,10 +338,10 @@ export class AppointmentsService {
     );
   }
 
-  private toAppointmentDetails(appointment: Appointment) {
+  private async toAppointmentDetails(appointment: Appointment) {
     let doctor: any = null;
     try {
-      doctor = this.doctorsService.getDoctorById(appointment.doctorId);
+      doctor = await this.doctorsService.getDoctorById(appointment.doctorId);
     } catch (_) {
       doctor = {
         id: appointment.doctorId,

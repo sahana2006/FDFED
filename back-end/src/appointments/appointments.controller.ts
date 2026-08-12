@@ -1,4 +1,4 @@
-﻿import { BadRequestException, Body, Controller, Delete, Get, Header, Param, Post, Put, Query, UseGuards, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Header, Param, Post, Put, Query, UseGuards, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBody } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -35,8 +35,9 @@ export class AppointmentsController {
     return this.getAppointmentBranchId(appointment) === scopedBranchId;
   }
 
-  private requireAppointmentInScope(appointmentId: string) {
-    const appointment = this.appointmentsService.listAppointments().find((item) => item.id === appointmentId);
+  private async requireAppointmentInScope(appointmentId: string) {
+    const allAppointments = await this.appointmentsService.listAppointments();
+    const appointment = allAppointments.find((item) => item.id === appointmentId);
     if (!appointment) {
       throw new NotFoundException('Appointment not found');
     }
@@ -53,11 +54,11 @@ export class AppointmentsController {
   @Get()
   @ApiOperation({ summary: 'List appointments' })
   @ApiResponse({ status: 200, description: 'List of appointments' })
-  getAppointments(
+  async getAppointments(
     @Query('status') status?: string,
   ) {
-    return this.appointmentsService.listAppointments({ status })
-      .filter((appointment) => this.isAppointmentInScope(appointment));
+    const all = await this.appointmentsService.listAppointments({ status });
+    return all.filter((appointment) => this.isAppointmentInScope(appointment));
   }
 
   @Roles('patient', 'frontdesk', 'admin')
@@ -88,23 +89,23 @@ export class AppointmentsController {
   @Get('user/:userId')
   @ApiOperation({ summary: 'Get appointments for a user' })
   @ApiResponse({ status: 200, description: 'List of user appointments' })
-  getAppointmentsByUserId(
+  async getAppointmentsByUserId(
     @Param('userId') userId: string,
     @Query('status') status?: string,
   ) {
     this.patientsService.getPatientByUserId(userId);
-    return this.appointmentsService.getAppointmentsByUserId(userId, status)
-      .filter((appointment) => this.isAppointmentInScope(appointment));
+    const all = await this.appointmentsService.getAppointmentsByUserId(userId, status);
+    return all.filter((appointment) => this.isAppointmentInScope(appointment));
   }
 
   @Roles('patient', 'frontdesk', 'admin')
   @Get('completed/:userId')
   @ApiOperation({ summary: 'Get completed appointments for a user' })
   @ApiResponse({ status: 200, description: 'List of completed user appointments' })
-  getCompletedAppointmentsByUserId(@Param('userId') userId: string) {
+  async getCompletedAppointmentsByUserId(@Param('userId') userId: string) {
     this.patientsService.getPatientByUserId(userId);
-    return this.appointmentsService.getCompletedAppointmentsByUserId(userId)
-      .filter((appointment) => this.isAppointmentInScope(appointment));
+    const all = await this.appointmentsService.getCompletedAppointmentsByUserId(userId);
+    return all.filter((appointment) => this.isAppointmentInScope(appointment));
   }
 
   @Roles('doctor', 'frontdesk', 'admin')

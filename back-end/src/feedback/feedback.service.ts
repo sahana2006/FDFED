@@ -39,7 +39,7 @@ export class FeedbackService {
       );
     }
 
-    const doctor = this.doctorsService.getDoctorById(input.doctorId);
+    const doctor = await this.doctorsService.getDoctorById(input.doctorId);
     const branchId = input.branchId?.trim() || doctor.branchId;
     const branch = await this.hospitalBranchService.findOne(branchId);
     if (doctor.branchId !== branchId) {

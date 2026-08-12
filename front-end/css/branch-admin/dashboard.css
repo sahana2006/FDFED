@@ -1,189 +1,44 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+/* ── Branch Admin Dashboard — page-specific styles ── */
 
-:root {
-  --bg: #f4f7f8;
-  --panel: rgba(255, 255, 255, 0.94);
-  --text: #10202f;
-  --muted: #667085;
-  --border: rgba(16, 32, 47, 0.08);
-  --teal: #0f766e;
-  --teal-soft: #d8f5f0;
-  --shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: 'DM Sans', sans-serif;
-  color: var(--text);
-  background:
-    radial-gradient(circle at top right, rgba(15, 118, 110, 0.14), transparent 30%),
-    linear-gradient(180deg, #f9fbfb 0%, var(--bg) 100%);
-}
-
-.branch-admin-shell {
-  min-height: 100vh;
-  padding: 1.5rem;
+/* Quick Actions Grid */
+.quick-grid {
   display: grid;
-  gap: 1.25rem;
-  max-width: 1180px;
-  margin: 0 auto;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
 }
 
-.branch-admin-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 1.4rem;
-  box-shadow: var(--shadow);
-  padding: 1.25rem;
-}
-
-.hero-card {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: center;
-}
-
-.eyebrow {
-  display: inline-flex;
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
-  background: var(--teal-soft);
-  color: #115e59;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.hero-card h1 {
-  margin: 0.75rem 0 0.45rem;
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
-}
-
-.hero-card p,
-.card-header p {
-  margin: 0;
-  color: var(--muted);
-}
-
-.refresh-btn {
-  border: 0;
-  border-radius: 0.9rem;
-  background: linear-gradient(135deg, var(--teal) 0%, #14b8a6 100%);
-  color: #fff;
-  padding: 0.9rem 1.1rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  cursor: pointer;
-}
-
-.card-header {
-  margin-bottom: 1rem;
-}
-
-.card-header h2 {
-  margin: 0;
-  font-size: 1.3rem;
-}
-
-.branch-grid,
-.account-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
-}
-
-.info-card {
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: #f8fafc;
-  padding: 1rem;
+.quick-action {
+  border-radius: var(--radius);
+  padding: 22px 20px;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-}
-
-.info-card span {
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.info-card strong {
-  font-size: 1rem;
-  line-height: 1.4;
-}
-
-.empty-state {
-  padding: 1.25rem;
-  border-radius: 1rem;
-  background: #f8fafc;
-  border: 1px dashed var(--border);
-  color: var(--muted);
-}
-
-#toast-host {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  display: grid;
-  gap: 0.75rem;
-  z-index: 100;
-}
-
-.toast {
-  min-width: 260px;
-  max-width: 360px;
-  padding: 0.95rem 1rem;
-  border-radius: 0.9rem;
-  color: #fff;
-  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
-}
-
-.toast.success { background: linear-gradient(135deg, #0f766e, #14b8a6); }
-.toast.error { background: linear-gradient(135deg, #b91c1c, #ef4444); }
-
-@media (max-width: 768px) {
-  .branch-admin-shell {
-    padding: 1rem;
-  }
-
-  .hero-card {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .branch-grid,
-  .account-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.hero-actions {
-  display: inline-flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.logout-btn {
-  border: 0;
-  border-radius: 0.9rem;
-  background: #eef2f7;
-  color: #10202f;
-  padding: 0.9rem 1.1rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
+  align-items: flex-start;
+  gap: 10px;
   cursor: pointer;
+  transition: var(--transition);
+  border: 2px solid transparent;
+}
+.quick-action:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+.qa-teal { background: var(--accent-light); border-color: var(--accent); }
+.qa-teal:hover { background: var(--accent); color: #fff; }
+
+.qa-navy { background: #e0f2fe; border-color: #0ea5e9; }
+.qa-navy:hover { background: #0c4a6e; color: #fff; }
+
+.qa-icon  { font-size: 28px; }
+.qa-label { font-size: 14px; font-weight: 600; }
+
+/* Two-column bottom row */
+.dash-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.logout-btn:hover {
-  background: #e2e8f0;
+.mb-16 { margin-bottom: 16px; }
+
+@media (max-width: 860px) {
+  .dash-bottom   { grid-template-columns: 1fr; }
+  .quick-grid    { grid-template-columns: 1fr; }
 }

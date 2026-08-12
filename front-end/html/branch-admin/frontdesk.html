@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MEDBITS Branch Admin — Manage Front Desk staff in your branch">
+  <title>MEDBITS — Manage Front Desk</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/branch-admin/global.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">✚</span>
+    <span class="brand-name">MEDBITS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" data-page="dashboard"  href="dashboard.html"> <span class="nav-icon">⊞</span><span>Dashboard</span></a>
+    <a class="nav-item" data-page="doctors"    href="doctors.html">   <span class="nav-icon">🩺</span><span>Manage Doctors</span></a>
+    <a class="nav-item active" data-page="frontdesk"  href="frontdesk.html"> <span class="nav-icon">🖥️</span><span>Manage Front Desk</span></a>
+    <a class="nav-item" data-page="leave-management" href="leave-management.html"> <span class="nav-icon">📅</span><span>Leave Management</span></a>
+  </nav>
+  <div class="sidebar-bottom">
+    <a class="nav-item logout-btn" id="logoutBtn">
+      <span class="nav-icon">⇥</span><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle">☰</button>
+      <div>
+        <div class="page-title" id="pageTitle">Manage Front Desk</div>
+        <div class="page-sub" id="portalLabel">Branch Admin Portal</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="notif-btn" id="notifBtn">🔔</button>
+      <div class="user-chip">
+        <div class="user-avatar" id="userAvatarTop">BA</div>
+        <div>
+          <div class="user-name" id="userNameTop">Branch Admin</div>
+          <div class="user-role">Branch Admin</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- Page Header -->
+    <div class="page-header mb-16">
+      <div>
+        <h1 class="page-h1">Manage Front Desk</h1>
+        <p class="text-muted">Add, edit, and view front desk staff assigned to your branch</p>
+      </div>
+      <button class="btn btn-accent btn-lg" id="addFDBtn">＋ Add Front Desk Staff</button>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar mb-16">
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="Search by name or counter…" autocomplete="off">
+      </div>
+      <select id="filterGender" class="filter-select">
+        <option value="">All Genders</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Staff</div>
+        <div class="stat-value" id="statTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Counters</div>
+        <div class="stat-value" id="statCounters">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Languages Covered</div>
+        <div class="stat-value" id="statLangs">—</div>
+      </div>
+    </div>
+
+    <!-- Front Desk Table -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">Front Desk Staff</div>
+        <span class="text-muted text-sm" id="resultCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table id="fdTable">
+          <thead>
+            <tr>
+              <th>Staff Member</th>
+              <th>Counter</th>
+              <th>Shift</th>
+              <th>Phone</th>
+              <th>Gender</th>
+              <th>Languages</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="fdBody">
+            <tr><td colspan="7" class="empty-state"><p>Loading staff…</p></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/branch-admin/utils.js"></script>
+<script src="../../js/branch-admin/components.js"></script>
+<script src="../../js/branch-admin/frontdesk.js"></script>
+<script>
+  (async () => {
+    await loadComponents('frontdesk', 'Manage Front Desk');
+    updateTopbarUser();
+    try {
+      await initFrontDeskPage();
+    } catch (err) {
+      showToast(err.message || 'Failed to load front desk staff', 'error');
+    }
+  })();
+</script>
+</body>
+</html>

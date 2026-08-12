@@ -50,9 +50,9 @@ export class SuperAdminDashboardService {
     branches: SuperAdminDashboardBranchRow[];
   }> {
     const branches = await this.hospitalBranchService.findAll();
-    const doctors = this.doctorsService.findAll();
+    const doctors = await this.doctorsService.findAll();
     const patients = this.patientsService.getAllPatients();
-    const appointments = this.appointmentsService.listAppointments();
+    const appointments = await this.appointmentsService.listAppointments();
     const branchAdmins = await this.usersService.listBranchAdminSummaries();
     const branchAdminMap = new Map(branchAdmins.map((admin) => [admin.branchId, admin] as const));
 

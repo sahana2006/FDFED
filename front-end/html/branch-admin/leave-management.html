@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Leave Management - Branch Admin | Medbits</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/branch-admin/global.css">
+  <link rel="stylesheet" href="../../css/branch-admin/dashboard.css">
+</head>
+<body class="dashboard-body">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">✚</span>
+      <span class="brand-name">MEDBITS</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" data-page="dashboard"  href="dashboard.html"> <span class="nav-icon">⊞</span><span>Dashboard</span></a>
+      <a class="nav-item" data-page="doctors"    href="doctors.html">   <span class="nav-icon">🩺</span><span>Manage Doctors</span></a>
+      <a class="nav-item" data-page="frontdesk"  href="frontdesk.html"> <span class="nav-icon">🖥️</span><span>Manage Front Desk</span></a>
+      <a class="nav-item active" data-page="leave-management" href="leave-management.html"> <span class="nav-icon">📅</span><span>Leave Management</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a class="nav-item logout-btn" id="logoutBtn">
+        <span class="nav-icon">⇥</span><span>Logout</span>
+      </a>
+    </div>
+  </aside>
+  <div class="main-wrap">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div>
+          <div class="page-title" id="pageTitle">Leave Management</div>
+          <div class="page-sub" id="portalLabel">Branch Admin Portal</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="notif-btn" id="notifBtn">🔔</button>
+        <div class="user-chip">
+          <div class="user-avatar" id="userAvatarTop">BA</div>
+          <div>
+            <div class="user-name" id="userNameTop">Branch Admin</div>
+            <div class="user-role">Branch Admin</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <header class="page-header">
+        <div class="header-info">
+          <h1 class="page-title">Leave Requests</h1>
+          <p class="page-desc">Review and manage doctor leave requests.</p>
+        </div>
+      </header>
+
+      <!-- Data Table -->
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Doctor</th>
+              <th>Department</th>
+              <th>Date Requested</th>
+              <th>Leave Type</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Submitted On</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leaveTableBody">
+            <tr><td colspan="8" style="text-align:center; padding: 20px;">Loading leave requests...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../js/branch-admin/utils.js"></script>
+  <script src="../../js/branch-admin/components.js"></script>
+  <script src="../../js/branch-admin/leave-management.js"></script>
+</body>
+</html>

@@ -70,28 +70,8 @@ function getHeaderTemplate() {
         <span>Notifications</span>
         <button class="notif-clear" id="notifClear">Clear all</button>
       </div>
-      <div class="notif-list">
-        <div class="notif-item unread">
-          <div class="notif-dot"></div>
-          <div class="notif-content">
-            <p>New appointment confirmed - <strong>Paul Johnson</strong></p>
-            <span>10:00 AM today</span>
-          </div>
-        </div>
-        <div class="notif-item unread">
-          <div class="notif-dot"></div>
-          <div class="notif-content">
-            <p>Lab result ready - <strong>Neil Verma</strong></p>
-            <span>Yesterday, 4:30 PM</span>
-          </div>
-        </div>
-        <div class="notif-item unread">
-          <div class="notif-dot"></div>
-          <div class="notif-content">
-            <p>Follow-up reminder - <strong>Ria Sharma</strong></p>
-            <span>Yesterday, 2:00 PM</span>
-          </div>
-        </div>
+      <div class="notif-list" id="notifListContainer">
+        <!-- Dynamic notifications go here -->
       </div>
     </div>
 
@@ -209,10 +189,17 @@ async function loadComponents(activePage, pageTitle) {
     });
   }
   if (notifClear) {
-    notifClear.addEventListener('click', () => {
-      document.querySelectorAll('.notif-item.unread').forEach(i => i.classList.remove('unread'));
-      document.querySelectorAll('.notif-dot').forEach(d => d.style.opacity = '0');
-      if (notifBadge) notifBadge.style.display = 'none';
+    notifClear.addEventListener('click', async () => {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const u = JSON.parse(userStr);
+        try {
+          await fetch(\`http://localhost:3000/notifications/user/\${u.id}\`, { method: 'DELETE', headers: { role: 'doctor' } });
+          const list = document.getElementById('notifListContainer');
+          if (list) list.innerHTML = '<div style="padding:15px;color:#888;text-align:center;">No new notifications</div>';
+          if (notifBadge) notifBadge.style.display = 'none';
+        } catch(e) {}
+      }
     });
   }
 
@@ -235,6 +222,52 @@ async function loadComponents(activePage, pageTitle) {
     if (profileDropdown) profileDropdown.classList.remove('open');
     if (doctorProfile)   doctorProfile.classList.remove('open');
   });
+
+  // Fetch real notifications
+  await fetchDoctorNotifications();
+}
+
+async function fetchDoctorNotifications() {
+  const userStr = localStorage.getItem('user');
+  if (!userStr) return;
+  const user = JSON.parse(userStr);
+  
+  try {
+    const res = await fetch(\`http://localhost:3000/notifications/user/\${user.id}\`, { headers: { role: 'doctor' } });
+    if (!res.ok) return;
+    const notifs = await res.json();
+    
+    const badge = document.getElementById('notifBadge');
+    const container = document.getElementById('notifListContainer');
+    
+    const unreadCount = notifs.filter(n => !n.read).length;
+    if (badge) {
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+    
+    if (container) {
+      if (notifs.length === 0) {
+        container.innerHTML = '<div style="padding:15px;color:#888;text-align:center;">No new notifications</div>';
+      } else {
+        container.innerHTML = notifs.map(n => \`
+          <div class="notif-item \${n.read ? '' : 'unread'}">
+            <div class="notif-dot" style="\${n.read ? 'opacity:0;' : ''}"></div>
+            <div class="notif-content">
+              <p>\${n.message}</p>
+              <span>\${new Date(n.createdAt).toLocaleString()}</span>
+            </div>
+          </div>
+        \`).join('');
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load notifications', e);
+  }
 }
 
 /* ── Toast utility ─────────────────────────────────────────── */

@@ -23,6 +23,7 @@ import { HospitalBranchModule } from './hospital-branch/hospital-branch.module';
 import { LabTechniciansModule } from './lab-technicians/lab-technicians.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { SuperAdminDashboardModule } from './super-admin-dashboard/super-admin-dashboard.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { SuperAdminDashboardModule } from './super-admin-dashboard/super-admin-d
     FrontdeskModule,
     WalkInsModule,
     LeaveRequestsModule,
+    NotificationsModule,
     HospitalBranchModule,
     LabTechniciansModule,
     DepartmentsModule,

@@ -45,4 +45,7 @@ export class FrontdeskEntity {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @Column({ type: 'boolean', default: true })
+  isActive!: boolean;
 }

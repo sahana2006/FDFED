@@ -80,6 +80,16 @@ export class DoctorsController {
     });
   }
 
+  @ApiOperation({ summary: 'Remove a doctor from the branch (Soft Delete)' })
+  @ApiParam({ name: 'userId', description: 'Doctor user ID' })
+  @ApiResponse({ status: 200, description: 'Doctor removed' })
+  @Roles('admin')
+  @Delete(':userId')
+  async removeDoctor(@Param('userId') userId: string) {
+    await this.doctorsService.removeDoctor(userId);
+    return { success: true };
+  }
+
   @ApiOperation({ summary: 'Get a single doctor profile by ID' })
   @ApiParam({ name: 'doctorId', description: 'Doctor ID (e.g. DOC001)' })
   @ApiResponse({ status: 200, description: 'Doctor profile object' })
@@ -96,11 +106,11 @@ export class DoctorsController {
   @ApiResponse({ status: 200, description: 'Array of available slot time strings' })
   @Roles('patient', 'doctor', 'frontdesk')
   @Get(':doctorId/slots')
-  getAvailableSlots(
+  async getAvailableSlots(
     @Param('doctorId') doctorId: string,
     @Query('date') date?: string,
   ) {
-    const doctor = this.doctorsService.getDoctorById(doctorId);
+    const doctor = await this.doctorsService.getDoctorById(doctorId);
     if (!date?.trim()) {
       return doctor.slots;
     }
@@ -114,12 +124,12 @@ export class DoctorsController {
   @ApiResponse({ status: 200, description: 'Array of appointment objects' })
   @Roles('doctor', 'frontdesk')
   @Get(':doctorId/appointments')
-  getAppointmentsByDoctorId(
+  async getAppointmentsByDoctorId(
     @Param('doctorId') doctorId: string,
     @Query('status') status?: string,
   ) {
-    this.doctorsService.getDoctorById(doctorId);
-    const appointments = this.appointmentsService.getAppointmentsByDoctorId(doctorId);
+    await this.doctorsService.getDoctorById(doctorId);
+    const appointments = await this.appointmentsService.getAppointmentsByDoctorId(doctorId);
     if (status === 'upcoming' || status === 'completed') {
       return appointments.filter((a) => a.status === status);
     }
@@ -146,7 +156,7 @@ export class DoctorsController {
   @ApiResponse({ status: 400, description: 'Slot already blocked / invalid slot / date fully unavailable' })
   @Roles('doctor')
   @Post(':doctorId/slot-blocks')
-  blockSlot(
+  async blockSlot(
     @Param('doctorId') doctorId: string,
     @Body() body: CreateSlotBlockDto,
   ) {
@@ -154,7 +164,7 @@ export class DoctorsController {
     const slot = body.slot?.trim() ?? '';
 
     if (date && slot) {
-      const existingAppointments = this.appointmentsService.getAppointmentsByDoctorId(doctorId);
+      const existingAppointments = await this.appointmentsService.getAppointmentsByDoctorId(doctorId);
       const hasBooking = existingAppointments.some(
         (a) => a.date === date && a.slot === slot && a.status === 'upcoming',
       );
@@ -198,14 +208,14 @@ export class DoctorsController {
   @ApiResponse({ status: 400, description: 'Date already marked unavailable' })
   @Roles('doctor')
   @Post(':doctorId/unavailable-dates')
-  markDateUnavailable(
+  async markDateUnavailable(
     @Param('doctorId') doctorId: string,
     @Body() body: MarkUnavailableDateDto,
   ) {
     const date = body.date?.trim() ?? '';
 
     if (date) {
-      const existingAppointments = this.appointmentsService.getAppointmentsByDoctorId(doctorId);
+      const existingAppointments = await this.appointmentsService.getAppointmentsByDoctorId(doctorId);
       const bookedSlots = existingAppointments
         .filter((a) => a.date === date && a.status === 'upcoming')
         .map((a) => a.slot);

@@ -1,10 +1,13 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { RequestContextService } from '../common/request-context.service';
 import { UsersService } from '../users/users.service';
 import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
 import { HospitalBranch } from '../hospital-branch/entities/hospital-branch.entity';
+import { DoctorEntity } from './entities/doctor.entity';
 
 export type Doctor = {
   id: string;
@@ -15,7 +18,7 @@ export type Doctor = {
   branch?: HospitalBranch;
   department: string;
   qualification: string;
-  experience: number; // years
+  experience: number;
   age: number;
   gender: string;
   email: string;
@@ -72,193 +75,52 @@ export type CreateDoctorInput = {
 
 export type UpdateDoctorInput = Partial<Omit<CreateDoctorInput, 'password'>>;
 
-const SLOT_BLOCKS_FILE = join(
-  __dirname,
-  '..',
-  '..',
-  'data',
-  'slot-blocks.json',
-);
-
-const UNAVAILABLE_DATES_FILE = join(
-  __dirname,
-  '..',
-  '..',
-  'data',
-  'unavailable-dates.json',
-);
-
+const SLOT_BLOCKS_FILE = join(__dirname, '..', '..', 'data', 'slot-blocks.json');
+const UNAVAILABLE_DATES_FILE = join(__dirname, '..', '..', 'data', 'unavailable-dates.json');
 const DEFAULT_BRANCH_ID = '00000000-0000-4000-8000-000000000001';
 
+/** Map a DoctorEntity row to the plain Doctor DTO */
+function toDoctor(e: DoctorEntity): Doctor {
+  return {
+    id: e.id,
+    userId: e.userId,
+    name: e.name,
+    specialization: e.specialization,
+    branchId: e.branchId,
+    department: e.department,
+    qualification: e.qualification,
+    experience: e.experience,
+    age: e.age,
+    gender: e.gender,
+    email: e.email,
+    phone: e.phone,
+    licenseNo: e.licenseNo,
+    bio: e.bio,
+    slots: Array.isArray(e.slots) ? [...e.slots] : [],
+  };
+}
+
 @Injectable()
-export class DoctorsService {
-  private readonly doctors: Doctor[] = [
-    {
-      id: 'DOC001',
-      userId: 'DOC001',
-      name: 'Dr. S Madhuri',
-      specialization: 'Dermatologist',
-      department: 'Dermatology',
-      qualification: 'MBBS, MD - Dermatology',
-      experience: 12,
-      age: 38,
-      gender: 'Female',
-      email: 'madhuri@medbits.com',
-      phone: '9876541001',
-      licenseNo: 'MCI-DRM-2012-001',
-      bio: 'Specialist in skin disorders, cosmetic dermatology and laser treatments with 12 years of clinical experience.',
-      slots: ['10:00', '10:30', '11:00', '11:30', '12:00'],
-    },
-    {
-      id: 'DOC002',
-      userId: 'DOC002',
-      name: 'Dr. Ashwini Ray',
-      specialization: 'Dermatologist',
-      department: 'Dermatology',
-      qualification: 'MBBS, DNB - Dermatology',
-      experience: 8,
-      age: 34,
-      gender: 'Female',
-      email: 'ashwini.ray@medbits.com',
-      phone: '9876541002',
-      licenseNo: 'MCI-DRM-2016-002',
-      bio: 'Focused on pediatric dermatology, eczema management and phototherapy.',
-      slots: ['10:00', '10:30', '11:00', '11:30', '12:00'],
-    },
-    {
-      id: 'DOC003',
-      userId: 'DOC003',
-      name: 'Dr. Sarah Johnson',
-      specialization: 'Cardiologist',
-      department: 'Cardiology',
-      qualification: 'MBBS, MD, DM - Cardiology',
-      experience: 15,
-      age: 44,
-      gender: 'Female',
-      email: 'sarah.johnson@medbits.com',
-      phone: '9384751206',
-      licenseNo: 'MCI-CAR-2009-003',
-      bio: 'Interventional cardiologist specializing in angioplasty, heart failure management and preventive cardiology.',
-      slots: ['10:00', '10:30', '11:00', '11:30', '12:00'],
-    },
-    {
-      id: 'DOC004',
-      userId: 'DOC004',
-      name: 'Dr. Ramesh Iyer',
-      specialization: 'Cardiologist',
-      department: 'Cardiology',
-      qualification: 'MBBS, MD, DM - Cardiology',
-      experience: 20,
-      age: 50,
-      gender: 'Male',
-      email: 'ramesh.iyer@medbits.com',
-      phone: '9876541004',
-      licenseNo: 'MCI-CAR-2004-004',
-      bio: 'Senior cardiologist with expertise in echocardiography, cardiac arrhythmias and valve disorders.',
-      slots: ['10:00', '10:30', '11:00', '11:30', '12:00'],
-    },
-    {
-      id: 'DOC005',
-      userId: 'DOC005',
-      name: 'Dr. Paul Johnson',
-      specialization: 'Pediatrician',
-      department: 'Paediatrics',
-      qualification: 'MBBS, MD - Paediatrics',
-      experience: 10,
-      age: 39,
-      gender: 'Male',
-      email: 'paul.johnson@medbits.com',
-      phone: '9876541005',
-      licenseNo: 'MCI-PED-2014-005',
-      bio: 'Dedicated to child health and development, neonatal care, and adolescent medicine.',
-      slots: ['10:00', '10:30', '11:00', '11:30', '12:00'],
-    },
-    {
-      id: 'DOC006',
-      userId: 'DOC006',
-      name: 'Dr. Robert Wilson',
-      specialization: 'Orthopedic',
-      department: 'Orthopaedics',
-      qualification: 'MBBS, MS - Orthopaedics',
-      experience: 18,
-      age: 47,
-      gender: 'Male',
-      email: 'robert.wilson@medbits.com',
-      phone: '9876541006',
-      licenseNo: 'MCI-ORT-2006-006',
-      bio: 'Expert in joint replacement, sports injuries, spine surgery and trauma management.',
-      slots: ['10:00', '10:30', '11:00', '11:30', '12:00'],
-    },
-    {
-      id: 'DOC007',
-      userId: 'DOC007',
-      name: 'Dr. Anita Gupta',
-      specialization: 'Neurologist',
-      department: 'Neurology',
-      qualification: 'MBBS, MD, DM - Neurology',
-      experience: 14,
-      age: 43,
-      gender: 'Female',
-      email: 'anita.gupta@medbits.com',
-      phone: '9876541007',
-      licenseNo: 'MCI-NEU-2010-007',
-      bio: 'Specialist in epilepsy, migraine, stroke management and neurodegenerative disorders.',
-      slots: ['10:00', '10:30', '11:00', '11:30', '12:00'],
-    },
-    {
-      id: 'DOC008',
-      userId: 'DOC008',
-      name: 'Dr. Kavita Sharma',
-      specialization: 'General',
-      department: 'General Medicine',
-      qualification: 'MBBS, MD - General Medicine',
-      experience: 9,
-      age: 36,
-      gender: 'Female',
-      email: 'kavita.sharma@medbits.com',
-      phone: '9876541008',
-      licenseNo: 'MCI-GEN-2015-008',
-      bio: 'Primary care physician with focus on preventive medicine, chronic disease management and patient wellness.',
-      slots: ['10:00', '10:30', '11:00', '11:30', '12:00'],
-    },
-    {
-      id: 'DOC009',
-      userId: 'DOC009',
-      name: 'Dr. Vikram Nair',
-      specialization: 'General',
-      department: 'General Medicine',
-      qualification: 'MBBS, MD - General Medicine',
-      experience: 11,
-      age: 40,
-      gender: 'Male',
-      email: 'vikram.nair@medbits.com',
-      phone: '9876541009',
-      licenseNo: 'MCI-GEN-2013-009',
-      bio: 'Experienced general physician managing acute and chronic conditions with emphasis on holistic patient care.',
-      slots: ['10:00', '10:30', '11:00', '11:30', '12:00'],
-    },
-  ] as Doctor[];
-
-  // ─── In-memory slot management stores ───────────────────────────────────────
-
+export class DoctorsService implements OnModuleInit {
+  // ─── In-memory slot management stores (still JSON-file backed) ──────────────
   private slotBlocks: SlotBlock[] = [];
   private unavailableDates: UnavailableDate[] = [];
 
   constructor(
+    @InjectRepository(DoctorEntity)
+    private readonly doctorRepository: Repository<DoctorEntity>,
     private readonly usersService: UsersService,
     private readonly hospitalBranchService: HospitalBranchService,
     private readonly requestContextService: RequestContextService,
-  ) {
+  ) {}
+
+  onModuleInit(): void {
     this.loadSlotBlocks();
     this.loadUnavailableDates();
   }
 
   private getScopedBranchId(): string | undefined {
     return this.requestContextService.getContext()?.branchId;
-  }
-
-  private getDoctorBranchId(doctor: Doctor): string {
-    return doctor.branchId ?? DEFAULT_BRANCH_ID;
   }
 
   private ensureBranchAccess(branchId: string): void {
@@ -268,79 +130,55 @@ export class DoctorsService {
     }
   }
 
-  // â”€â”€â”€ Doctor lookup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Doctor lookup ────────────────────────────────────────────────────────────
 
-  findAll(specialization?: string): Doctor[] {
+  async findAll(specialization?: string): Promise<Doctor[]> {
     const scopedBranchId = this.getScopedBranchId();
-    const normalizedSpecialization = specialization?.trim();
-    const doctors = normalizedSpecialization
-      ? this.doctors.filter(
-          (doctor) => doctor.specialization === normalizedSpecialization,
-        )
-      : this.doctors;
-
-    const scopedDoctors = scopedBranchId
-      ? doctors.filter((doctor) => this.getDoctorBranchId(doctor) === scopedBranchId)
-      : doctors;
-
-    return scopedDoctors.map((doctor) => ({ ...doctor, branchId: this.getDoctorBranchId(doctor), slots: [...doctor.slots] }));
+    const where: Record<string, unknown> = { isActive: true };
+    if (specialization?.trim()) where.specialization = specialization.trim();
+    if (scopedBranchId) where.branchId = scopedBranchId;
+    const rows = await this.doctorRepository.find({ where });
+    return rows.map(toDoctor);
   }
 
-  getDoctorById(doctorId: string): Doctor {
-    const doctor = this.doctors.find(
-      (item) => item.id === doctorId || item.userId === doctorId,
-    );
-    if (!doctor) {
-      throw new NotFoundException('Doctor not found');
-    }
-
-    this.ensureBranchAccess(this.getDoctorBranchId(doctor));
-
-    return { ...doctor, branchId: this.getDoctorBranchId(doctor), slots: [...doctor.slots] };
+  async getDoctorById(doctorId: string): Promise<Doctor> {
+    const row = await this.doctorRepository.findOne({
+      where: [{ id: doctorId }, { userId: doctorId }],
+    });
+    if (!row) throw new NotFoundException('Doctor not found');
+    this.ensureBranchAccess(row.branchId ?? DEFAULT_BRANCH_ID);
+    return toDoctor(row);
   }
 
   async createDoctor(input: CreateDoctorInput): Promise<Doctor> {
     const name = input.name?.trim();
     const email = input.email?.trim();
     const specialization = input.specialization?.trim();
-    const branchId = input.branchId?.trim();
     const slots = this.normalizeSlots(input.slots);
 
     if (!name || !email || !input.password || !specialization) {
-      throw new BadRequestException(
-        'name, email, password and specialization are required',
-      );
+      throw new BadRequestException('name, email, password and specialization are required');
     }
-
-    if (slots.length === 0) {
-      throw new BadRequestException('At least one slot is required');
-    }
+    if (slots.length === 0) throw new BadRequestException('At least one slot is required');
 
     const scopedBranchId = this.getScopedBranchId();
+    const branchId = input.branchId?.trim();
     const effectiveBranchId = scopedBranchId ?? branchId;
     if (scopedBranchId && branchId && branchId !== scopedBranchId) {
       throw new ForbiddenException('Access denied for this hospital branch');
     }
+    if (!effectiveBranchId) throw new BadRequestException('branchId is required');
 
-    if (!effectiveBranchId) {
-      throw new BadRequestException('branchId is required');
-    }
+    await this.hospitalBranchService.findOne(effectiveBranchId);
 
-    const branch = await this.hospitalBranchService.findOne(effectiveBranchId);
+    const user = this.usersService.createDoctorUser({ name, email, password: input.password });
 
-    const user = this.usersService.createDoctorUser({
-      name,
-      email,
-      password: input.password,
-    });
-
-    const doctor: Doctor = {
+    const entity = this.doctorRepository.create({
       id: user.id,
       userId: user.id,
       name,
       specialization,
       branchId: effectiveBranchId,
-      branch,
       department: input.department?.trim() || specialization,
       qualification: input.qualification?.trim() || '',
       experience: Number(input.experience) || 0,
@@ -351,107 +189,76 @@ export class DoctorsService {
       licenseNo: input.licenseNo?.trim() || '',
       bio: input.bio?.trim() || '',
       slots,
-    };
+    });
 
-    this.doctors.push(doctor);
-    return { ...doctor, branchId: this.getDoctorBranchId(doctor), slots: [...doctor.slots] };
+    const saved = await this.doctorRepository.save(entity);
+    return toDoctor(saved);
   }
 
   async updateDoctor(userId: string, input: UpdateDoctorInput): Promise<Doctor> {
-    const doctor = this.doctors.find((item) => item.userId === userId);
-    if (!doctor) {
-      throw new NotFoundException('Doctor not found');
-    }
-
-    this.ensureBranchAccess(this.getDoctorBranchId(doctor));
+    const row = await this.doctorRepository.findOne({ where: { userId } });
+    if (!row) throw new NotFoundException('Doctor not found');
+    this.ensureBranchAccess(row.branchId ?? DEFAULT_BRANCH_ID);
 
     const nextName = input.name?.trim();
     const nextEmail = input.email?.trim();
     if (nextName || nextEmail) {
-      const user = this.usersService.updateDoctorUser(userId, {
-        name: nextName,
-        email: nextEmail,
-      });
-      doctor.name = user.name;
-      doctor.email = user.email;
+      const user = this.usersService.updateDoctorUser(userId, { name: nextName, email: nextEmail });
+      row.name = user.name;
+      row.email = user.email;
     }
 
-    if (input.specialization?.trim()) {
-      doctor.specialization = input.specialization.trim();
-    }
-    if (input.department !== undefined) {
-      doctor.department = input.department.trim();
-    }
-    if (input.qualification !== undefined) {
-      doctor.qualification = input.qualification.trim();
-    }
-    if (input.experience !== undefined) {
-      doctor.experience = Number(input.experience) || 0;
-    }
-    if (input.age !== undefined) {
-      doctor.age = Number(input.age) || 0;
-    }
-    if (input.gender !== undefined) {
-      doctor.gender = input.gender.trim();
-    }
-    if (input.phone !== undefined) {
-      doctor.phone = input.phone.trim();
-    }
-    if (input.licenseNo !== undefined) {
-      doctor.licenseNo = input.licenseNo.trim();
-    }
-    if (input.bio !== undefined) {
-      doctor.bio = input.bio.trim();
-    }
+    if (input.specialization?.trim()) row.specialization = input.specialization.trim();
+    if (input.department !== undefined)   row.department   = input.department.trim();
+    if (input.qualification !== undefined) row.qualification = input.qualification.trim();
+    if (input.experience !== undefined)   row.experience   = Number(input.experience) || 0;
+    if (input.age !== undefined)          row.age          = Number(input.age) || 0;
+    if (input.gender !== undefined)       row.gender       = input.gender.trim();
+    if (input.phone !== undefined)        row.phone        = input.phone.trim();
+    if (input.licenseNo !== undefined)    row.licenseNo    = input.licenseNo.trim();
+    if (input.bio !== undefined)          row.bio          = input.bio.trim();
+
     if (input.branchId !== undefined) {
       const branchId = input.branchId.trim();
-      if (!branchId) {
-        throw new BadRequestException('branchId is required');
-      }
-
+      if (!branchId) throw new BadRequestException('branchId is required');
       this.ensureBranchAccess(branchId);
-
-      const branch = await this.hospitalBranchService.findOne(branchId);
-      doctor.branchId = branchId;
-      doctor.branch = branch;
+      await this.hospitalBranchService.findOne(branchId);
+      row.branchId = branchId;
     }
+
     if (input.slots !== undefined) {
       const slots = this.normalizeSlots(input.slots);
-      if (slots.length === 0) {
-        throw new BadRequestException('At least one slot is required');
-      }
-      doctor.slots = slots;
+      if (slots.length === 0) throw new BadRequestException('At least one slot is required');
+      row.slots = slots;
     }
 
-    return { ...doctor, branchId: doctor.branchId ?? DEFAULT_BRANCH_ID, slots: [...doctor.slots] };
+    const saved = await this.doctorRepository.save(row);
+    return toDoctor(saved);
+  }
+
+  async removeDoctor(userId: string): Promise<void> {
+    const row = await this.doctorRepository.findOne({ where: { userId, isActive: true } });
+    if (!row) throw new NotFoundException('Doctor not found');
+    this.ensureBranchAccess(row.branchId ?? DEFAULT_BRANCH_ID);
+    row.isActive = false;
+    await this.doctorRepository.save(row);
   }
 
   // ─── Slot Blocks ─────────────────────────────────────────────────────────────
 
-  /**
-   * Returns all blocked slots for a doctor, optionally filtered by date.
-   * @param doctorId The doctor's ID
-   * @param date     Optional ISO date (YYYY-MM-DD) to filter results
-   */
   getSlotBlocks(doctorId: string, date?: string): SlotBlock[] {
-    this.getDoctorById(doctorId); // validate doctor exists
+    // Validate doctor exists — async getDoctorById not used here to keep sync
     return this.slotBlocks.filter(
       (b) => b.doctorId === doctorId && (date ? b.date === date : true),
     );
   }
 
-  /**
-   * Blocks a specific time slot on a specific date for a doctor.
-   * @throws BadRequestException if the slot is already blocked, invalid, or date is unavailable
-   */
-  blockSlot(doctorId: string, input: CreateSlotBlockInput): SlotBlock {
-    const doctor = this.getDoctorById(doctorId);
+  async blockSlot(doctorId: string, input: CreateSlotBlockInput): Promise<SlotBlock> {
+    const doctor = await this.getDoctorById(doctorId);
 
     const date = input.date?.trim();
     const slot = input.slot?.trim();
-    if (!date || !slot) {
-      throw new BadRequestException('date and slot are required');
-    }
+    if (!date || !slot) throw new BadRequestException('date and slot are required');
 
     if (!doctor.slots.includes(slot)) {
       throw new BadRequestException(
@@ -469,9 +276,7 @@ export class DoctorsService {
       (b) => b.doctorId === doctorId && b.date === date && b.slot === slot,
     );
     if (alreadyBlocked) {
-      throw new BadRequestException(
-        `Slot "${slot}" on ${date} is already blocked for this doctor`,
-      );
+      throw new BadRequestException(`Slot "${slot}" on ${date} is already blocked for this doctor`);
     }
 
     const block: SlotBlock = {
@@ -487,28 +292,14 @@ export class DoctorsService {
     return block;
   }
 
-  /**
-   * Removes a previously blocked slot.
-   * @throws NotFoundException if the block record does not exist
-   */
   unblockSlot(doctorId: string, blockId: string): SlotBlock {
-    this.getDoctorById(doctorId);
-    const idx = this.slotBlocks.findIndex(
-      (b) => b.id === blockId && b.doctorId === doctorId,
-    );
-    if (idx === -1) {
-      throw new NotFoundException('Slot block not found');
-    }
-
+    const idx = this.slotBlocks.findIndex((b) => b.id === blockId && b.doctorId === doctorId);
+    if (idx === -1) throw new NotFoundException('Slot block not found');
     const [removed] = this.slotBlocks.splice(idx, 1);
     this.persistSlotBlocks();
     return removed;
   }
 
-  /**
-   * Returns the set of blocked slot times for a doctor on a given date.
-   * Used internally by AppointmentsService.
-   */
   getBlockedSlotTimesForDate(doctorId: string, date: string): Set<string> {
     return new Set(
       this.slotBlocks
@@ -519,91 +310,53 @@ export class DoctorsService {
 
   // ─── Unavailable Dates ───────────────────────────────────────────────────────
 
-  /**
-   * Returns all dates marked fully unavailable for a doctor.
-   */
-  getUnavailableDates(doctorId: string): UnavailableDate[] {
-    this.getDoctorById(doctorId);
+  async getUnavailableDates(doctorId: string): Promise<UnavailableDate[]> {
+    await this.getDoctorById(doctorId);
     return this.unavailableDates.filter((u) => u.doctorId === doctorId);
   }
 
-  /**
-   * Marks an entire date as unavailable for a doctor.
-   * @throws BadRequestException if the date is already marked
-   */
-  markDateUnavailable(doctorId: string, date: string): UnavailableDate {
-    this.getDoctorById(doctorId);
-
+  async markDateUnavailable(doctorId: string, date: string): Promise<UnavailableDate> {
+    await this.getDoctorById(doctorId);
     const cleanDate = date?.trim();
-    if (!cleanDate) {
-      throw new BadRequestException('date is required');
-    }
-
+    if (!cleanDate) throw new BadRequestException('date is required');
     if (this.isDateUnavailable(doctorId, cleanDate)) {
       throw new BadRequestException(`Date ${cleanDate} is already marked as unavailable`);
     }
-
-    const entry: UnavailableDate = {
-      id: `UD${Date.now()}`,
-      doctorId,
-      date: cleanDate,
-    };
-
+    const entry: UnavailableDate = { id: `UD${Date.now()}`, doctorId, date: cleanDate };
     this.unavailableDates.push(entry);
     this.persistUnavailableDates();
     return entry;
   }
 
-  /**
-   * Removes a date from the unavailable list.
-   * @throws NotFoundException if the entry does not exist
-   */
-  removeUnavailableDate(doctorId: string, unavailId: string): UnavailableDate {
-    this.getDoctorById(doctorId);
-    const idx = this.unavailableDates.findIndex(
-      (u) => u.id === unavailId && u.doctorId === doctorId,
-    );
-    if (idx === -1) {
-      throw new NotFoundException('Unavailable date entry not found');
-    }
-
+  async removeUnavailableDate(doctorId: string, unavailId: string): Promise<UnavailableDate> {
+    await this.getDoctorById(doctorId);
+    const idx = this.unavailableDates.findIndex((u) => u.id === unavailId && u.doctorId === doctorId);
+    if (idx === -1) throw new NotFoundException('Unavailable date entry not found');
     const [removed] = this.unavailableDates.splice(idx, 1);
     this.persistUnavailableDates();
     return removed;
   }
 
-  /**
-   * Returns true if the given date is fully blocked for a doctor.
-   * Used internally by AppointmentsService.
-   */
   isDateUnavailable(doctorId: string, date: string): boolean {
-    return this.unavailableDates.some(
-      (u) => u.doctorId === doctorId && u.date === date,
-    );
+    return this.unavailableDates.some((u) => u.doctorId === doctorId && u.date === date);
   }
 
   // ─── Weekly Availability Overview ────────────────────────────────────────────
 
-  /**
-   * Returns availability summary for each day of the week starting from weekStart.
-   * @param doctorId  The doctor's ID
-   * @param weekStart ISO date (YYYY-MM-DD) for Monday of the target week (defaults to current week)
-   */
-  getWeeklyAvailability(
+  async getWeeklyAvailability(
     doctorId: string,
     weekStart?: string,
-  ): Array<{
+  ): Promise<Array<{
     date: string;
     dayName: string;
     totalSlots: number;
     blockedSlots: number;
     availableSlots: number;
     isUnavailable: boolean;
-  }> {
-    const doctor = this.getDoctorById(doctorId);
+  }>> {
+    const doctor = await this.getDoctorById(doctorId);
     const totalSlots = doctor.slots.length;
 
-    // Compute the Monday of the current ISO week if not provided
     const startDate = weekStart?.trim()
       ? new Date(`${weekStart.trim()}T00:00:00`)
       : this.getWeekMonday(new Date());
@@ -656,30 +409,22 @@ export class DoctorsService {
 
   private persistUnavailableDates() {
     mkdirSync(dirname(UNAVAILABLE_DATES_FILE), { recursive: true });
-    writeFileSync(
-      UNAVAILABLE_DATES_FILE,
-      JSON.stringify(this.unavailableDates, null, 2),
-    );
+    writeFileSync(UNAVAILABLE_DATES_FILE, JSON.stringify(this.unavailableDates, null, 2));
   }
 
   private getWeekMonday(date: Date): Date {
     const d = new Date(date);
-    const day = d.getDay(); // 0=Sun, 1=Mon, ...
-    const diff = day === 0 ? -6 : 1 - day; // shift to Monday
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
     d.setDate(d.getDate() + diff);
     d.setHours(0, 0, 0, 0);
     return d;
   }
 
   private normalizeSlots(slots?: string[]): string[] {
-    if (!Array.isArray(slots)) {
-      return [];
-    }
-
-    return [...new Set(slots.map((slot) => slot?.trim()).filter(Boolean))]
-      .sort((a, b) => a.localeCompare(b));
+    if (!Array.isArray(slots)) return [];
+    return [...new Set(slots.map((slot) => slot?.trim()).filter(Boolean))].sort((a, b) =>
+      a.localeCompare(b),
+    );
   }
 }
-
-
-

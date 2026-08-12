@@ -48,5 +48,32 @@
     "status": "approved",
     "createdAt": "2026-05-09T06:52:48.364Z",
     "actionedOn": "May 9, 2026, 12:23 PM"
+  },
+  {
+    "id": "LR1786086385526",
+    "doctorId": "DOC001",
+    "date": "2026-08-14",
+    "type": "Casual",
+    "reason": "Requested via portal",
+    "status": "pending",
+    "createdAt": "2026-08-07T07:06:25.526Z"
+  },
+  {
+    "id": "LR1786087554135",
+    "doctorId": "DOC001",
+    "date": "2026-08-15",
+    "type": "Casual",
+    "reason": "Requested via portal",
+    "status": "pending",
+    "createdAt": "2026-08-07T07:25:54.135Z"
+  },
+  {
+    "id": "LR1786087627287",
+    "doctorId": "DOC001",
+    "date": "2026-08-26",
+    "type": "Casual",
+    "reason": "Requested via portal",
+    "status": "pending",
+    "createdAt": "2026-08-07T07:27:07.287Z"
   }
 ]

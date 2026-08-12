@@ -3,6 +3,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { DoctorsService } from '../doctors/doctors.service';
 import { AppointmentsService } from '../appointments/appointments.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { RequestContextService } from '../common/request-context.service';
 
 export type LeaveRequestStatus = 'pending' | 'approved' | 'rejected';
 
@@ -32,6 +34,8 @@ export class LeaveRequestsService {
   constructor(
     private readonly doctorsService: DoctorsService,
     private readonly appointmentsService: AppointmentsService,
+    private readonly notificationsService: NotificationsService,
+    private readonly requestContextService: RequestContextService,
   ) {
     this.loadPersistedRequests();
   }
@@ -66,28 +70,39 @@ export class LeaveRequestsService {
     return req;
   }
 
-  getAllRequests(): Array<LeaveRequest & { name: string; dept: string; dateRange: string }> {
-    return this.requests.map((r) => {
+  async getAllRequests(): Promise<Array<LeaveRequest & { name: string; dept: string; dateRange: string }>> {
+    const branchId = this.requestContextService.getContext()?.branchId;
+    const role = this.requestContextService.getContext()?.role;
+
+    const result = (await Promise.all(this.requests.map(async (r) => {
       let doctorName = r.doctorId;
       let doctorDept = '';
+      let docBranchId = '';
       try {
-        const doc = this.doctorsService.getDoctorById(r.doctorId);
+        const doc = await this.doctorsService.getDoctorById(r.doctorId);
         doctorName = doc.name;
         doctorDept = doc.department || doc.specialization;
+        docBranchId = doc.branchId;
       } catch (_) {}
       
       return {
         ...r,
         name: doctorName,
         dept: doctorDept,
+        branchId: docBranchId,
         dateRange: new Date(r.date).toLocaleDateString('en-US', {
             month: 'short', day: 'numeric', year: 'numeric'
         }),
       };
-    }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }))).filter((r) => {
+      if (branchId) return r.branchId === branchId;
+      return true;
+    });
+    
+    return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
-  updateRequestStatus(id: string, status: LeaveRequestStatus): LeaveRequest {
+  async updateRequestStatus(id: string, status: LeaveRequestStatus): Promise<LeaveRequest> {
     const req = this.requests.find((r) => r.id === id);
     if (!req) {
       throw new NotFoundException('Leave request not found');
@@ -95,7 +110,7 @@ export class LeaveRequestsService {
     
     if (status === 'approved') {
       // Check if there are booked appointments
-      const existingAppointments = this.appointmentsService.getAppointmentsByDoctorId(req.doctorId);
+      const existingAppointments = await this.appointmentsService.getAppointmentsByDoctorId(req.doctorId);
       const bookedSlots = existingAppointments
         .filter((a) => a.date === req.date && a.status === 'upcoming')
         .map((a) => a.slot);
@@ -107,7 +122,7 @@ export class LeaveRequestsService {
       }
       
       // Mark unavailable
-      this.doctorsService.markDateUnavailable(req.doctorId, req.date);
+      await this.doctorsService.markDateUnavailable(req.doctorId, req.date);
     }
     
     req.status = status;
@@ -116,6 +131,12 @@ export class LeaveRequestsService {
         hour: '2-digit', minute: '2-digit'
     });
     this.persistRequests();
+
+    // Send notification to the doctor
+    const prettyDate = new Date(req.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const notifMessage = `Your leave request for ${prettyDate} has been ${status.toUpperCase()}.`;
+    const notifType = status === 'approved' ? 'success' : 'error';
+    this.notificationsService.createNotification(req.doctorId, notifMessage, notifType);
     
     return req;
   }

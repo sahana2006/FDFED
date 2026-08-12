@@ -4,14 +4,21 @@ import { PatientsModule } from '../patients/patients.module';
 import { LabTechnician } from '../lab-technicians/entities/lab-technician.entity';
 import { HospitalBranchModule } from '../hospital-branch/hospital-branch.module';
 import { BranchAdminEntity } from './entities/branch-admin.entity';
+import { DoctorEntity } from '../doctors/entities/doctor.entity';
+import { FrontdeskEntity } from '../frontdesk/entities/frontdesk.entity';
 import { UsersController } from './users.controller';
 import { SuperAdminBranchAdminController } from './super-admin-branch-admin.controller';
 import { UsersService } from './users.service';
 
 @Module({
-  imports: [PatientsModule, HospitalBranchModule, TypeOrmModule.forFeature([LabTechnician, BranchAdminEntity])],
+  imports: [
+    PatientsModule,
+    HospitalBranchModule,
+    TypeOrmModule.forFeature([LabTechnician, BranchAdminEntity, DoctorEntity, FrontdeskEntity]),
+  ],
   controllers: [UsersController, SuperAdminBranchAdminController],
   providers: [UsersService],
   exports: [UsersService],
 })
 export class UsersModule {}
+

@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { LabTechnician } from '../lab-technicians/entities/lab-technician.entity';
 import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
 import { BranchAdminEntity } from './entities/branch-admin.entity';
+import { DoctorEntity } from '../doctors/entities/doctor.entity';
+import { FrontdeskEntity } from '../frontdesk/entities/frontdesk.entity';
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 
@@ -96,6 +98,10 @@ export class UsersService implements OnModuleInit {
     private readonly labTechnicianRepository: Repository<LabTechnician>,
     @InjectRepository(BranchAdminEntity)
     private readonly branchAdminRepository: Repository<BranchAdminEntity>,
+    @InjectRepository(DoctorEntity)
+    private readonly doctorRepository: Repository<DoctorEntity>,
+    @InjectRepository(FrontdeskEntity)
+    private readonly frontdeskRepository: Repository<FrontdeskEntity>,
     private readonly hospitalBranchService: HospitalBranchService,
   ) {}
 
@@ -120,6 +126,7 @@ export class UsersService implements OnModuleInit {
   async onModuleInit(): Promise<void> {
     await this.seedDefaultBranchAdmin();
     await this.hydrateBranchAdmins();
+    await this.hydrateDoctorAndFrontdeskUsers();
 
     const email = (process.env.SUPER_ADMIN_EMAIL ?? DEFAULT_SUPER_ADMIN_EMAIL)
       .trim()
@@ -134,6 +141,46 @@ export class UsersService implements OnModuleInit {
       password: await this.hashPassword(password),
       role: Role.SUPER_ADMIN,
     });
+  }
+
+  /**
+   * Loads all doctor and frontdesk users from the SQLite database into the
+   * in-memory users[] array so that login works correctly after a restart.
+   * Existing hardcoded entries (DOC001–DOC009, FD001) are replaced/merged.
+   */
+  private async hydrateDoctorAndFrontdeskUsers(): Promise<void> {
+    const doctors = await this.doctorRepository.find();
+    for (const doc of doctors) {
+      const existing = this.users.findIndex(
+        (u) => u.id === doc.id || u.email.toLowerCase() === doc.email.toLowerCase(),
+      );
+      const user: User = {
+        id: doc.userId,
+        name: doc.name,
+        email: doc.email,
+        // Keep existing password if already in memory (plain text seeds), else default
+        password: existing >= 0 ? this.users[existing].password : 'doctor123',
+        role: Role.DOCTOR,
+      };
+      if (existing >= 0) this.users[existing] = user;
+      else this.users.push(user);
+    }
+
+    const frontdesks = await this.frontdeskRepository.find();
+    for (const fd of frontdesks) {
+      const existing = this.users.findIndex(
+        (u) => u.id === fd.userId || u.email.toLowerCase() === fd.email.toLowerCase(),
+      );
+      const user: User = {
+        id: fd.userId,
+        name: fd.name,
+        email: fd.email,
+        password: existing >= 0 ? this.users[existing].password : 'desk123',
+        role: Role.FRONTDESK,
+      };
+      if (existing >= 0) this.users[existing] = user;
+      else this.users.push(user);
+    }
   }
 
   private async seedDefaultBranchAdmin(): Promise<void> {

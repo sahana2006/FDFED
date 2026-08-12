@@ -1711,6 +1711,38 @@
         "tags": [
           "Doctors"
         ]
+      },
+      "delete": {
+        "operationId": "DoctorsController_removeDoctor",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (patient | doctor | frontdesk)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "Doctor user ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor removed"
+          }
+        },
+        "summary": "Remove a doctor from the branch (Soft Delete)",
+        "tags": [
+          "Doctors"
+        ]
       }
     },
     "/doctors/{doctorId}": {
@@ -2589,6 +2621,38 @@
         "tags": [
           "Frontdesk"
         ]
+      },
+      "delete": {
+        "operationId": "FrontdeskController_removeFrontdesk",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "Frontdesk user ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Frontdesk staff removed"
+          }
+        },
+        "summary": "Remove frontdesk staff from the branch (Soft Delete)",
+        "tags": [
+          "Frontdesk"
+        ]
       }
     },
     "/walkins": {
@@ -2748,6 +2812,106 @@
         "summary": "Update leave request status (Admin)",
         "tags": [
           "Leave Requests"
+        ]
+      }
+    },
+    "/notifications/user/{userId}": {
+      "get": {
+        "operationId": "NotificationsController_getNotifications",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of notifications"
+          }
+        },
+        "summary": "Get all notifications for a user",
+        "tags": [
+          "Notifications"
+        ]
+      },
+      "delete": {
+        "operationId": "NotificationsController_clearAll",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notifications cleared"
+          }
+        },
+        "summary": "Clear all notifications for a user",
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
+    "/notifications/{id}/read": {
+      "put": {
+        "operationId": "NotificationsController_markAsRead",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Notification ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification marked as read"
+          }
+        },
+        "summary": "Mark a notification as read",
+        "tags": [
+          "Notifications"
         ]
       }
     },

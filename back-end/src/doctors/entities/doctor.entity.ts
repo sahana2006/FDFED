@@ -57,4 +57,7 @@ export class DoctorEntity {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @Column({ type: 'boolean', default: true })
+  isActive!: boolean;
 }

@@ -1,61 +1,134 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MEDBITS - Branch Admin Dashboard</title>
+  <meta name="description" content="MEDBITS Branch Admin Dashboard — manage your branch, doctors, and staff">
+  <title>MEDBITS — Branch Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/branch-admin/global.css">
   <link rel="stylesheet" href="../../css/branch-admin/dashboard.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-  <script>
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || (user.role !== 'branch_admin' && user.role !== 'admin')) {
-      window.location.href = '../login.html';
-    }
-  </script>
 
-  <main class="branch-admin-shell">
-    <section class="branch-admin-card hero-card">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">✚</span>
+    <span class="brand-name">MEDBITS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item active" data-page="dashboard"  href="dashboard.html"> <span class="nav-icon">⊞</span><span>Dashboard</span></a>
+    <a class="nav-item" data-page="doctors"    href="doctors.html">   <span class="nav-icon">🩺</span><span>Manage Doctors</span></a>
+    <a class="nav-item" data-page="frontdesk"  href="frontdesk.html"> <span class="nav-icon">🖥️</span><span>Manage Front Desk</span></a>
+    <a class="nav-item" data-page="leave-management" href="leave-management.html"> <span class="nav-icon">📅</span><span>Leave Management</span></a>
+  </nav>
+  <div class="sidebar-bottom">
+    <a class="nav-item logout-btn" id="logoutBtn">
+      <span class="nav-icon">⇥</span><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle">☰</button>
       <div>
-        <span class="eyebrow">Branch Admin Portal</span>
-        <h1 id="welcome-title">Welcome</h1>
-        <p id="welcome-copy">Loading your branch details from the backend.</p>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="page-sub" id="portalLabel">Branch Admin Portal</div>
       </div>
-      <div class="hero-actions">
-        <button class="refresh-btn" id="refresh-btn" type="button">
-          <i data-lucide="refresh-cw"></i>
-          <span>Refresh</span>
-        </button>
-        <button class="logout-btn" id="logout-btn" type="button">
-          <i data-lucide="log-out"></i>
-          <span>Logout</span>
-        </button>
-      </div>
-    </section>
-
-    <section class="branch-admin-card">
-      <div class="card-header">
+    </div>
+    <div class="topbar-right">
+      <button class="notif-btn" id="notifBtn">🔔</button>
+      <div class="user-chip">
+        <div class="user-avatar" id="userAvatarTop">BA</div>
         <div>
-          <h2>Your Branch</h2>
-          <p>Details for the branch linked to your login account.</p>
+          <div class="user-name" id="userNameTop">Branch Admin</div>
+          <div class="user-role">Branch Admin</div>
         </div>
       </div>
-      <div class="branch-grid" id="branch-grid"></div>
-    </section>
+    </div>
+  </header>
 
-    <section class="branch-admin-card">
-      <div class="card-header">
-        <div>
-          <h2>Account Details</h2>
-          <p>Use these credentials to access your dashboard.</p>
+  <main class="content">
+
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div class="hero-greeting">MEDBITS BRANCH ADMIN PORTAL</div>
+      <div class="hero-name">Welcome back, <span id="welcomeName">Admin</span>!</div>
+      <div class="hero-sub">Manage your branch, staff, and operations</div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="statDoctors">—</div>
+          <div class="hero-stat-label">Doctors</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-value" id="statFrontDesk">—</div>
+          <div class="hero-stat-label">Front Desk Staff</div>
         </div>
       </div>
-      <div class="account-grid" id="account-grid"></div>
-    </section>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card mb-16">
+      <div class="section-header">
+        <div class="section-title">Quick Actions</div>
+      </div>
+      <div class="quick-grid">
+        <div class="quick-action qa-teal" onclick="location.href='doctors.html'">
+          <div class="qa-icon">🩺</div>
+          <div class="qa-label">Manage Doctors</div>
+        </div>
+        <div class="quick-action qa-navy" onclick="location.href='frontdesk.html'">
+          <div class="qa-icon">🖥️</div>
+          <div class="qa-label">Manage Front Desk</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Branch Details + Account Details -->
+    <div class="dash-bottom">
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Branch Details</div>
+          <button class="btn btn-outline btn-sm" id="refreshBtn">↺ Refresh</button>
+        </div>
+        <div id="branchGrid" class="detail-grid">
+          <div class="empty-state"><p>Loading branch info…</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Account Details</div>
+        </div>
+        <div id="accountGrid" class="detail-grid"></div>
+      </div>
+    </div>
+
   </main>
+</div>
 
-  <div id="toast-host"></div>
-  <script src="../../js/branch-admin/dashboard.js"></script>
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/branch-admin/utils.js"></script>
+<script src="../../js/branch-admin/components.js"></script>
+<script src="../../js/branch-admin/dashboard.js"></script>
+<script>
+  (async () => {
+    await loadComponents('dashboard', 'Dashboard');
+    updateTopbarUser();
+    try {
+      await initDashboard();
+    } catch (_err) {
+      showToast('Could not load branch data from backend', 'error');
+    }
+  })();
+</script>
 </body>
 </html>

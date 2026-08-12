@@ -68,7 +68,7 @@ export class QueueService {
       throw new BadRequestException('doctorId and userId are required');
     }
 
-    const doctor = this.doctorsService.getDoctorById(input.doctorId);
+    const doctor = await this.doctorsService.getDoctorById(input.doctorId);
     const branchId = input.branchId?.trim() || doctor.branchId;
     const branch = await this.hospitalBranchService.findOne(branchId);
     const patient = this.patientsService.getPatientByUserId(input.userId);

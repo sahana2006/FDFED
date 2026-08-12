@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiHeader, ApiBody } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -75,5 +75,15 @@ export class FrontdeskController {
       shiftStart: body.shiftStart?.trim(),
       shiftEnd: body.shiftEnd?.trim(),
     });
+  }
+
+  @ApiOperation({ summary: 'Remove frontdesk staff from the branch (Soft Delete)' })
+  @ApiParam({ name: 'userId', description: 'Frontdesk user ID' })
+  @ApiResponse({ status: 200, description: 'Frontdesk staff removed' })
+  @Roles('admin')
+  @Delete(':userId')
+  async removeFrontdesk(@Param('userId') userId: string) {
+    await this.frontdeskService.removeFrontdesk(userId);
+    return { success: true };
   }
 }

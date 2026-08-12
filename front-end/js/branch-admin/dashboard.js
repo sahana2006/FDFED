@@ -1,201 +1,115 @@
-﻿const API_BASE_URL = 'http://localhost:3000';
-const STORAGE_KEY = 'user';
-
-const $ = (id) => document.getElementById(id);
-
-function getSession() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch (_error) {
-    return null;
-  }
-}
-
-function getAuthHeaders(extra = {}) {
-  const session = getSession();
-  const headers = {
-    ...extra,
-  };
-
-  if (session?.role) {
-    headers.role = session.role;
-  }
-
-  if (session?.id) {
-    headers['x-user-id'] = session.id;
-  }
-
-  return headers;
-}
-
-async function getErrorMessage(response) {
-  const body = await response.json().catch(() => null);
-  if (Array.isArray(body?.message)) {
-    return body.message.join(', ');
-  }
-  return body?.message || 'Request failed.';
-}
-
-async function apiRequest(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      ...getAuthHeaders(),
-      ...(options.headers || {}),
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(await getErrorMessage(response));
-  }
-
-  return response.json();
-}
-
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function showToast(message, type = 'success') {
-  const host = $('toast-host');
-  if (!host) return;
-
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.textContent = message;
-  host.appendChild(toast);
-
-  window.setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(6px)';
-    toast.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-  }, 2600);
-
-  window.setTimeout(() => toast.remove(), 3000);
-}
-
-function logoutBranchAdmin(event) {
-  event?.preventDefault();
-  localStorage.removeItem(STORAGE_KEY);
-  window.location.href = '../login.html';
-}
-
-function renderHeader() {
-  const session = getSession();
-  const title = $('welcome-title');
-  const copy = $('welcome-copy');
-
-  if (title) {
-    title.textContent = `${session?.name || 'Branch Admin'}`;
-  }
-
-  if (copy) {
-    copy.textContent = session?.branchId
-      ? 'Your branch profile and login details are loaded live from the backend.'
-      : 'No branch is currently linked to this account.';
-  }
-}
+/* ============================================================
+   dashboard.js — Branch Admin Dashboard
+   FILE: front-end/js/branch-admin/dashboard.js
+   ============================================================ */
 
 function renderBranchDetails(branch) {
-  const host = $('branch-grid');
+  const host = $('branchGrid');
   if (!host) return;
 
   if (!branch) {
-    host.innerHTML = '<div class="empty-state">No branch details available.</div>';
+    host.innerHTML = '<div class="empty-state"><div class="empty-icon">🏥</div><p>No branch linked to this account.</p></div>';
     return;
   }
 
-  const rows = [
-    ['Hospital Name', branch.hospitalName || '-'],
-    ['Branch Name', branch.branchName || '-'],
-    ['Address', branch.address || '-'],
-    ['City', branch.city || '-'],
-    ['State', branch.state || '-'],
-    ['Pincode', branch.pincode || '-'],
-    ['Phone', branch.phone || '-'],
-    ['Email', branch.email || '-'],
-    ['Status', branch.status || '-'],
+  const fields = [
+    ['Hospital Name', branch.hospitalName],
+    ['Branch Name',  branch.branchName],
+    ['City',         branch.city],
+    ['State',        branch.state],
+    ['Pincode',      branch.pincode],
+    ['Phone',        branch.phone],
+    ['Email',        branch.email],
+    ['Status',       branch.status],
   ];
 
-  host.innerHTML = rows.map(([label, value]) => `
-    <article class="info-card">
-      <span>${escapeHtml(label)}</span>
-      <strong>${escapeHtml(value)}</strong>
-    </article>
+  host.innerHTML = fields.map(([label, value]) => `
+    <div class="detail-item">
+      <span class="detail-label">${escapeHtml(label)}</span>
+      <span class="detail-value">${escapeHtml(value || '—')}</span>
+    </div>
   `).join('');
+
+  if (branch.address) {
+    host.innerHTML += `
+      <div class="detail-item full">
+        <span class="detail-label">Address</span>
+        <span class="detail-value">${escapeHtml(branch.address)}</span>
+      </div>`;
+  }
 }
 
 function renderAccountDetails(session) {
-  const host = $('account-grid');
+  const host = $('accountGrid');
   if (!host) return;
 
-  const rows = [
-    ['User Name', session?.name || '-'],
-    ['Email', session?.email || '-'],
-    ['Role', session?.role || '-'],
-    ['Branch ID', session?.branchId || '-'],
+  const fields = [
+    ['Name',      session?.name || '—'],
+    ['Email',     session?.email || '—'],
+    ['Role',      session?.role || '—'],
+    ['Branch ID', session?.branchId || '—'],
   ];
 
-  host.innerHTML = rows.map(([label, value]) => `
-    <article class="info-card">
-      <span>${escapeHtml(label)}</span>
-      <strong>${escapeHtml(value)}</strong>
-    </article>
+  host.innerHTML = fields.map(([label, value]) => `
+    <div class="detail-item">
+      <span class="detail-label">${escapeHtml(label)}</span>
+      <span class="detail-value">${escapeHtml(value)}</span>
+    </div>
   `).join('');
 }
 
-async function loadDashboard() {
+async function loadStats(branchId) {
+  try {
+    const [doctors, frontdesk] = await Promise.all([
+      apiRequest('/doctors'),
+      apiRequest('/frontdesk'),
+    ]);
+    const myDoctors  = Array.isArray(doctors)   ? doctors.filter(d => d.branchId === branchId).length   : '—';
+    const myFD       = Array.isArray(frontdesk)  ? frontdesk.filter(f => f.branchId === branchId).length : '—';
+    setText('statDoctors',  myDoctors);
+    setText('statFrontDesk', myFD);
+  } catch (_err) {
+    // Stats are non-critical, don't block the page
+  }
+}
+
+async function initDashboard() {
   const session = getSession();
   if (!session || (session.role !== 'branch_admin' && session.role !== 'admin')) {
-    window.location.href = '../login.html';
+    window.location.replace('../login.html');
     return;
   }
 
-  renderHeader();
+  // Welcome name
+  const name = session.firstName || session.name || 'Admin';
+  setText('welcomeName', name.split(' ')[0]);
+
   renderAccountDetails(session);
-  lucide.createIcons();
 
   if (!session.branchId) {
     renderBranchDetails(null);
     return;
   }
 
-  try {
-    const branches = await apiRequest('/hospital-branches', { method: 'GET' });
-    const branch = Array.isArray(branches)
-      ? branches.find((item) => item.id === session.branchId) || null
-      : null;
+  // Load stats in background
+  loadStats(session.branchId);
 
+  try {
+    const branches = await apiRequest('/hospital-branches');
+    const branch = Array.isArray(branches)
+      ? branches.find(b => b.id === session.branchId) || null
+      : null;
     renderBranchDetails(branch);
-    if (!branch) {
-      showToast('Your branch record could not be found.', 'error');
-    }
-  } catch (error) {
+    if (!branch) showToast('Branch record not found in backend', 'error');
+  } catch (err) {
     renderBranchDetails(null);
-    showToast(error.message || 'Unable to load branch data.', 'error');
+    showToast(err.message || 'Could not load branch details', 'error');
   }
 }
 
-function bindEvents() {
-  $('refresh-btn')?.addEventListener('click', () => {
-    loadDashboard().catch((error) => {
-      showToast(error.message || 'Unable to refresh dashboard.', 'error');
-    });
-  });
-
-  $('logout-btn')?.addEventListener('click', logoutBranchAdmin);
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-  bindEvents();
-  loadDashboard().catch((error) => {
-    console.error('Branch admin dashboard failed to load:', error);
-    showToast(error.message || 'Unable to load dashboard.', 'error');
+  $('refreshBtn')?.addEventListener('click', async () => {
+    showToast('Refreshing…', 'info');
+    try { await initDashboard(); } catch (err) { showToast(err.message, 'error'); }
   });
 });
