@@ -132,10 +132,12 @@ export class DoctorsService implements OnModuleInit {
 
   // ─── Doctor lookup ────────────────────────────────────────────────────────────
 
-  async findAll(specialization?: string): Promise<Doctor[]> {
+  async findAll(specialization?: string, branchId?: string): Promise<Doctor[]> {
     const scopedBranchId = this.getScopedBranchId();
     const where: Record<string, unknown> = { isActive: true };
     if (specialization?.trim()) where.specialization = specialization.trim();
+    const requestedBranchId = branchId?.trim();
+    if (requestedBranchId) where.branchId = requestedBranchId;
     if (scopedBranchId) where.branchId = scopedBranchId;
     const rows = await this.doctorRepository.find({ where });
     return rows.map(toDoctor);

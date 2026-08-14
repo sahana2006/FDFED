@@ -71,12 +71,8 @@ export class QueueService {
     const doctor = await this.doctorsService.getDoctorById(input.doctorId);
     const branchId = input.branchId?.trim() || doctor.branchId;
     const branch = await this.hospitalBranchService.findOne(branchId);
-    const patient = this.patientsService.getPatientByUserId(input.userId);
     if (doctor.branchId !== branchId) {
       throw new BadRequestException('Doctor does not belong to the selected hospital branch');
-    }
-    if (patient.branchId !== branchId) {
-      throw new BadRequestException('Patient does not belong to the selected hospital branch');
     }
 
     const nextTokenNumber =

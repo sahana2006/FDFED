@@ -34,7 +34,6 @@ export class PatientsController {
       bloodGroup: body.bloodGroup.trim(),
       phone: body.phone.trim(),
       email: body.email.trim(),
-      branchId: body.branchId.trim(),
       guardianName: body.guardianName?.trim() ?? '',
     });
 
@@ -81,7 +80,6 @@ export class PatientsController {
       bloodGroup: body.bloodGroup?.trim() ?? '',
       phone: body.phone?.trim() ?? '',
       email: body.email?.trim() ?? '',
-      branchId: body.branchId?.trim(),
       guardianName: body.guardianName?.trim() ?? '',
     });
   }

@@ -215,6 +215,40 @@
   cursor: pointer;
 }
 
+.branch-picker-panel {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--color-bg), #fbf7ff);
+}
+
+.branch-picker-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.branch-picker-copy p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.branch-picker-field {
+  min-width: 280px;
+  margin: 0;
+}
+
+.branch-picker-field .input-field {
+  min-width: 280px;
+}
+
 /* Doctor Grid */
 .doctor-grid {
   display: grid;
@@ -476,7 +510,8 @@
 @media (max-width: 768px) {
   .consultation-item,
   .slot-actions,
-  .modify-hero {
+  .modify-hero,
+  .branch-picker-panel {
     flex-direction: column;
     align-items: stretch;
   }
@@ -490,6 +525,12 @@
   .doctor-grid,
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .branch-picker-field,
+  .branch-picker-field .input-field {
+    min-width: 0;
+    width: 100%;
   }
 
   .modify-hero-meta {

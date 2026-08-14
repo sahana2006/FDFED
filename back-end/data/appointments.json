@@ -1,5 +1,51 @@
 [
   {
+    "id": "APT1786689632886",
+    "userId": "PAT001",
+    "doctorId": "DOC013",
+    "branchId": "0941e1c8-9ec5-4fb0-9909-11250f7d1739",
+    "branch": {
+      "id": "0941e1c8-9ec5-4fb0-9909-11250f7d1739",
+      "hospitalName": "Medbits Main Branch",
+      "branchName": "Electronic City",
+      "address": "5th Street, Neeladri Nagar, Electronic City",
+      "city": "Bangalore",
+      "state": "Karnataka",
+      "pincode": "560100",
+      "phone": "9889812543",
+      "email": "medbitsmain@gmail.com",
+      "status": "active",
+      "createdAt": "2026-08-04T13:03:59.000Z",
+      "updatedAt": "2026-08-04T13:03:59.000Z"
+    },
+    "date": "2026-08-14",
+    "slot": "03:12 PM",
+    "status": "upcoming"
+  },
+  {
+    "id": "APT1786688185758",
+    "userId": "PAT003",
+    "doctorId": "DOC003",
+    "branchId": "00000000-0000-4000-8000-000000000001",
+    "branch": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "hospitalName": "Apollo Main Branch",
+      "branchName": "Main Branch",
+      "address": "Legacy data migration branch",
+      "city": "Hyderabad",
+      "state": "Telangana",
+      "pincode": "500001",
+      "phone": "+919000000000",
+      "email": "main.branch@apollo.local",
+      "status": "active",
+      "createdAt": "2026-07-31T06:30:09.000Z",
+      "updatedAt": "2026-07-31T06:30:09.000Z"
+    },
+    "date": "2026-08-14",
+    "slot": "10:30",
+    "status": "upcoming"
+  },
+  {
     "id": "APT1778309236686",
     "userId": "PAT001",
     "doctorId": "DOC001",

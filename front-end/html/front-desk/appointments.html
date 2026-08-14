@@ -150,6 +150,19 @@
         <!-- ===== STEP 2: Browse Specialties ===== -->
         <div id="step-specialty" class="appt-step hidden">
           <div class="card">
+            <div class="branch-picker-panel">
+              <div class="branch-picker-copy">
+                <span class="section-title">Select Branch</span>
+                <p>Choose the branch first to filter doctors and specialties.</p>
+              </div>
+              <div class="form-group branch-picker-field">
+                <label class="form-label" for="branch-select">Hospital Branch</label>
+                <select id="branch-select" class="input-field">
+                  <option value="">Loading branches...</option>
+                </select>
+              </div>
+            </div>
+
             <div class="search-bar" style="margin-bottom: var(--space-6)">
               <svg
                 width="18"

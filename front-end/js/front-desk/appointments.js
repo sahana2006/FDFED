@@ -5,9 +5,11 @@
 const APPOINTMENTS_API_BASE_URL = 'http://localhost:3000';
 
 let allPatients = [];
+let allBranches = [];
 let allDoctors = [];
 let allSpecialties = [];
 let appointments = [];
+let selectedBranchId = '';
 let selectedSpecialty = null;
 let selectedDoctor = null;
 let selectedSlot = null;
@@ -18,6 +20,20 @@ let showAllConsultations = false;
 let activeModifyId = null;
 let modifyAppointment = null;
 let appointmentRefreshTimer = null;
+const SELECTED_BRANCH_STORAGE_KEY = 'medbits_selected_branch';
+
+function getStoredSelectedBranchId() {
+  return localStorage.getItem(SELECTED_BRANCH_STORAGE_KEY) || '';
+}
+
+function setStoredSelectedBranchId(branchId) {
+  if (!branchId) {
+    localStorage.removeItem(SELECTED_BRANCH_STORAGE_KEY);
+    return;
+  }
+
+  localStorage.setItem(SELECTED_BRANCH_STORAGE_KEY, branchId);
+}
 
 async function fetchAppointmentsApi(url, role) {
   const res = await fetch(url, {
@@ -61,6 +77,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document
     .getElementById('back-to-doctor-btn')
     .addEventListener('click', () => goToStep('doctor'));
+
+  document.getElementById('branch-select')?.addEventListener('change', () => {
+    void handleBranchSelection();
+  });
 
   document
     .getElementById('specialty-search-input')
@@ -116,14 +136,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     .addEventListener('click', () => void saveModifiedAppointment());
 
   setupPatientSearch();
+  setupBranchSelect();
   setupConsultationToggle();
   startAppointmentsRefresh();
 });
 
 async function initializeAppointmentsPage() {
+  await loadBranches();
   await Promise.all([
     loadPatients(),
-    loadDoctors(),
     loadUpcomingAppointments(),
   ]);
 
@@ -135,6 +156,7 @@ async function initializeAppointmentsPage() {
     showSelectedPatient(currentPatient);
   }
 
+  await loadDoctors(selectedBranchId);
   renderUpcomingConsultations();
 }
 
@@ -151,7 +173,7 @@ function startAppointmentsRefresh() {
 
   window.addEventListener('focus', async () => {
     try {
-      await loadDoctors();
+      await loadDoctors(selectedBranchId);
       await loadUpcomingAppointments();
       renderUpcomingConsultations();
     } catch (_) {}
@@ -160,7 +182,9 @@ function startAppointmentsRefresh() {
 
 async function openNewAppointmentFlow() {
   try {
-    await loadDoctors();
+    if (selectedBranchId) {
+      await loadDoctors(selectedBranchId);
+    }
   } catch (error) {
     showToast('Failed to load doctors.', 'error');
     return;
@@ -180,6 +204,88 @@ async function loadPatients() {
     'frontdesk',
   );
   allPatients = data.map(normalizePatientRecord);
+}
+
+async function loadBranches() {
+  const data = await fetchAppointmentsApi(
+    `${APPOINTMENTS_API_BASE_URL}/hospital-branches`,
+    'frontdesk',
+  );
+
+  allBranches = Array.isArray(data) ? data : [];
+  const savedBranchId = getStoredSelectedBranchId();
+  const branchExists = allBranches.some((branch) => branch.id === savedBranchId);
+  selectedBranchId = branchExists
+    ? savedBranchId
+    : (allBranches.length === 1 ? allBranches[0].id : '');
+
+  if (selectedBranchId) {
+    setStoredSelectedBranchId(selectedBranchId);
+  } else {
+    setStoredSelectedBranchId('');
+  }
+
+  populateBranchSelect();
+}
+
+function setupBranchSelect() {
+  const select = document.getElementById('branch-select');
+  if (!select) return;
+
+  populateBranchSelect();
+}
+
+function populateBranchSelect() {
+  const select = document.getElementById('branch-select');
+  if (!select) return;
+
+  if (!allBranches.length) {
+    select.innerHTML = '<option value="">No branches available</option>';
+    select.disabled = true;
+    return;
+  }
+
+  select.disabled = false;
+  select.innerHTML = [
+    '<option value="">Select a branch</option>',
+    ...allBranches.map((branch) => `
+      <option value="${branch.id}">${branch.branchName}${branch.city ? ` - ${branch.city}` : ''}</option>
+    `),
+  ].join('');
+
+  select.value = selectedBranchId;
+}
+
+async function handleBranchSelection() {
+  const select = document.getElementById('branch-select');
+  if (!select) return;
+
+  selectedBranchId = select.value;
+  setStoredSelectedBranchId(selectedBranchId);
+  selectedSpecialty = null;
+  selectedDoctor = null;
+  selectedSlot = null;
+  selectedDate = null;
+  setSelectedSpecialty(null);
+  setSelectedDoctor(null);
+  const specialtyLabel = document.getElementById('selected-specialty-label');
+  if (specialtyLabel) {
+    specialtyLabel.textContent = 'Select a specialty';
+  }
+  renderDoctors([]);
+  renderSpecialties([]);
+
+  if (!selectedBranchId) {
+    return;
+  }
+
+  try {
+    await loadDoctors(selectedBranchId);
+    renderSpecialties(allSpecialties);
+  } catch (error) {
+    showToast('Failed to load doctors for the selected branch.', 'error');
+    console.error('Branch doctor load error:', error);
+  }
 }
 
 function normalizePatientRecord(patient) {
@@ -214,9 +320,15 @@ function upsertPatientRecord(patient) {
   return normalizedPatient;
 }
 
-async function loadDoctors() {
+async function loadDoctors(branchId = selectedBranchId) {
+  if (!branchId) {
+    allDoctors = [];
+    allSpecialties = [];
+    return [];
+  }
+
   const payload = await fetchAppointmentsApi(
-    `${APPOINTMENTS_API_BASE_URL}/doctors`,
+    `${APPOINTMENTS_API_BASE_URL}/doctors?branchId=${encodeURIComponent(branchId)}`,
     'frontdesk',
   );
   console.log('GET /doctors response (frontdesk appointments):', payload);
@@ -228,6 +340,7 @@ async function loadDoctors() {
       name,
       icon: name.toLowerCase(),
     }));
+  return allDoctors;
 }
 
 function normalizeDoctor(doctor) {
@@ -398,7 +511,9 @@ function setupConsultationToggle() {
 function renderSpecialties(specialties) {
   const grid = document.getElementById('specialty-grid');
   if (!specialties.length) {
-    grid.innerHTML = '<div class="empty-state"><p>No specialties found</p></div>';
+    grid.innerHTML = selectedBranchId
+      ? '<div class="empty-state"><p>No specialties found for this branch</p></div>'
+      : '<div class="empty-state"><p>Select a branch to view available specialties</p></div>';
     return;
   }
 
@@ -434,7 +549,9 @@ function renderSpecialties(specialties) {
 function renderDoctors(doctors) {
   const grid = document.getElementById('doctor-grid');
   if (!doctors.length) {
-    grid.innerHTML = '<div class="empty-state"><p>No doctors found</p></div>';
+    grid.innerHTML = selectedBranchId
+      ? '<div class="empty-state"><p>No doctors found for this branch</p></div>'
+      : '<div class="empty-state"><p>Select a branch to browse doctors</p></div>';
     return;
   }
 
@@ -590,8 +707,24 @@ async function confirmAppointment() {
     return;
   }
 
+  if (!selectedBranchId) {
+    showToast('Please select a branch first.', 'error');
+    goToStep('specialty');
+    return;
+  }
+
   if (!selectedDoctor || !selectedDate || !selectedSlot) {
     showToast('Please choose doctor, date and slot.', 'error');
+    return;
+  }
+
+  if (selectedDoctor.branchId !== selectedBranchId) {
+    showToast('Please re-select a doctor for the selected branch.', 'error');
+    selectedDoctor = null;
+    selectedSlot = null;
+    selectedDate = null;
+    renderDoctors(allDoctors);
+    goToStep('specialty');
     return;
   }
 
@@ -604,6 +737,7 @@ async function confirmAppointment() {
     body: JSON.stringify({
       userId: patient.userId,
       doctorId: selectedDoctor.id,
+      branchId: selectedBranchId,
       date: selectedDate,
       slot: selectedSlot,
     }),

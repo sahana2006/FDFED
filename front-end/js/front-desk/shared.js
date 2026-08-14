@@ -51,6 +51,7 @@ function clearSession() {
   localStorage.removeItem('medbits_selected_patient');
   localStorage.removeItem('medbits_selected_specialty');
   localStorage.removeItem('medbits_selected_doctor');
+  localStorage.removeItem('medbits_selected_branch');
 }
 
 function getSelectedPatient() {

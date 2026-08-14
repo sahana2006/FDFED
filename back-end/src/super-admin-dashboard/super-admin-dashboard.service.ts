@@ -17,7 +17,7 @@ export type SuperAdminDashboardBranchRow = {
   email: string;
   status: string;
   totalDoctors: number;
-  totalPatients: number;
+  totalPatients: number | null;
   totalAppointments: number;
   branchAdmin: {
     userId: string;
@@ -58,7 +58,6 @@ export class SuperAdminDashboardService {
 
     const today = new Date().toISOString().split('T')[0];
     const branchDoctorCounts = this.countByBranch(doctors);
-    const branchPatientCounts = this.countByBranch(patients);
     const branchAppointmentCounts = this.countByBranch(appointments);
 
     const branchRows = branches.map((branch) => {
@@ -75,7 +74,7 @@ export class SuperAdminDashboardService {
         email: branch.email,
         status: branch.status,
         totalDoctors: branchDoctorCounts.get(branch.id) ?? 0,
-        totalPatients: branchPatientCounts.get(branch.id) ?? 0,
+        totalPatients: null,
         totalAppointments: branchAppointmentCounts.get(branch.id) ?? 0,
         branchAdmin: admin
           ? {

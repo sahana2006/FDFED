@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreatePatientDto {
@@ -36,11 +36,6 @@ export class CreatePatientDto {
   @IsEmail()
   @IsNotEmpty()
   email!: string;
-
-  @ApiProperty({ example: '00000000-0000-4000-8000-000000000001', description: 'Hospital branch UUID' })
-  @IsUUID()
-  @IsNotEmpty()
-  branchId!: string;
 
   @ApiPropertyOptional({ example: 'Jane Doe' })
   @IsString()
@@ -83,11 +78,6 @@ export class UpdatePatientProfileDto {
   @IsEmail()
   @IsOptional()
   email?: string;
-
-  @ApiPropertyOptional({ example: '00000000-0000-4000-8000-000000000001', description: 'Hospital branch UUID' })
-  @IsUUID()
-  @IsOptional()
-  branchId?: string;
 
   @ApiPropertyOptional({ example: 'Jane Doe' })
   @IsString()

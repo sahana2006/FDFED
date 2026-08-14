@@ -8,10 +8,10 @@ import { HospitalBranchService } from './hospital-branch.service';
 @ApiTags('Hospital Branches')
 @ApiHeader({ name: 'role', required: true, description: 'User role for RBAC (admin)' })
 @Controller('hospital-branches')
-@Roles('admin')
 export class HospitalBranchController {
   constructor(private readonly hospitalBranchService: HospitalBranchService) {}
 
+  @Roles('admin')
   @Post()
   @ApiOperation({ summary: 'Create a hospital branch' })
   @ApiBody({ type: CreateHospitalBranchDto })
@@ -37,6 +37,7 @@ export class HospitalBranchController {
     return this.hospitalBranchService.findOne(id);
   }
 
+  @Roles('admin')
   @Patch(':id')
   @ApiOperation({ summary: 'Update a hospital branch' })
   @ApiParam({ name: 'id', description: 'Hospital branch UUID' })
@@ -49,6 +50,7 @@ export class HospitalBranchController {
     return this.hospitalBranchService.update(id, updateHospitalBranchDto);
   }
 
+  @Roles('admin')
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a hospital branch' })

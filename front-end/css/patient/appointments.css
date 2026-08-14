@@ -18,6 +18,9 @@
 }
 .find-form-row select option { background: var(--navy); }
 .find-form-row input[type="date"] { color-scheme: dark; }
+.branch-group select {
+  width: 100%;
+}
 
 .appt-layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
 
@@ -62,6 +65,7 @@
 }
 @media (max-width: 860px) {
   .find-form-row { flex-direction: column; }
+  .find-form-row .btn { width: 100%; }
 }
 
 /* ─── appointment2.html – booking page extras ─── */

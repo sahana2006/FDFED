@@ -34,7 +34,6 @@ export class WalkInsController {
       dob: body.dob.trim(),
       gender: body.gender.trim(),
       bloodGroup: body.bloodGroup.trim(),
-      branchId: body.branchId.trim(),
       guardianName: body.guardianName?.trim() ?? '',
     });
   }

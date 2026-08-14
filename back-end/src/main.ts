@@ -10,22 +10,29 @@ async function bootstrap() {
   app.enableCors();
 
   // Enable global validation using class-validator
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
   // ── Swagger / OpenAPI setup ────────────────────────────────
   const swaggerConfig = new DocumentBuilder()
     .setTitle('MEDBITS Healthcare API')
     .setDescription(
       'REST API for the MEDBITS Healthcare Management System.\n\n' +
-      '**Authentication**: Pass the user role in the `role` request header.\n\n' +
-      'Valid roles: `patient` | `doctor` | `frontdesk` | `admin`',
+        '**Authentication**: Pass the user role in the `role` request header.\n\n' +
+        'Valid roles: `patient` | `doctor` | `frontdesk` | `admin`',
     )
     .setVersion('1.0')
     .addApiKey(
-      { type: 'apiKey', name: 'role', in: 'header', description: 'User role for RBAC' },
+      {
+        type: 'apiKey',
+        name: 'role',
+        in: 'header',
+        description: 'User role for RBAC',
+      },
       'role',
     )
     .build();
@@ -40,12 +47,15 @@ async function bootstrap() {
   const docsDir = join(process.cwd(), 'docs');
   try {
     mkdirSync(docsDir, { recursive: true });
-    writeFileSync(join(docsDir, 'swagger.json'), JSON.stringify(document, null, 2));
+    writeFileSync(
+      join(docsDir, 'swagger.json'),
+      JSON.stringify(document, null, 2),
+    );
   } catch (err) {
     console.error('Error writing swagger.json', err);
   }
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3001);
   console.log(`Application running on http://localhost:3000`);
   console.log(`Swagger docs available at http://localhost:3000/api/docs`);
 }

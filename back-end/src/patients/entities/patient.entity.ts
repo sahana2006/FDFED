@@ -1,17 +1,9 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { HospitalBranch } from '../../hospital-branch/entities/hospital-branch.entity';
+import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity({ name: 'patients' })
 export class PatientEntity {
   @PrimaryColumn({ type: 'varchar', length: 20 })
   userId!: string;
-
-  @Column({ type: 'uuid' })
-  branchId!: string;
-
-  @ManyToOne(() => HospitalBranch, { nullable: false, onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'branchId' })
-  branch!: HospitalBranch;
 
   @Column({ length: 100 })
   firstName!: string;

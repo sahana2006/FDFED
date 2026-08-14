@@ -1617,6 +1617,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "branchId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by hospital branch UUID",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3293,11 +3302,6 @@
             "type": "string",
             "example": "john.doe@example.com"
           },
-          "branchId": {
-            "type": "string",
-            "example": "00000000-0000-4000-8000-000000000001",
-            "description": "Hospital branch UUID"
-          },
           "guardianName": {
             "type": "string",
             "example": "Jane Doe"
@@ -3310,8 +3314,7 @@
           "gender",
           "bloodGroup",
           "phone",
-          "email",
-          "branchId"
+          "email"
         ]
       },
       "UpdatePatientProfileDto": {
@@ -3344,11 +3347,6 @@
           "email": {
             "type": "string",
             "example": "john.doe@example.com"
-          },
-          "branchId": {
-            "type": "string",
-            "example": "00000000-0000-4000-8000-000000000001",
-            "description": "Hospital branch UUID"
           },
           "guardianName": {
             "type": "string",
@@ -4094,11 +4092,6 @@
             "type": "string",
             "example": "O+"
           },
-          "branchId": {
-            "type": "string",
-            "example": "00000000-0000-4000-8000-000000000001",
-            "description": "Hospital branch UUID"
-          },
           "guardianName": {
             "type": "string",
             "example": "Jane Doe"
@@ -4111,8 +4104,7 @@
           "phone",
           "dob",
           "gender",
-          "bloodGroup",
-          "branchId"
+          "bloodGroup"
         ]
       },
       "CreateLeaveRequestDto": {

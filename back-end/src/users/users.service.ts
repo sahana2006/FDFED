@@ -329,7 +329,6 @@ export class UsersService implements OnModuleInit {
       bloodGroup: input.bloodGroup.trim(),
       phone: input.phone.trim(),
       email,
-      branchId: input.branchId.trim(),
       guardianName: input.guardianName.trim(),
     });
 

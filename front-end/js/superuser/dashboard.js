@@ -67,6 +67,10 @@ function formatNumber(value) {
   return new Intl.NumberFormat('en-IN').format(Number(value) || 0);
 }
 
+function formatNullableNumber(value) {
+  return value == null ? '—' : formatNumber(value);
+}
+
 function formatStatus(status) {
   return String(status || '').toLowerCase() === 'active' ? 'Active' : 'Inactive';
 }
@@ -202,7 +206,7 @@ function renderBranches(branches) {
         <td>${escapeHtml(branch.state || '-')}</td>
         <td><span class="status-badge ${isInactive ? 'inactive' : 'active'}">${escapeHtml(formatStatus(branch.status))}</span></td>
         <td>${formatNumber(branch.totalDoctors)}</td>
-        <td>${formatNumber(branch.totalPatients)}</td>
+        <td>${formatNullableNumber(branch.totalPatients)}</td>
         <td>${formatNumber(branch.totalAppointments)}</td>
         <td>${branchAdminMarkup(branch.branchAdmin)}</td>
       </tr>

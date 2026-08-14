@@ -1,14 +1,7 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
-import { HospitalBranch } from '../hospital-branch/entities/hospital-branch.entity';
-import { RequestContextService } from '../common/request-context.service';
-
-const DEFAULT_BRANCH_ID = '00000000-0000-4000-8000-000000000001';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
 export type PatientProfile = {
   userId: string;
-  branchId: string;
-  branch?: HospitalBranch;
   firstName: string;
   lastName: string;
   dob: string;
@@ -22,73 +15,51 @@ export type PatientProfile = {
 // Profiles created during user signup already have a user id; patient creation
 // generates one internally via `createPatient`.
 export type CreatePatientProfileInput = PatientProfile;
-export type CreatePatientInput = Omit<PatientProfile, 'userId' | 'branch'>;
+export type CreatePatientInput = Omit<PatientProfile, 'userId'>;
 export type UpdatePatientProfileInput = Partial<Omit<PatientProfile, 'userId'>>;
 
 @Injectable()
 export class PatientsService {
   private readonly patients: PatientProfile[] = [
-    { userId: 'PAT001', branchId: DEFAULT_BRANCH_ID, firstName: 'Ria', lastName: 'Sharma', dob: '1990-10-24', gender: 'Female', bloodGroup: 'A+', phone: '9473487399', email: 'ria@medbits.com', guardianName: 'Ravi Sharma' },
-    { userId: 'PAT002', branchId: DEFAULT_BRANCH_ID, firstName: 'Arun', lastName: 'Menon', dob: '1988-02-28', gender: 'Male', bloodGroup: 'O+', phone: '9123456780', email: 'arun.menon@medbits.com', guardianName: 'Lakshmi Menon' },
-    { userId: 'PAT003', branchId: DEFAULT_BRANCH_ID, firstName: 'Farah', lastName: 'Ali', dob: '2001-11-06', gender: 'Female', bloodGroup: 'A-', phone: '9988776655', email: 'farah.ali@medbits.com', guardianName: 'Imran Ali' },
-    { userId: 'PAT004', branchId: DEFAULT_BRANCH_ID, firstName: 'Dev', lastName: 'Patel', dob: '1992-07-19', gender: 'Male', bloodGroup: 'AB+', phone: '9012345678', email: 'dev.patel@medbits.com', guardianName: 'Kiran Patel' },
+    { userId: 'PAT001', firstName: 'Ria', lastName: 'Sharma', dob: '1990-10-24', gender: 'Female', bloodGroup: 'A+', phone: '9473487399', email: 'ria@medbits.com', guardianName: 'Ravi Sharma' },
+    { userId: 'PAT002', firstName: 'Arun', lastName: 'Menon', dob: '1988-02-28', gender: 'Male', bloodGroup: 'O+', phone: '9123456780', email: 'arun.menon@medbits.com', guardianName: 'Lakshmi Menon' },
+    { userId: 'PAT003', firstName: 'Farah', lastName: 'Ali', dob: '2001-11-06', gender: 'Female', bloodGroup: 'A-', phone: '9988776655', email: 'farah.ali@medbits.com', guardianName: 'Imran Ali' },
+    { userId: 'PAT004', firstName: 'Dev', lastName: 'Patel', dob: '1992-07-19', gender: 'Male', bloodGroup: 'AB+', phone: '9012345678', email: 'dev.patel@medbits.com', guardianName: 'Kiran Patel' },
   ];
-
-  constructor(
-    private readonly hospitalBranchService: HospitalBranchService,
-    private readonly requestContextService: RequestContextService,
-  ) {}
-
-  private getScopedBranchId(): string | undefined {
-    return this.requestContextService.getContext()?.branchId;
-  }
 
   getPatientByUserId(userId: string): PatientProfile {
     const patient = this.patients.find((item) => item.userId === userId);
     if (!patient) throw new NotFoundException('Patient profile not found');
 
-    const scopedBranchId = this.getScopedBranchId();
-    if (scopedBranchId && patient.branchId !== scopedBranchId) {
-      throw new ForbiddenException('Access denied for this hospital branch');
-    }
-
     return { ...patient };
   }
 
   getAllPatients(): PatientProfile[] {
-    const scopedBranchId = this.getScopedBranchId();
-    const patients = scopedBranchId
-      ? this.patients.filter((patient) => patient.branchId === scopedBranchId)
-      : this.patients;
-
-    return patients.map((patient) => ({ ...patient }));
+    return this.patients.map((patient) => ({ ...patient }));
   }
 
   async createPatientProfile(profile: CreatePatientProfileInput): Promise<PatientProfile> {
-    const branchId = profile.branchId?.trim();
-    if (!branchId) throw new BadRequestException('branchId is required');
-
-    const scopedBranchId = this.getScopedBranchId();
-    if (scopedBranchId && branchId !== scopedBranchId) {
-      throw new ForbiddenException('Access denied for this hospital branch');
+    if (!profile.userId?.trim()) {
+      throw new BadRequestException('userId is required');
     }
-
-    const branch = await this.hospitalBranchService.findOne(branchId);
-    const patient: PatientProfile = { ...profile, branchId, branch };
+    const patient: PatientProfile = {
+      userId: profile.userId.trim(),
+      firstName: profile.firstName.trim(),
+      lastName: profile.lastName.trim(),
+      dob: profile.dob.trim(),
+      gender: profile.gender.trim(),
+      bloodGroup: profile.bloodGroup.trim(),
+      phone: profile.phone.trim(),
+      email: profile.email.trim().toLowerCase(),
+      guardianName: profile.guardianName.trim(),
+    };
     this.patients.push({ ...patient });
     return { ...patient };
   }
 
   async createPatient(input: CreatePatientInput): Promise<PatientProfile> {
-    const scopedBranchId = this.getScopedBranchId();
-    const branchId = scopedBranchId ?? input.branchId?.trim();
-    if (scopedBranchId && input.branchId?.trim() && input.branchId.trim() !== scopedBranchId) {
-      throw new ForbiddenException('Access denied for this hospital branch');
-    }
-
     const normalizedPatient: PatientProfile = {
       userId: this.generateNextPatientId(),
-      branchId: branchId || '',
       firstName: input.firstName.trim(),
       lastName: input.lastName.trim(),
       dob: input.dob.trim(),
@@ -102,9 +73,6 @@ export class PatientsService {
     if (!normalizedPatient.firstName || !normalizedPatient.lastName || !normalizedPatient.dob || !normalizedPatient.gender || !normalizedPatient.bloodGroup || !normalizedPatient.phone || !normalizedPatient.email) {
       throw new BadRequestException('firstName, lastName, dob, gender, bloodGroup, phone and email are required');
     }
-    if (!branchId) throw new BadRequestException('branchId is required');
-
-    normalizedPatient.branch = await this.hospitalBranchService.findOne(branchId);
     this.patients.push(normalizedPatient);
     return { ...normalizedPatient };
   }
@@ -112,25 +80,20 @@ export class PatientsService {
   async updatePatientByUserId(userId: string, updates: UpdatePatientProfileInput): Promise<PatientProfile> {
     const patientIndex = this.patients.findIndex((item) => item.userId === userId);
     if (patientIndex === -1) throw new NotFoundException('Patient profile not found');
-
-    const scopedBranchId = this.getScopedBranchId();
     const existingPatient = this.patients[patientIndex];
-    if (scopedBranchId && existingPatient.branchId !== scopedBranchId) {
-      throw new ForbiddenException('Access denied for this hospital branch');
-    }
-
-    const nextPatient = { ...existingPatient, ...updates, userId } as PatientProfile;
-    if (updates.branchId !== undefined) {
-      const branchId = updates.branchId.trim();
-      if (scopedBranchId && branchId && branchId !== scopedBranchId) {
-        throw new ForbiddenException('Access denied for this hospital branch');
-      }
-      if (branchId) {
-        nextPatient.branchId = branchId;
-        nextPatient.branch = await this.hospitalBranchService.findOne(branchId);
-      }
-    }
-
+    const nextPatient = {
+      ...existingPatient,
+      ...updates,
+      userId,
+      firstName: updates.firstName?.trim() ?? existingPatient.firstName,
+      lastName: updates.lastName?.trim() ?? existingPatient.lastName,
+      dob: updates.dob?.trim() ?? existingPatient.dob,
+      gender: updates.gender?.trim() ?? existingPatient.gender,
+      bloodGroup: updates.bloodGroup?.trim() ?? existingPatient.bloodGroup,
+      phone: updates.phone?.trim() ?? existingPatient.phone,
+      email: updates.email?.trim().toLowerCase() ?? existingPatient.email,
+      guardianName: updates.guardianName?.trim() ?? existingPatient.guardianName,
+    } as PatientProfile;
     this.patients[patientIndex] = nextPatient;
     return { ...nextPatient };
   }

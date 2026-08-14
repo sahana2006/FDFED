@@ -22,12 +22,13 @@ export class DoctorsController {
 
   @ApiOperation({ summary: 'List all doctors, optionally filtered by specialization' })
   @ApiQuery({ name: 'specialization', required: false, description: 'Filter by specialization (e.g. Cardiologist)' })
+  @ApiQuery({ name: 'branchId', required: false, description: 'Filter by hospital branch UUID' })
   @ApiResponse({ status: 200, description: 'Array of doctor profiles' })
   @Roles('patient', 'doctor', 'frontdesk', 'admin')
   @Header('Cache-Control', 'no-store')
   @Get()
-  listDoctors(@Query('specialization') specialization?: string) {
-    return this.doctorsService.findAll(specialization);
+  listDoctors(@Query('specialization') specialization?: string, @Query('branchId') branchId?: string) {
+    return this.doctorsService.findAll(specialization, branchId);
   }
 
   @ApiOperation({ summary: 'Add a doctor and create matching doctor login user' })
