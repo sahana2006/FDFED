@@ -1,9 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBody } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { LabTestsService } from './labtests.service';
-import { CreateTestBookingDto, CreateLabAssignmentDto, UpdateLabAssignmentDto } from './dto/labtests.dto';
+import { CreateTestBookingDto } from './dto/labtests.dto';
 
 @ApiTags('Lab Tests')
 @ApiHeader({ name: 'role', required: false, description: 'User role (admin, doctor, patient, frontdesk)' })
@@ -60,58 +60,4 @@ export class LabTestsController {
     return this.labTestsService.removeCartBooking(bookingId);
   }
 
-  @Roles('doctor', 'frontdesk', 'admin')
-  @Post('assignments')
-  @ApiOperation({ summary: 'Create a new lab test assignment' })
-  @ApiBody({ type: CreateLabAssignmentDto })
-  @ApiResponse({ status: 201, description: 'Lab assignment created successfully' })
-  createLabAssignment(@Body() body: CreateLabAssignmentDto) {
-    return this.labTestsService.createLabAssignment({
-      userId: body.userId.trim(),
-      patientName: body.patientName.trim(),
-      doctorId: body.doctorId.trim(),
-      doctorName: body.doctorName.trim(),
-      packageName: body.packageName?.trim(),
-      tests: body.tests ?? [],
-      remarks: body.remarks?.trim(),
-    });
-  }
-
-  @Roles('patient', 'doctor', 'frontdesk', 'admin')
-  @Get('assignments/user/:userId')
-  @ApiOperation({ summary: 'Get lab assignments by user ID' })
-  getAssignmentsByUserId(@Param('userId') userId: string) {
-    return this.labTestsService.getAssignmentsByUserId(userId);
-  }
-
-  @Roles('doctor', 'frontdesk', 'admin')
-  @Get('assignments/doctor/:doctorId')
-  @ApiOperation({ summary: 'Get lab assignments by doctor ID' })
-  getAssignmentsByDoctorId(@Param('doctorId') doctorId: string) {
-    return this.labTestsService.getAssignmentsByDoctorId(doctorId);
-  }
-
-  @Roles('doctor', 'frontdesk', 'admin')
-  @Put('assignments/:assignmentId')
-  @ApiOperation({ summary: 'Update a lab assignment' })
-  @ApiBody({ type: UpdateLabAssignmentDto })
-  updateLabAssignment(
-    @Param('assignmentId') assignmentId: string,
-    @Body() body: UpdateLabAssignmentDto,
-  ) {
-    return this.labTestsService.updateLabAssignment(assignmentId, {
-      userId: body.userId?.trim(),
-      patientName: body.patientName?.trim(),
-      packageName: body.packageName?.trim(),
-      tests: body.tests,
-      remarks: body.remarks?.trim(),
-    });
-  }
-
-  @Roles('doctor', 'frontdesk', 'admin')
-  @Delete('assignments/:assignmentId')
-  @ApiOperation({ summary: 'Delete a lab assignment' })
-  deleteLabAssignment(@Param('assignmentId') assignmentId: string) {
-    return this.labTestsService.deleteLabAssignment(assignmentId);
-  }
 }

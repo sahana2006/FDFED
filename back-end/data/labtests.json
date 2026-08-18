@@ -8,40 +8,5 @@
       "cartId": "LABCART1778309316934",
       "orderId": null
     }
-  ],
-  "labAssignments": [
-    {
-      "id": "LABASSIGN1777869875072",
-      "userId": "PAT001",
-      "patientName": "Ria Sharma",
-      "doctorId": "DOC001",
-      "doctorName": "Dr. S Madhuri",
-      "packageName": "Lab Test Package",
-      "tests": [
-        "Liver Function Test",
-        "HbA1c",
-        "Blood Glucose"
-      ],
-      "remarks": "",
-      "date": "2026-05-04",
-      "status": "assigned"
-    },
-    {
-      "id": "LABASSIGN1777807236986",
-      "userId": "PAT001",
-      "patientName": "Ria Sharma",
-      "doctorId": "DOC001",
-      "doctorName": "Dr. S Madhuri",
-      "packageName": "Lab Test Package",
-      "tests": [
-        "Complete Blood Count",
-        "Lipid Profile",
-        "Vitamin D",
-        "HbA1c"
-      ],
-      "remarks": "",
-      "date": "2026-05-03",
-      "status": "assigned"
-    }
   ]
 }

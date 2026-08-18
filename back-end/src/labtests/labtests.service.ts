@@ -11,7 +11,6 @@ export type LabTest = {
 };
 
 export type TestBookingStatus = 'cart' | 'booked';
-export type LabAssignmentStatus = 'assigned';
 
 export type TestBooking = {
   id: string;
@@ -22,45 +21,13 @@ export type TestBooking = {
   orderId: string | null;
 };
 
-export type LabAssignment = {
-  id: string;
-  userId: string;
-  patientName: string;
-  doctorId: string;
-  doctorName: string;
-  packageName: string;
-  tests: string[];
-  remarks: string;
-  date: string;
-  status: LabAssignmentStatus;
-};
-
 export type CreateTestBookingInput = {
   userId: string;
   labTestId: string;
 };
 
-export type CreateLabAssignmentInput = {
-  userId: string;
-  patientName: string;
-  doctorId: string;
-  doctorName: string;
-  packageName?: string;
-  tests: string[];
-  remarks?: string;
-};
-
-export type UpdateLabAssignmentInput = {
-  userId?: string;
-  patientName?: string;
-  packageName?: string;
-  tests?: string[];
-  remarks?: string;
-};
-
 type LabTestsState = {
   testBookings: TestBooking[];
-  labAssignments: LabAssignment[];
 };
 
 const LABTESTS_DATA_FILE = join(
@@ -119,7 +86,6 @@ export class LabTestsService {
   ];
 
   private testBookings: TestBooking[] = [];
-  private labAssignments: LabAssignment[] = [];
   private readonly activeCartIds = new Map<string, string>();
 
   constructor() {
@@ -219,81 +185,6 @@ export class LabTestsService {
     return this.toBookingDetails(removedBooking);
   }
 
-  createLabAssignment(input: CreateLabAssignmentInput) {
-    const tests = this.cleanTests(input.tests);
-    if (!input.userId || !input.patientName || !input.doctorId || !tests.length) {
-      throw new BadRequestException(
-        'userId, patientName, doctorId and tests are required',
-      );
-    }
-
-    const assignment: LabAssignment = {
-      id: `LABASSIGN${Date.now()}`,
-      userId: input.userId,
-      patientName: input.patientName,
-      doctorId: input.doctorId,
-      doctorName: input.doctorName?.trim() || 'Doctor',
-      packageName: input.packageName?.trim() || 'Lab Test Package',
-      tests,
-      remarks: input.remarks?.trim() || '',
-      date: new Date().toISOString().split('T')[0],
-      status: 'assigned',
-    };
-
-    this.labAssignments.unshift(assignment);
-    this.persistState();
-    return { ...assignment, tests: [...assignment.tests] };
-  }
-
-  getAssignmentsByUserId(userId: string) {
-    return this.labAssignments
-      .filter((assignment) => assignment.userId === userId)
-      .map((assignment) => ({ ...assignment, tests: [...assignment.tests] }));
-  }
-
-  getAssignmentsByDoctorId(doctorId: string) {
-    return this.labAssignments
-      .filter((assignment) => assignment.doctorId === doctorId)
-      .map((assignment) => ({ ...assignment, tests: [...assignment.tests] }));
-  }
-
-  updateLabAssignment(assignmentId: string, input: UpdateLabAssignmentInput) {
-    const assignment = this.labAssignments.find((item) => item.id === assignmentId);
-    if (!assignment) {
-      throw new BadRequestException('Assigned lab test not found');
-    }
-
-    if (input.userId?.trim()) assignment.userId = input.userId.trim();
-    if (input.patientName?.trim()) assignment.patientName = input.patientName.trim();
-    if (input.packageName !== undefined) {
-      assignment.packageName = input.packageName.trim() || 'Lab Test Package';
-    }
-    if (input.remarks !== undefined) assignment.remarks = input.remarks.trim();
-    if (input.tests) {
-      const tests = this.cleanTests(input.tests);
-      if (!tests.length) {
-        throw new BadRequestException('At least one test is required');
-      }
-      assignment.tests = tests;
-    }
-
-    this.persistState();
-    return { ...assignment, tests: [...assignment.tests] };
-  }
-
-  deleteLabAssignment(assignmentId: string) {
-    const assignmentIndex = this.labAssignments.findIndex(
-      (item) => item.id === assignmentId,
-    );
-    if (assignmentIndex === -1) {
-      throw new BadRequestException('Assigned lab test not found');
-    }
-
-    const [deletedAssignment] = this.labAssignments.splice(assignmentIndex, 1);
-    this.persistState();
-    return { ...deletedAssignment, tests: [...deletedAssignment.tests] };
-  }
-
   private findTestById(id: string): LabTest | undefined {
     const test = this.labTests.find((item) => item.id === id);
     return test ? { ...test } : undefined;
@@ -330,10 +221,6 @@ export class LabTestsService {
     return cartId;
   }
 
-  private cleanTests(tests: string[]) {
-    return [...new Set((tests || []).map((test) => test.trim()).filter(Boolean))];
-  }
-
   private loadPersistedState() {
     try {
       if (!existsSync(LABTESTS_DATA_FILE)) {
@@ -343,9 +230,6 @@ export class LabTestsService {
       const saved = JSON.parse(readFileSync(LABTESTS_DATA_FILE, 'utf8')) as Partial<LabTestsState>;
       if (Array.isArray(saved.testBookings)) {
         this.testBookings = saved.testBookings;
-      }
-      if (Array.isArray(saved.labAssignments)) {
-        this.labAssignments = saved.labAssignments;
       }
     } catch (_) {}
   }
@@ -357,7 +241,6 @@ export class LabTestsService {
       JSON.stringify(
         {
           testBookings: this.testBookings,
-          labAssignments: this.labAssignments,
         },
         null,
         2,

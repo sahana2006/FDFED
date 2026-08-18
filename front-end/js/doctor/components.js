@@ -43,7 +43,6 @@ function getSidebarTemplate() {
     <a href="profile.html" class="nav-item" data-page="profile" data-tooltip="Profile"><span class="nav-icon">◉</span><span class="nav-label">Profile</span></a>
     <a href="consultation-notes.html" class="nav-item" data-page="consultation-notes" data-tooltip="Consultation Notes"><span class="nav-icon">📋</span><span class="nav-label">Consultation Notes</span></a>
     <a href="internal-referral.html" class="nav-item" data-page="internal-referral" data-tooltip="Internal Referral"><span class="nav-icon">🔗</span><span class="nav-label">Internal Referral</span></a>
-    <a href="lab-test.html" class="nav-item" data-page="lab-test" data-tooltip="Lab Test"><span class="nav-icon">🧪</span><span class="nav-label">Lab Test</span></a>
     <a href="treatment-plan.html" class="nav-item" data-page="treatment-plan" data-tooltip="Treatment Plan"><span class="nav-icon">💊</span><span class="nav-label">Treatment Plan</span></a>
     <a href="slot-management.html" class="nav-item" data-page="slot-management" data-tooltip="Slot Management"><span class="nav-icon">🕐</span><span class="nav-label">Slot Management</span></a>
   </nav>

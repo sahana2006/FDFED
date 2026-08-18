@@ -55,7 +55,7 @@ async function bootstrap() {
     console.error('Error writing swagger.json', err);
   }
 
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(process.env.PORT ?? 3000);
   console.log(`Application running on http://localhost:3000`);
   console.log(`Swagger docs available at http://localhost:3000/api/docs`);
 }

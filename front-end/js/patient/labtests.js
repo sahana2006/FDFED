@@ -18,7 +18,6 @@ const LAB_TEST_ICONS = {
 let labTests = [];
 let cartBookings = [];
 let bookingHistory = [];
-let assignedLabTests = [];
 let activeLabCategory = 'Full Body Check Up';
 
 function useTemplate(id) {
@@ -27,7 +26,6 @@ function useTemplate(id) {
 
 async function initializeLabTestsPage() {
   await Promise.all([loadLabTests(), loadLabCart(), loadLabHistory()]);
-  await loadAssignedLabTestsSafely();
   renderLabTests();
 }
 
@@ -83,71 +81,6 @@ async function loadLabHistory() {
   }
 
   bookingHistory = await response.json();
-}
-
-async function loadAssignedLabTests() {
-  const session = requireRole('patient');
-  if (!session) return;
-
-  const response = await fetch(
-    `${LABTESTS_API_BASE_URL}/labtests/assignments/user/${encodeURIComponent(session.id)}`,
-    {
-      headers: {
-        role: 'patient',
-      },
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error('Failed to load assigned lab tests');
-  }
-
-  assignedLabTests = await response.json();
-}
-
-async function loadAssignedLabTestsSafely() {
-  try {
-    await loadAssignedLabTests();
-  } catch (_) {
-    assignedLabTests = [];
-  }
-  assignedLabTests = mergeLegacyAssignedLabTests(assignedLabTests);
-}
-
-function mergeLegacyAssignedLabTests(assignments) {
-  const session = requireRole('patient');
-  if (!session) return assignments;
-  if (assignments.length) return assignments;
-
-  let legacyAssignments = [];
-  try {
-    legacyAssignments = JSON.parse(localStorage.getItem('labAssignments') || '[]');
-  } catch (_) {
-    legacyAssignments = [];
-  }
-  if (!Array.isArray(legacyAssignments) || !legacyAssignments.length) return assignments;
-
-  const patientName = (session.name || `${session.firstName || ''} ${session.lastName || ''}`).trim().toLowerCase();
-  const migrated = legacyAssignments
-    .filter((item) => String(item.patient || '').trim().toLowerCase() === patientName)
-    .map((item, index) => ({
-      id: `legacy-${index}`,
-      userId: session.id,
-      patientName: item.patient,
-      doctorName: item.doctorName || 'Doctor',
-      packageName: item.packageName || 'Assigned Lab Package',
-      tests: String(item.tests || '').split(',').map((test) => test.trim()).filter(Boolean),
-      remarks: item.remarks || '',
-      status: 'assigned',
-    }));
-
-  const existingKeys = new Set(
-    assignments.map((item) => `${item.packageName}|${Array.isArray(item.tests) ? item.tests.join(',') : item.tests}`),
-  );
-  return [
-    ...assignments,
-    ...migrated.filter((item) => !existingKeys.has(`${item.packageName}|${item.tests.join(',')}`)),
-  ];
 }
 
 function renderLabTests() {
@@ -382,7 +315,6 @@ async function confirmLabBooking() {
   }
 
   await Promise.all([loadLabCart(), loadLabHistory()]);
-  await loadAssignedLabTestsSafely();
   renderLabTests();
   hideLabCart();
   showToast('Lab tests booked!', 'success');
@@ -393,26 +325,13 @@ function renderLabOrders() {
   if (!el) return;
   el.innerHTML = '';
 
-  if (!bookingHistory.length && !assignedLabTests.length) {
+  if (!bookingHistory.length) {
     const msg = document.createElement('p');
     msg.className = 'text-muted';
-    msg.textContent = 'No assigned or completed lab tests yet.';
+    msg.textContent = 'No completed lab tests yet.';
     el.appendChild(msg);
     return;
   }
-
-  assignedLabTests.forEach((assignment) => {
-    const frag = useTemplate('tpl-lab-order-row');
-    const row = frag.querySelector('.order-item');
-
-    row.querySelector('.lab-order-test').textContent = assignment.packageName || 'Assigned Lab Package';
-    const assignedTests = Array.isArray(assignment.tests) ? assignment.tests.join(', ') : String(assignment.tests || '');
-    row.querySelector('.lab-order-date').textContent =
-      `${assignedTests} | Assigned by ${assignment.doctorName}${assignment.remarks ? ' | ' + assignment.remarks : ''}`;
-    row.querySelector('.lab-order-badge').textContent = 'Assigned';
-
-    el.appendChild(frag);
-  });
 
   const groupedBookings = groupLabBookingsByOrderId(bookingHistory);
 
