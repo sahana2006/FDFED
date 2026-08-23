@@ -121,6 +121,8 @@ export class UsersService implements OnModuleInit {
     { id: 'DOC008', name: 'Dr. Kavita Sharma', email: 'kavita.sharma@medbits.com', password: 'doctor123', role: 'doctor' },
     { id: 'DOC009', name: 'Dr. Vikram Nair', email: 'vikram.nair@medbits.com', password: 'doctor123', role: 'doctor' },
     { id: 'FD001', name: 'Priya Nair', email: 'frontdesk@medbits.com', password: 'desk123', role: 'frontdesk' },
+    { id: 'LT001', name: 'Suresh Kumar', email: 'labtech@medbits.com', password: 'lab123', role: Role.LABTECH, branchId: DEFAULT_BRANCH_ID },
+    { id: 'LT002', name: 'Aakash Verma', email: 'aakash.verma@medbits.com', password: 'lab123', role: Role.LABTECH, branchId: DEFAULT_BRANCH_ID },
   ];
 
   async onModuleInit(): Promise<void> {
@@ -144,97 +146,125 @@ export class UsersService implements OnModuleInit {
   }
 
   /**
-   * Loads all doctor and frontdesk users from the SQLite database into the
+   * Loads all doctor, frontdesk, and lab technician users from the SQLite database into the
    * in-memory users[] array so that login works correctly after a restart.
-   * Existing hardcoded entries (DOC001–DOC009, FD001) are replaced/merged.
+   * Existing hardcoded entries (DOC001–DOC009, FD001, LT001) are replaced/merged.
    */
   private async hydrateDoctorAndFrontdeskUsers(): Promise<void> {
-    const doctors = await this.doctorRepository.find();
-    for (const doc of doctors) {
-      const existing = this.users.findIndex(
-        (u) => u.id === doc.id || u.email.toLowerCase() === doc.email.toLowerCase(),
-      );
-      const user: User = {
-        id: doc.userId,
-        name: doc.name,
-        email: doc.email,
-        // Keep existing password if already in memory (plain text seeds), else default
-        password: existing >= 0 ? this.users[existing].password : 'doctor123',
-        role: Role.DOCTOR,
-      };
-      if (existing >= 0) this.users[existing] = user;
-      else this.users.push(user);
-    }
+    try {
+      const doctors = await this.doctorRepository.find();
+      for (const doc of doctors) {
+        const existing = this.users.findIndex(
+          (u) => u.id === doc.id || u.email.toLowerCase() === doc.email.toLowerCase(),
+        );
+        const user: User = {
+          id: doc.userId,
+          name: doc.name,
+          email: doc.email,
+          password: existing >= 0 ? this.users[existing].password : 'doctor123',
+          role: Role.DOCTOR,
+        };
+        if (existing >= 0) this.users[existing] = user;
+        else this.users.push(user);
+      }
+    } catch (_) {}
 
-    const frontdesks = await this.frontdeskRepository.find();
-    for (const fd of frontdesks) {
-      const existing = this.users.findIndex(
-        (u) => u.id === fd.userId || u.email.toLowerCase() === fd.email.toLowerCase(),
-      );
-      const user: User = {
-        id: fd.userId,
-        name: fd.name,
-        email: fd.email,
-        password: existing >= 0 ? this.users[existing].password : 'desk123',
-        role: Role.FRONTDESK,
-      };
-      if (existing >= 0) this.users[existing] = user;
-      else this.users.push(user);
-    }
+    try {
+      const frontdesks = await this.frontdeskRepository.find();
+      for (const fd of frontdesks) {
+        const existing = this.users.findIndex(
+          (u) => u.id === fd.userId || u.email.toLowerCase() === fd.email.toLowerCase(),
+        );
+        const user: User = {
+          id: fd.userId,
+          name: fd.name,
+          email: fd.email,
+          password: existing >= 0 ? this.users[existing].password : 'desk123',
+          role: Role.FRONTDESK,
+        };
+        if (existing >= 0) this.users[existing] = user;
+        else this.users.push(user);
+      }
+    } catch (_) {}
+
+    try {
+      const labTechs = await this.labTechnicianRepository.find();
+      for (const lt of labTechs) {
+        const existing = this.users.findIndex(
+          (u) => u.id === lt.id || u.email.toLowerCase() === lt.email.toLowerCase(),
+        );
+        const user: User = {
+          id: lt.id,
+          name: lt.name,
+          email: lt.email,
+          password: lt.password || (existing >= 0 ? this.users[existing].password : 'lab123'),
+          role: Role.LABTECH,
+          branchId: lt.branchId,
+        };
+        if (existing >= 0) this.users[existing] = user;
+        else this.users.push(user);
+      }
+    } catch (_) {}
   }
 
   private async seedDefaultBranchAdmin(): Promise<void> {
     const userId = 'ADM001';
-    const existingAssignment = await this.branchAdminRepository.findOne({ where: { branchId: DEFAULT_BRANCH_ID } });
-    if (existingAssignment) {
-      if (existingAssignment.userId === userId && !existingAssignment.password) {
-        existingAssignment.password = await this.hashPassword(DEFAULT_BRANCH_ADMIN_PASSWORD);
-        await this.branchAdminRepository.save(existingAssignment);
+    try {
+      const existingAssignment = await this.branchAdminRepository.findOne({ where: { branchId: DEFAULT_BRANCH_ID } });
+      if (existingAssignment) {
+        if (existingAssignment.userId === userId && !existingAssignment.password) {
+          existingAssignment.password = await this.hashPassword(DEFAULT_BRANCH_ADMIN_PASSWORD);
+          await this.branchAdminRepository.save(existingAssignment);
+        }
+        return;
       }
-      return;
-    }
 
-    const branch = await this.hospitalBranchService.findOne(DEFAULT_BRANCH_ID);
-    await this.branchAdminRepository.save(
-      this.branchAdminRepository.create({
-        userId,
-        branchId: branch.id,
-        name: DEFAULT_BRANCH_ADMIN_NAME,
-        email: DEFAULT_BRANCH_ADMIN_EMAIL,
-        password: await this.hashPassword(DEFAULT_BRANCH_ADMIN_PASSWORD),
-        phone: '',
-        branch,
-      }),
-    );
+      const branch = await this.hospitalBranchService.findOne(DEFAULT_BRANCH_ID);
+      await this.branchAdminRepository.save(
+        this.branchAdminRepository.create({
+          userId,
+          branchId: branch.id,
+          name: DEFAULT_BRANCH_ADMIN_NAME,
+          email: DEFAULT_BRANCH_ADMIN_EMAIL,
+          password: await this.hashPassword(DEFAULT_BRANCH_ADMIN_PASSWORD),
+          phone: '',
+          branch,
+        }),
+      );
+    } catch (_) {}
   }
 
   private async hydrateBranchAdmins(): Promise<void> {
-    const assignments = await this.branchAdminRepository.find();
-    for (const assignment of assignments) {
-      const user: User = {
-        id: assignment.userId,
-        name: assignment.name,
-        email: assignment.email,
-        password: assignment.password ?? '',
-        role: Role.BRANCH_ADMIN,
-        branchId: assignment.branchId,
-        phone: assignment.phone,
-      };
+    try {
+      const assignments = await this.branchAdminRepository.find();
+      for (const assignment of assignments) {
+        const user: User = {
+          id: assignment.userId,
+          name: assignment.name,
+          email: assignment.email,
+          password: assignment.password ?? '',
+          role: Role.BRANCH_ADMIN,
+          branchId: assignment.branchId,
+          phone: assignment.phone,
+        };
 
-      const existingIndex = this.users.findIndex((item) => item.id === assignment.userId || item.email.toLowerCase() === assignment.email.toLowerCase());
-      if (existingIndex >= 0) {
-        this.users[existingIndex] = user;
-      } else {
-        this.users.push(user);
+        const existingIndex = this.users.findIndex((item) => item.id === assignment.userId || item.email.toLowerCase() === assignment.email.toLowerCase());
+        if (existingIndex >= 0) {
+          this.users[existingIndex] = user;
+        } else {
+          this.users.push(user);
+        }
       }
-    }
+    } catch (_) {}
   }
 
   async getBranchAdminBranchId(userId: string): Promise<string | null> {
-    const assignment = await this.branchAdminRepository.findOne({ where: { userId } });
-    if (assignment?.branchId) {
-      return assignment.branchId;
-    }
+    try {
+      const assignment = await this.branchAdminRepository.findOne({ where: { userId } });
+      if (assignment?.branchId) {
+        return assignment.branchId;
+      }
+    } catch (_) {}
 
     const inMemoryUser = this.users.find(
       (user) => user.id === userId && user.role === Role.BRANCH_ADMIN,
@@ -251,20 +281,21 @@ export class UsersService implements OnModuleInit {
     branchName: string;
     status: string;
   } | null> {
-    const assignment = await this.branchAdminRepository.findOne({ where: { branchId }, relations: { branch: true } });
-    if (!assignment) {
-      return null;
-    }
-
-    return {
-      userId: assignment.userId,
-      name: assignment.name,
-      email: assignment.email,
-      phone: assignment.phone,
-      branchId: assignment.branchId,
-      branchName: assignment.branch.branchName,
-      status: assignment.branch.status,
-    };
+    try {
+      const assignment = await this.branchAdminRepository.findOne({ where: { branchId }, relations: { branch: true } });
+      if (assignment) {
+        return {
+          userId: assignment.userId,
+          name: assignment.name,
+          email: assignment.email,
+          phone: assignment.phone,
+          branchId: assignment.branchId,
+          branchName: assignment.branch.branchName,
+          status: assignment.branch.status,
+        };
+      }
+    } catch (_) {}
+    return null;
   }
 
   async listBranchAdminSummaries(): Promise<Array<{
@@ -277,32 +308,59 @@ export class UsersService implements OnModuleInit {
     branchStatus: string;
     createdAt: Date;
   }>> {
-    const assignments = await this.branchAdminRepository.find({ relations: { branch: true }, order: { createdAt: 'DESC' } });
-    return assignments.map((assignment) => ({
-      userId: assignment.userId,
-      name: assignment.name,
-      email: assignment.email,
-      phone: assignment.phone,
-      branchId: assignment.branchId,
-      branchName: assignment.branch.branchName,
-      branchStatus: assignment.branch.status,
-      createdAt: assignment.createdAt,
-    }));
+    try {
+      const assignments = await this.branchAdminRepository.find({ relations: { branch: true }, order: { createdAt: 'DESC' } });
+      return assignments.map((assignment) => ({
+        userId: assignment.userId,
+        name: assignment.name,
+        email: assignment.email,
+        phone: assignment.phone,
+        branchId: assignment.branchId,
+        branchName: assignment.branch.branchName,
+        branchStatus: assignment.branch.status,
+        createdAt: assignment.createdAt,
+      }));
+    } catch (_) {
+      return [];
+    }
   }
 
   async login(email: string, password: string): Promise<SafeUser | null> {
-    const user = this.users.find((item) => item.email === email);
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = this.users.find((item) => item.email.toLowerCase() === normalizedEmail);
+
     if (!user) {
-      const technician = await this.labTechnicianRepository.findOneBy({ email: email.trim().toLowerCase() });
-      if (!technician || technician.password !== password) return null;
-      return { id: technician.id, name: technician.name, email: technician.email, role: 'labtech' };
+      try {
+        const technician = await this.labTechnicianRepository.findOneBy({ email: normalizedEmail });
+        if (technician && technician.password === password) {
+          return {
+            id: technician.id,
+            name: technician.name,
+            email: technician.email,
+            role: 'labtech',
+            branchId: technician.branchId,
+          };
+        }
+      } catch (_) {}
+      return null;
     }
+
     const passwordMatches = user.password.startsWith('scrypt$')
       ? await this.verifyPassword(password, user.password)
       : user.password === password;
     if (!passwordMatches) return null;
 
     const { password: _password, ...safeUser } = user;
+    if (safeUser.role === Role.LABTECH) {
+      return {
+        id: safeUser.id,
+        name: safeUser.name,
+        email: safeUser.email,
+        role: 'labtech',
+        branchId: safeUser.branchId || DEFAULT_BRANCH_ID,
+      };
+    }
+
     if (safeUser.role !== 'patient') return safeUser;
 
     const patientProfile = this.patientsService.getPatientByUserId(safeUser.id);
@@ -477,6 +535,3 @@ export class UsersService implements OnModuleInit {
       && timingSafeEqual(storedHashBuffer, derivedHash);
   }
 }
-
-
-

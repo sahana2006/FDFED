@@ -244,6 +244,14 @@ export class AppointmentsService {
     );
   }
 
+  async getAppointmentById(appointmentId: string) {
+    const appointment = this.appointments.find((item) => item.id === appointmentId);
+    if (!appointment) {
+      return null;
+    }
+    return this.toAppointmentDetails(appointment);
+  }
+
   async completeAppointment(appointmentId: string) {
     const appointment = this.appointments.find((item) => item.id === appointmentId);
     if (!appointment) {

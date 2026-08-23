@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MEDBITS Branch Admin — Manage Lab Technicians in your branch">
+  <title>MEDBITS — Lab Technicians</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/branch-admin/global.css">
+  <link rel="stylesheet" href="../../css/branch-admin/lab-technicians.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">✚</span>
+    <span class="brand-name">MEDBITS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" data-page="dashboard"  href="dashboard.html"> <span class="nav-icon">⊞</span><span>Dashboard</span></a>
+    <a class="nav-item" data-page="doctors"    href="doctors.html">   <span class="nav-icon">🩺</span><span>Manage Doctors</span></a>
+    <a class="nav-item" data-page="frontdesk"  href="frontdesk.html"> <span class="nav-icon">🖥️</span><span>Manage Front Desk</span></a>
+    <a class="nav-item active" data-page="lab-technicians" href="lab-technicians.html"> <span class="nav-icon">🔬</span><span>Lab Technicians</span></a>
+    <a class="nav-item" data-page="leave-management" href="leave-management.html"> <span class="nav-icon">📅</span><span>Leave Management</span></a>
+  </nav>
+  <div class="sidebar-bottom">
+    <a class="nav-item logout-btn" id="logoutBtn">
+      <span class="nav-icon">⇥</span><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="main-wrap">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle">☰</button>
+      <div>
+        <div class="page-title" id="pageTitle">Lab Technicians</div>
+        <div class="page-sub" id="portalLabel">Branch Admin Portal</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="notif-btn" id="notifBtn">🔔</button>
+      <div class="user-chip">
+        <div class="user-avatar" id="userAvatarTop">BA</div>
+        <div>
+          <div class="user-name" id="userNameTop">Branch Admin</div>
+          <div class="user-role">Branch Admin</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- Page Header -->
+    <div class="page-header mb-16">
+      <div>
+        <h1 class="page-h1">Lab Technicians</h1>
+        <p class="text-muted">Manage lab technicians for your branch.</p>
+      </div>
+      <button class="btn btn-accent btn-lg" id="addTechnicianBtn">＋ Add Lab Technician</button>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar mb-16">
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="Search by name or email…" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Technicians</div>
+        <div class="stat-value" id="statTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Technicians</div>
+        <div class="stat-value" id="statActive">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Branch</div>
+        <div class="stat-value" id="statBranch" style="font-size:1.1rem;word-break:break-all;">—</div>
+      </div>
+    </div>
+
+    <!-- Lab Technicians Table -->
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">Lab Technicians List</div>
+        <span class="text-muted text-sm" id="resultCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table id="techniciansTable">
+          <thead>
+            <tr>
+              <th>Technician</th>
+              <th>Technician ID</th>
+              <th>Email</th>
+              <th>Branch</th>
+              <th>Status</th>
+              <th>Created Date</th>
+            </tr>
+          </thead>
+          <tbody id="techniciansBody">
+            <tr><td colspan="6" class="empty-state"><p>Loading lab technicians…</p></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/branch-admin/utils.js"></script>
+<script src="../../js/branch-admin/components.js"></script>
+<script src="../../js/branch-admin/lab-technicians.js"></script>
+</body>
+</html>

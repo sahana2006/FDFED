@@ -21,6 +21,7 @@ import { RequestContextMiddleware } from './common/request-context.middleware';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HospitalBranchModule } from './hospital-branch/hospital-branch.module';
 import { LabTechniciansModule } from './lab-technicians/lab-technicians.module';
+import { LabRequestsModule } from './lab-requests/lab-requests.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { SuperAdminDashboardModule } from './super-admin-dashboard/super-admin-dashboard.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -52,6 +53,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     NotificationsModule,
     HospitalBranchModule,
     LabTechniciansModule,
+    LabRequestsModule,
     DepartmentsModule,
     SuperAdminDashboardModule,
   ],

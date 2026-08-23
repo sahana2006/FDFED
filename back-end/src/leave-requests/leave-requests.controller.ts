@@ -24,10 +24,10 @@ import { CreateLeaveRequestDto, UpdateLeaveRequestStatusDto } from './dto/leave-
 export class LeaveRequestsController {
   constructor(private readonly leaveRequestsService: LeaveRequestsService) {}
 
-  @ApiOperation({ summary: 'Create a new leave request (Doctor)' })
+  @ApiOperation({ summary: 'Create a new leave request (Doctor or Lab Technician)' })
   @ApiBody({ type: CreateLeaveRequestDto })
   @ApiResponse({ status: 201, description: 'Leave request created' })
-  @Roles('doctor')
+  @Roles('doctor', 'labtech')
   @Post()
   createLeaveRequest(@Body() body: CreateLeaveRequestDto) {
     return this.leaveRequestsService.createLeaveRequest(
@@ -40,7 +40,7 @@ export class LeaveRequestsController {
 
   @ApiOperation({ summary: 'Get all leave requests' })
   @ApiResponse({ status: 200, description: 'List of all leave requests' })
-  @Roles('admin', 'branch_admin', 'doctor', 'frontdesk')
+  @Roles('admin', 'branch_admin', 'doctor', 'frontdesk', 'labtech')
   @Get()
   getLeaveRequests() {
     return this.leaveRequestsService.getAllRequests();

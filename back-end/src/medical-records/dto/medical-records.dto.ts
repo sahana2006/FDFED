@@ -12,6 +12,11 @@ export class CreateMedicalRecordDto {
   @IsNotEmpty()
   patientId!: string;
 
+  @ApiPropertyOptional({ example: 'Ria Sharma' })
+  @IsString()
+  @IsOptional()
+  patientName?: string;
+
   @ApiPropertyOptional({ example: 'consultation', enum: ['consultation', 'treatment', 'lab'] })
   @IsString()
   @IsIn(['consultation', 'treatment', 'lab'])
@@ -62,6 +67,11 @@ export class CreateMedicalRecordDto {
   @IsString()
   @IsOptional()
   tests?: string;
+
+  @ApiPropertyOptional({ example: '2026-05-12' })
+  @IsString()
+  @IsOptional()
+  labTestDate?: string;
 
   @ApiPropertyOptional({ example: 'Avoid spicy food' })
   @IsString()

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Account — MEDBITS Lab Technician</title>
+  <link rel="stylesheet" href="../../css/lab-technician/global.css"/>
+  <link rel="stylesheet" href="../../css/lab-technician/my-account.css"/>
+</head>
+<body data-page="my-account">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <!-- Profile Header Banner -->
+      <div class="account-header-card">
+        <div class="account-avatar" id="dispAvatar">--</div>
+        <div class="account-header-info">
+          <div class="account-name" id="dispHeaderName">Loading...</div>
+          <div style="font-size:.85rem;opacity:.85;" id="dispHeaderEmail">--</div>
+          <div class="account-role-badge">
+            <span>⚗</span>
+            <span id="dispHeaderRole">Lab Technician</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Alert Banner -->
+      <div class="card" style="padding:14px 18px;background:#f0f9ff;border-color:#bae6fd;margin-bottom:24px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:1.25rem;">🔒</span>
+        <div style="font-size:.85rem;color:#0369a1;">
+          <strong>Account Security:</strong> Your Lab Technician profile information is managed by your Branch Administrator and is presented in read-only mode.
+        </div>
+      </div>
+
+      <!-- Profile Details Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Technician Profile Details</span>
+        </div>
+
+        <div class="account-grid">
+          <div class="account-field">
+            <span class="account-field-label">Full Name</span>
+            <div class="account-field-value" id="dispName">—</div>
+          </div>
+
+          <div class="account-field">
+            <span class="account-field-label">Email Address</span>
+            <div class="account-field-value" id="dispEmail">—</div>
+          </div>
+
+          <div class="account-field">
+            <span class="account-field-label">Technician ID</span>
+            <div class="account-field-value" id="dispTechId" style="font-family:monospace;">—</div>
+          </div>
+
+          <div class="account-field">
+            <span class="account-field-label">System Role</span>
+            <div class="account-field-value">Lab Technician</div>
+          </div>
+
+          <div class="account-field">
+            <span class="account-field-label">Hospital Branch</span>
+            <div class="account-field-value" id="dispBranchName">—</div>
+          </div>
+
+          <div class="account-field">
+            <span class="account-field-label">Branch ID</span>
+            <div class="account-field-value" id="dispBranchId" style="font-family:monospace;">—</div>
+          </div>
+
+          <div class="account-field">
+            <span class="account-field-label">Department</span>
+            <div class="account-field-value">Clinical Pathology & Diagnostic Laboratory</div>
+          </div>
+
+          <div class="account-field">
+            <span class="account-field-label">Account Status</span>
+            <div class="account-field-value" style="color:#059669;display:flex;align-items:center;gap:6px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;"></span>
+              Active
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/lab-technician/components.js"></script>
+<script src="../../js/lab-technician/my-account.js"></script>
+</body>
+</html>

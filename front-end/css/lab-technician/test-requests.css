@@ -1,0 +1,101 @@
+/* ── MEDBITS Lab Technician test-requests.css ── */
+
+.tr-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.tr-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-muted);
+}
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: .6;
+}
+.empty-state-text {
+  font-size: .95rem;
+  font-weight: 500;
+}
+
+/* Detail Modal Styling */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.detail-section {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+}
+.detail-section-full {
+  grid-column: 1 / -1;
+}
+.detail-section-title {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: .875rem;
+}
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+.detail-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.detail-val {
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
+}
+.detail-box {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: .875rem;
+  color: var(--text);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
+  .tr-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-bar-shell {
+    max-width: 100%;
+  }
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

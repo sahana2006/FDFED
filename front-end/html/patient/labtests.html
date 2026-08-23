@@ -163,6 +163,21 @@
     <div id="modalContent"></div>
   </div>
 </div>
+
+<!-- Patient Lab Report Details Modal -->
+<div class="modal-overlay" id="patientReportModal" aria-hidden="true" style="position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;">
+  <div class="card" style="background:#fff;border-radius:12px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:0;margin:auto;">
+    <div style="padding:18px 24px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;">
+      <h3 style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;margin:0;">Diagnostic Lab Report</h3>
+      <button type="button" id="closePatientReportModal" style="font-size:1.4rem;border:none;background:none;cursor:pointer;color:#64748b;line-height:1;">&times;</button>
+    </div>
+    <div id="patientReportModalBody" style="padding:24px;"></div>
+    <div style="padding:16px 24px;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:12px;background:#f8fafc;border-bottom-left-radius:12px;border-bottom-right-radius:12px;">
+      <button type="button" class="btn btn-outline" id="dismissPatientReportModal">Close</button>
+      <button type="button" class="btn btn-primary" id="printPatientReportBtn">Print Report</button>
+    </div>
+  </div>
+</div>
 <div class="toast-container" id="toastContainer"></div>
 
 <script src="../../js/patient/utils.js"></script>

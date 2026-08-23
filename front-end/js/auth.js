@@ -22,6 +22,7 @@ function redirectByRole(user) {
     patient: 'patient/dashboard.html',
     doctor: 'doctor/dashboard.html',
     frontdesk: 'front-desk/dashboard.html',
+    labtech: 'lab-technician/dashboard.html',
   };
 
   const route = routes[user.role];
