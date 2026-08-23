@@ -43,7 +43,7 @@ function setupEventListeners() {
 async function loadTechnicians() {
   const tbody = $('techniciansBody');
   if (tbody) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><p>Loading lab technicians…</p></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Loading lab technicians…</p></td></tr>';
   }
 
   try {
@@ -55,7 +55,7 @@ async function loadTechnicians() {
     renderTable();
   } catch (error) {
     if (tbody) {
-      tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><p style="color:var(--red);">${escapeHtml(error.message || 'Failed to load technicians.')}</p></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><p style="color:var(--red);">${escapeHtml(error.message || 'Failed to load technicians.')}</p></td></tr>`;
     }
     showToast(error.message || 'Could not load lab technicians', 'error');
   }
@@ -80,7 +80,7 @@ function renderTable() {
   if (!tbody) return;
 
   if (!filteredTechnicians.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><p>No lab technicians found.</p></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No lab technicians found.</p></td></tr>';
     return;
   }
 
@@ -100,53 +100,114 @@ function renderTable() {
               </div>
             </div>
           </td>
-          <td><span style="font-family:monospace;font-size:12px;color:var(--text-muted);">${escapeHtml(tech.id)}</span></td>
           <td>${escapeHtml(tech.email)}</td>
-          <td><span style="font-size:12.5px;color:var(--text-muted);">${escapeHtml(tech.branchId)}</span></td>
           <td><span class="badge badge-active">Active</span></td>
           <td><span style="white-space:nowrap;font-size:12.5px;color:var(--text-muted);">${escapeHtml(createdStr)}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-icon" title="View" onclick="openViewModal('${escapeHtml(tech.id)}')">👁</button>
+              <button class="btn-icon" title="Edit" onclick="openEditModal('${escapeHtml(tech.id)}')">✏️</button>
+              <button class="btn-icon" title="Remove" onclick="deleteTechnician('${escapeHtml(tech.id)}')">🗑️</button>
+            </div>
+          </td>
         </tr>
       `;
     })
     .join('');
 }
 
-function openAddModal() {
-  const modalHtml = `
-    <div class="modal-header">
-      <div class="modal-title">Add Lab Technician</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <form id="addTechnicianForm" onsubmit="event.preventDefault(); submitCreateTechnician();">
-        <div class="form-group">
-          <label class="form-label required">Full Name</label>
-          <input type="text" id="techName" class="form-control" placeholder="e.g. John Doe" required autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label class="form-label required">Email Address</label>
-          <input type="email" id="techEmail" class="form-control" placeholder="e.g. johndoe@medbits.com" required autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label class="form-label required">Password</label>
-          <input type="password" id="techPassword" class="form-control" placeholder="Minimum 6 characters" required autocomplete="new-password">
-          <div class="form-help-text">Choose a secure password for the technician login.</div>
-        </div>
-      </form>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
-      <button type="button" class="btn btn-accent" id="submitTechBtn" onclick="submitCreateTechnician()">Create Lab Technician</button>
-    </div>
-  `;
 
-  openModal(modalHtml);
+function buildModalForm(tech = null) {
+  const isEdit = !!tech;
+  return `
+    <div class="modal-title">${isEdit ? '✏️ Edit Lab Technician' : '➕ Add Lab Technician'}</div>
+    <form id="addTechnicianForm" onsubmit="submitTechnicianForm(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="techName">Full Name *</label>
+          <input type="text" id="techName" required placeholder="e.g. John Doe" autocomplete="off" value="${escapeHtml(tech?.name || '')}">
+        </div>
+        <div class="form-group">
+          <label for="techEmail">Email Address *</label>
+          <input type="email" id="techEmail" required placeholder="e.g. johndoe@medbits.com" autocomplete="off" value="${escapeHtml(tech?.email || '')}" ${isEdit ? 'disabled title="Email cannot be changed easily"' : ''}>
+        </div>
+        ${!isEdit ? `
+        <div class="form-group">
+          <label for="techPassword">Password *</label>
+          <input type="password" id="techPassword" required placeholder="Minimum 6 characters" minlength="6" autocomplete="new-password">
+        </div>
+        <div></div>
+        ` : ''}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-accent" id="submitTechBtn">
+          ${isEdit ? '💾 Save Changes' : '➕ Add Lab Technician'}
+        </button>
+      </div>
+    </form>
+  `;
 }
 
-async function submitCreateTechnician() {
+function openAddModal() {
+  currentEditId = null;
+  openModal(buildModalForm(null));
+}
+
+function openEditModal(techId) {
+  const tech = allTechnicians.find(t => t.id === techId);
+  if (!tech) {
+    showToast('Lab Technician not found', 'error');
+    return;
+  }
+  currentEditId = techId;
+  openModal(buildModalForm(tech));
+}
+
+function openViewModal(techId) {
+  const tech = allTechnicians.find(t => t.id === techId);
+  if (!tech) { showToast('Lab Technician not found', 'error'); return; }
+
+  const createdStr = tech.createdAt ? formatDate(tech.createdAt.split('T')[0]) : '—';
+  
+  openModal(`
+    <div class="modal-title">🔬 Lab Technician Profile</div>
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+      <div class="lt-profile-avatar" style="width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 20px; font-weight: 700;">
+        ${escapeHtml(getInitials(tech.name))}
+      </div>
+      <div>
+        <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:700">${escapeHtml(tech.name || '—')}</div>
+        <div class="text-muted">Lab Technician · ${escapeHtml(tech.id)}</div>
+      </div>
+    </div>
+    <div style="height: 1px; background: var(--border); margin-bottom: 24px;"></div>
+    <div class="detail-grid">
+      ${detailItem('Email', tech.email)}
+      ${detailItem('Branch ID', tech.branchId)}
+      ${detailItem('Status', 'Active')}
+      ${detailItem('Created Date', createdStr)}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Close</button>
+      <button class="btn btn-accent" onclick="closeModal(); openEditModal('${escapeHtml(techId)}')">Edit</button>
+    </div>
+  `);
+}
+
+function detailItem(label, value) {
+  return `
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">${escapeHtml(label)}</span>
+      <span style="font-size: 14.5px; font-weight: 500; color: var(--text);">${escapeHtml(String(value ?? '—'))}</span>
+    </div>`;
+}
+
+async function submitTechnicianForm(e) {
+  e.preventDefault();
   const name = val('techName');
   const email = val('techEmail');
-  const password = val('techPassword');
+  const password = currentEditId ? null : val('techPassword');
 
   if (!name) {
     showToast('Name is required', 'warning');
@@ -160,7 +221,7 @@ async function submitCreateTechnician() {
     return;
   }
 
-  if (!password || password.length < 6) {
+  if (!currentEditId && (!password || password.length < 6)) {
     showToast('Password must be at least 6 characters', 'warning');
     $('techPassword')?.focus();
     return;
@@ -169,31 +230,53 @@ async function submitCreateTechnician() {
   const submitBtn = $('submitTechBtn');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Creating…';
+    submitBtn.textContent = 'Saving…';
   }
 
   try {
-    const created = await apiRequest('/lab-technicians', {
-      method: 'POST',
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-      }),
-    });
-
-    showToast(`Lab Technician "${created.name}" created successfully.`, 'success');
+    if (currentEditId) {
+      await apiRequest('/lab-technicians/' + currentEditId, {
+        method: 'PUT',
+        body: JSON.stringify({ name, email }),
+      });
+      showToast('Lab Technician updated successfully.', 'success');
+    } else {
+      await apiRequest('/lab-technicians', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password }),
+      });
+      showToast('Lab Technician created successfully.', 'success');
+    }
+    
     closeModal();
     await loadTechnicians();
   } catch (error) {
-    showToast(error.message || 'Failed to create lab technician', 'error');
+    showToast(error.message || 'Operation failed', 'error');
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Create Lab Technician';
+      submitBtn.textContent = currentEditId ? 'Save Changes' : 'Create Lab Technician';
     }
   }
 }
+
+function deleteTechnician(techId) {
+  confirmAction(
+    'Remove Lab Technician',
+    'Are you sure you want to remove this lab technician?',
+    'Remove Technician',
+    async () => {
+      try {
+        await apiRequest('/lab-technicians/' + techId, { method: 'DELETE' });
+        showToast('Lab Technician removed successfully', 'success');
+        await loadTechnicians();
+      } catch (err) {
+        showToast(err.message || 'Failed to remove lab technician', 'error');
+      }
+    }
+  );
+}
+
 
 function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -206,4 +289,8 @@ function getInitials(str) {
     .map((w) => w[0]?.toUpperCase() || '')
     .slice(0, 2)
     .join('') || 'LT';
+}
+
+function handleOverlayClick(e) {
+  if (e.target.id === 'modalOverlay') closeModal();
 }

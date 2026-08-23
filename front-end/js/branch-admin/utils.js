@@ -133,6 +133,27 @@ function closeModal() {
   currentEditId = null;
 }
 
+function confirmAction(title, message, confirmText, onConfirm) {
+  window.__confirmCallback = function() {
+    closeModal();
+    if (typeof onConfirm === 'function') onConfirm();
+  };
+  
+  const html = `
+    <div class="modal-title" style="color: var(--red); display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 24px;">⚠️</span> ${escapeHtml(title)}
+    </div>
+    <div style="margin-bottom: 24px; font-size: 15px; color: var(--text); line-height: 1.5;">
+      ${escapeHtml(message)}
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button type="button" class="btn btn-red" onclick="window.__confirmCallback()">${escapeHtml(confirmText)}</button>
+    </div>
+  `;
+  openModal(html);
+}
+
 // ── TOPBAR USER ────────────────────────────────────────────
 function updateTopbarUser() {
   const session = getSession();

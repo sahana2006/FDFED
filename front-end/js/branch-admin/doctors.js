@@ -371,16 +371,21 @@ async function submitDoctorForm(e) {
 }
 
 // ── DELETE ─────────────────────────────────────────────────
-async function deleteDoctor(doctorId) {
-  if (!confirm('Are you sure you want to remove this doctor from the branch? Historical records will be kept.')) return;
-  
-  try {
-    await apiRequest(`/doctors/${doctorId}`, { method: 'DELETE' });
-    showToast('Doctor removed successfully', 'success');
-    await fetchDoctors();
-  } catch (err) {
-    showToast(err.message || 'Failed to remove doctor', 'error');
-  }
+function deleteDoctor(doctorId) {
+  confirmAction(
+    'Remove Doctor',
+    'Are you sure you want to remove this doctor from the branch? Historical records will be kept.',
+    'Remove Doctor',
+    async () => {
+      try {
+        await apiRequest(`/doctors/${doctorId}`, { method: 'DELETE' });
+        showToast('Doctor removed successfully', 'success');
+        await fetchDoctors();
+      } catch (err) {
+        showToast(err.message || 'Failed to remove doctor', 'error');
+      }
+    }
+  );
 }
 
 // ── HELPERS ────────────────────────────────────────────────

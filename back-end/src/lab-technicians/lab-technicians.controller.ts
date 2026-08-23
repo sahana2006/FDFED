@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, ForbiddenException, Get, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, Get, Post, Put, Delete, Param, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { isBranchAdminRole } from '../common/branch-request-context';
 import { RequestContextService } from '../common/request-context.service';
@@ -51,5 +51,30 @@ export class LabTechniciansController {
       password: body.password,
       branchId: scopedBranchId ?? body.branchId,
     });
+  }
+
+  @Put(':id')
+  @Roles('admin')
+  @ApiOperation({ summary: 'Update a lab technician account' })
+  @ApiResponse({ status: 200, description: 'Lab technician updated' })
+  update(@Param('id') id: string, @Body() body: any) {
+    const context = this.requestContextService.getContext();
+    const scopedBranchId = context?.branchId;
+    
+    // Pass the logic to service
+    const updateData = { ...body };
+    if (isBranchAdminRole(context?.role) && scopedBranchId) {
+      updateData.branchId = scopedBranchId; // lock to branch
+    }
+    
+    return this.labTechniciansService.update(id, updateData);
+  }
+
+  @Delete(':id')
+  @Roles('admin')
+  @ApiOperation({ summary: 'Delete a lab technician account' })
+  @ApiResponse({ status: 200, description: 'Lab technician deleted' })
+  remove(@Param('id') id: string) {
+    return this.labTechniciansService.remove(id);
   }
 }

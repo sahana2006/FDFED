@@ -73,8 +73,9 @@
     "date": "2026-08-26",
     "type": "Casual",
     "reason": "Requested via portal",
-    "status": "pending",
-    "createdAt": "2026-08-07T07:27:07.287Z"
+    "status": "rejected",
+    "createdAt": "2026-08-07T07:27:07.287Z",
+    "actionedOn": "Aug 23, 2026, 04:29 PM"
   },
   {
     "id": "LR1787419531780",

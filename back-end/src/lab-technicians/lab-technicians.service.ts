@@ -196,4 +196,70 @@ export class LabTechniciansService implements OnModuleInit {
     } catch (_) {}
     throw new NotFoundException('Lab technician not found');
   }
+
+  async update(id: string, input: any): Promise<{ id: string; name: string; email: string; role: 'labtech'; branchId: string }> {
+    const existingIndex = this.inMemoryLabTechnicians.findIndex((t) => t.id === id);
+    if (existingIndex === -1) {
+      throw new NotFoundException('Lab technician not found');
+    }
+    
+    const existing = this.inMemoryLabTechnicians[existingIndex];
+    let newEmail = existing.email;
+    
+    if (input.email) {
+      newEmail = input.email.trim().toLowerCase();
+      if (newEmail !== existing.email) {
+        const emailExists = this.inMemoryLabTechnicians.find(t => t.email.toLowerCase() === newEmail && t.id !== id);
+        if (emailExists) {
+          throw new ConflictException('A lab technician with this email already exists');
+        }
+      }
+    }
+
+    const updatedRecord: LabTechnicianRecord = {
+      ...existing,
+      name: input.name ? input.name.trim() : existing.name,
+      email: newEmail,
+    };
+    if (input.password) {
+      updatedRecord.password = input.password;
+    }
+    if (input.branchId) {
+      updatedRecord.branchId = input.branchId;
+    }
+
+    try {
+      const dbTech = await this.labTechnicianRepository.findOneBy({ id });
+      if (dbTech) {
+        if (input.name) dbTech.name = input.name.trim();
+        if (input.email) dbTech.email = newEmail;
+        if (input.password) dbTech.password = input.password;
+        if (input.branchId) dbTech.branchId = input.branchId;
+        await this.labTechnicianRepository.save(dbTech);
+      }
+    } catch (_) {}
+
+    this.inMemoryLabTechnicians[existingIndex] = updatedRecord;
+
+    return {
+      id: updatedRecord.id,
+      name: updatedRecord.name,
+      email: updatedRecord.email,
+      role: 'labtech',
+      branchId: updatedRecord.branchId,
+    };
+  }
+
+  async remove(id: string): Promise<void> {
+    const existingIndex = this.inMemoryLabTechnicians.findIndex((t) => t.id === id);
+    if (existingIndex === -1) {
+      throw new NotFoundException('Lab technician not found');
+    }
+
+    try {
+      await this.labTechnicianRepository.delete(id);
+    } catch (_) {}
+
+    this.inMemoryLabTechnicians.splice(existingIndex, 1);
+  }
 }

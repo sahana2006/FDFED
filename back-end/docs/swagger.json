@@ -2765,6 +2765,88 @@
         ]
       }
     },
+    "/lab-technicians/{id}": {
+      "put": {
+        "operationId": "LabTechniciansController_update",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Required for branch_admin scoping",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin, branch_admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lab technician updated"
+          }
+        },
+        "summary": "Update a lab technician account",
+        "tags": [
+          "Lab Technicians"
+        ]
+      },
+      "delete": {
+        "operationId": "LabTechniciansController_remove",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Required for branch_admin scoping",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin, branch_admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lab technician deleted"
+          }
+        },
+        "summary": "Delete a lab technician account",
+        "tags": [
+          "Lab Technicians"
+        ]
+      }
+    },
     "/queue": {
       "post": {
         "operationId": "QueueController_createQueueToken",

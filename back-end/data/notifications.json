@@ -38,5 +38,13 @@
     "type": "success",
     "read": false,
     "createdAt": "2026-08-22T20:22:45.344Z"
+  },
+  {
+    "id": "NOTIF1787482791754954",
+    "userId": "DOC001",
+    "message": "Your leave request for August 26, 2026 has been REJECTED.",
+    "type": "error",
+    "read": false,
+    "createdAt": "2026-08-23T10:59:51.754Z"
   }
 ]

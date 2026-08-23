@@ -327,16 +327,21 @@ async function submitFDForm(e) {
 }
 
 // ── DELETE ─────────────────────────────────────────────────
-async function deleteFrontdesk(userId) {
-  if (!confirm('Are you sure you want to remove this staff member from the branch? Historical records will be kept.')) return;
-  
-  try {
-    await apiRequest(`/frontdesk/${userId}`, { method: 'DELETE' });
-    showToast('Staff removed successfully', 'success');
-    await fetchFrontDesk();
-  } catch (err) {
-    showToast(err.message || 'Failed to remove staff', 'error');
-  }
+function deleteFrontdesk(userId) {
+  confirmAction(
+    'Remove Front Desk Staff',
+    'Are you sure you want to remove this staff member from the branch? Historical records will be kept.',
+    'Remove Staff',
+    async () => {
+      try {
+        await apiRequest(`/frontdesk/${userId}`, { method: 'DELETE' });
+        showToast('Staff removed successfully', 'success');
+        await fetchFrontDesk();
+      } catch (err) {
+        showToast(err.message || 'Failed to remove staff', 'error');
+      }
+    }
+  );
 }
 
 // ── HELPERS ────────────────────────────────────────────────

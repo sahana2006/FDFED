@@ -79,10 +79,6 @@
         <div class="stat-label">Active Technicians</div>
         <div class="stat-value" id="statActive">—</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Branch</div>
-        <div class="stat-value" id="statBranch" style="font-size:1.1rem;word-break:break-all;">—</div>
-      </div>
     </div>
 
     <!-- Lab Technicians Table -->
@@ -96,15 +92,14 @@
           <thead>
             <tr>
               <th>Technician</th>
-              <th>Technician ID</th>
               <th>Email</th>
-              <th>Branch</th>
               <th>Status</th>
               <th>Created Date</th>
+              <th style="width:100px;">Actions</th>
             </tr>
           </thead>
           <tbody id="techniciansBody">
-            <tr><td colspan="6" class="empty-state"><p>Loading lab technicians…</p></td></tr>
+            <tr><td colspan="5" class="empty-state"><p>Loading lab technicians…</p></td></tr>
           </tbody>
         </table>
       </div>
@@ -114,9 +109,10 @@
 </div>
 
 <!-- Modal Overlay -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modalContent">
-    <!-- Populated by JS -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
   </div>
 </div>
 
