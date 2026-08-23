@@ -50,8 +50,27 @@ button { cursor: pointer; font-family: inherit; }
 input, select, textarea { font-family: inherit; }
 
 /* ── LAYOUT ── */
-.main-wrap  { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-.content    { flex: 1; padding: 28px; animation: fadeIn .3s ease; }
+.main-wrap {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-width: 0;
+  max-width: calc(100vw - var(--sidebar-w));
+  width: calc(100% - var(--sidebar-w));
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+.content {
+  flex: 1;
+  padding: 28px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  animation: fadeIn .3s ease;
+}
 @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
 /* ── SIDEBAR ── */
@@ -115,11 +134,14 @@ input, select, textarea { font-family: inherit; }
   padding: 0 24px;
   position: sticky; top: 0; z-index: 100;
   box-shadow: 0 1px 8px rgba(12,74,110,.06);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
-.topbar-left  { display: flex; align-items: center; gap: 14px; }
-.topbar-right { display: flex; align-items: center; gap: 14px; }
-.page-title   { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; }
-.page-sub     { font-size: 12px; color: var(--text-muted); }
+.topbar-left  { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.topbar-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.page-title   { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; white-space: nowrap; }
+.page-sub     { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 .menu-toggle  { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); display: none; }
 .notif-btn    { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); }
 .notif-btn:hover { color: var(--accent); }
@@ -132,8 +154,8 @@ input, select, textarea { font-family: inherit; }
   font-size: 13px; font-weight: 700;
   font-family: 'Sora', sans-serif;
 }
-.user-name    { font-size: 13.5px; font-weight: 600; }
-.user-role    { font-size: 11.5px; color: var(--text-muted); }
+.user-name    { font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+.user-role    { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; }
 
 /* ── CARD ── */
 .card {
@@ -142,6 +164,9 @@ input, select, textarea { font-family: inherit; }
   padding: 24px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
 .section-title  { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 700; }
@@ -205,8 +230,11 @@ input, select, textarea { font-family: inherit; }
 /* ── TABLE ── */
 .table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 table {
   width: 100%; border-collapse: collapse;
@@ -360,13 +388,23 @@ textarea { resize: vertical; min-height: 80px; }
 @keyframes toastOut { to   { opacity:0; transform:translateY(10px); } }
 
 /* ── STAT CARDS ── */
-.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
 .stat-card {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px 22px;
   box-shadow: var(--shadow);
+  min-width: 0;
+  box-sizing: border-box;
 }
 .stat-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
 .stat-value { font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 700; color: var(--navy); margin: 6px 0 2px; }
