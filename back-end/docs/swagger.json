@@ -2043,6 +2043,728 @@
         ]
       }
     },
+    "/lab-requests": {
+      "get": {
+        "operationId": "LabRequestsController_findForTechnician",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in lab technician ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Branch-scoped lab requests"
+          }
+        },
+        "summary": "List lab requests for the logged-in technician branch",
+        "tags": [
+          "Lab Requests"
+        ]
+      }
+    },
+    "/lab-requests/patient": {
+      "get": {
+        "operationId": "LabRequestsController_findForPatient",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in lab technician ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Patient lab requests"
+          }
+        },
+        "summary": "List lab requests for the authenticated patient",
+        "tags": [
+          "Lab Requests"
+        ]
+      }
+    },
+    "/lab-requests/{id}": {
+      "get": {
+        "operationId": "LabRequestsController_findOne",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in lab technician ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Lab request ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lab request details"
+          }
+        },
+        "summary": "Get a branch-scoped lab request by ID",
+        "tags": [
+          "Lab Requests"
+        ]
+      }
+    },
+    "/lab-requests/{id}/accept": {
+      "patch": {
+        "operationId": "LabRequestsController_accept",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in lab technician ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Lab request ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lab request accepted"
+          }
+        },
+        "summary": "Accept a lab request",
+        "tags": [
+          "Lab Requests"
+        ]
+      }
+    },
+    "/lab-requests/{id}/reject": {
+      "patch": {
+        "operationId": "LabRequestsController_reject",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in lab technician ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Lab request ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lab request rejected"
+          }
+        },
+        "summary": "Reject a lab request",
+        "tags": [
+          "Lab Requests"
+        ]
+      }
+    },
+    "/lab-requests/{id}/start": {
+      "patch": {
+        "operationId": "LabRequestsController_start",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in lab technician ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Lab request ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lab request marked in progress"
+          }
+        },
+        "summary": "Start processing a lab request",
+        "tags": [
+          "Lab Requests"
+        ]
+      }
+    },
+    "/lab-requests/{id}/report": {
+      "get": {
+        "operationId": "LabRequestsController_getReport",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in lab technician ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Lab request ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lab report details"
+          }
+        },
+        "summary": "Get lab report for a lab request",
+        "tags": [
+          "Lab Requests"
+        ]
+      }
+    },
+    "/lab-requests/{id}/report/draft": {
+      "patch": {
+        "operationId": "LabRequestsController_saveDraft",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in lab technician ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Lab request ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveLabReportDraftDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Draft lab report saved"
+          }
+        },
+        "summary": "Save draft lab report",
+        "tags": [
+          "Lab Requests"
+        ]
+      }
+    },
+    "/lab-requests/{id}/report/submit": {
+      "patch": {
+        "operationId": "LabRequestsController_submit",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in lab technician ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Lab request ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitLabReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Lab report submitted and request completed"
+          }
+        },
+        "summary": "Submit final lab report",
+        "tags": [
+          "Lab Requests"
+        ]
+      }
+    },
+    "/lab-reports": {
+      "get": {
+        "operationId": "LabReportsController_findAll",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in user ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech, doctor, patient)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Branch-scoped lab reports"
+          }
+        },
+        "summary": "List all lab reports for the logged-in technician branch",
+        "tags": [
+          "Lab Reports"
+        ]
+      }
+    },
+    "/lab-reports/doctor": {
+      "get": {
+        "operationId": "LabReportsController_findForDoctor",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in user ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech, doctor, patient)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor requested submitted lab reports"
+          }
+        },
+        "summary": "List all submitted lab reports requested by the logged-in doctor",
+        "tags": [
+          "Lab Reports"
+        ]
+      }
+    },
+    "/lab-reports/patient": {
+      "get": {
+        "operationId": "LabReportsController_findForPatient",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in user ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech, doctor, patient)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Patient submitted lab reports"
+          }
+        },
+        "summary": "List all submitted lab reports for the logged-in patient",
+        "tags": [
+          "Lab Reports"
+        ]
+      }
+    },
+    "/lab-reports/{id}": {
+      "get": {
+        "operationId": "LabReportsController_findOne",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in user ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech, doctor, patient)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Lab report ID or lab request ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lab report details"
+          }
+        },
+        "summary": "Get a specific lab report by ID with role-based authorization",
+        "tags": [
+          "Lab Reports"
+        ]
+      }
+    },
+    "/lab-technicians": {
+      "get": {
+        "operationId": "LabTechniciansController_findAll",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Required for branch_admin scoping",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin, branch_admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of lab technicians"
+          }
+        },
+        "summary": "List branch-scoped lab technicians",
+        "tags": [
+          "Lab Technicians"
+        ]
+      },
+      "post": {
+        "operationId": "LabTechniciansController_create",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Required for branch_admin scoping",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin, branch_admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLabTechnicianDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lab technician created"
+          }
+        },
+        "summary": "Create a branch-scoped lab technician account",
+        "tags": [
+          "Lab Technicians"
+        ]
+      }
+    },
     "/queue": {
       "post": {
         "operationId": "QueueController_createQueueToken",
@@ -2576,7 +3298,7 @@
             "description": "Leave request created"
           }
         },
-        "summary": "Create a new leave request (Doctor)",
+        "summary": "Create a new leave request (Doctor or Lab Technician)",
         "tags": [
           "Leave Requests"
         ]
@@ -2746,41 +3468,6 @@
         "summary": "Mark a notification as read",
         "tags": [
           "Notifications"
-        ]
-      }
-    },
-    "/lab-technicians": {
-      "post": {
-        "operationId": "LabTechniciansController_create",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role for RBAC (admin)",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateLabTechnicianDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Lab technician created"
-          }
-        },
-        "summary": "Create a branch-scoped lab technician account",
-        "tags": [
-          "Lab Technicians"
         ]
       }
     },
@@ -3341,6 +4028,10 @@
             "type": "string",
             "example": "PAT001"
           },
+          "patientName": {
+            "type": "string",
+            "example": "Ria Sharma"
+          },
           "type": {
             "type": "string",
             "example": "consultation",
@@ -3385,6 +4076,10 @@
           "tests": {
             "type": "string",
             "example": "ECG"
+          },
+          "labTestDate": {
+            "type": "string",
+            "example": "2026-05-12"
           },
           "lifestyle": {
             "type": "string",
@@ -3626,6 +4321,97 @@
         },
         "required": [
           "date"
+        ]
+      },
+      "FileAttachmentDto": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "example": "detailed_blood_report.pdf"
+          },
+          "fileType": {
+            "type": "string",
+            "example": "application/pdf"
+          },
+          "fileSize": {
+            "type": "number",
+            "example": 10240
+          },
+          "fileData": {
+            "type": "string",
+            "example": "data:application/pdf;base64,..."
+          }
+        }
+      },
+      "SaveLabReportDraftDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "example": "Hemoglobin: 13.5 g/dL, Platelets: 250,000 /mcL"
+          },
+          "findings": {
+            "type": "string",
+            "example": "All cell lines within normal limits."
+          },
+          "remarks": {
+            "type": "string",
+            "example": "Routine sample, no hemolysis."
+          },
+          "fileAttachment": {
+            "$ref": "#/components/schemas/FileAttachmentDto"
+          }
+        }
+      },
+      "SubmitLabReportDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "example": "Hemoglobin: 13.5 g/dL, Platelets: 250,000 /mcL"
+          },
+          "findings": {
+            "type": "string",
+            "example": "All cell lines within normal limits."
+          },
+          "remarks": {
+            "type": "string",
+            "example": "Routine sample, no hemolysis."
+          },
+          "fileAttachment": {
+            "$ref": "#/components/schemas/FileAttachmentDto"
+          }
+        },
+        "required": [
+          "result"
+        ]
+      },
+      "CreateLabTechnicianDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Anita Rao"
+          },
+          "email": {
+            "type": "string",
+            "example": "anita.rao@apollo.example"
+          },
+          "password": {
+            "type": "string",
+            "example": "secure-password"
+          },
+          "branchId": {
+            "type": "string",
+            "description": "Hospital branch UUID. Ignored for branch admin requests."
+          }
+        },
+        "required": [
+          "name",
+          "email",
+          "password",
+          "branchId"
         ]
       },
       "CreateQueueDto": {
@@ -3900,33 +4686,6 @@
         },
         "required": [
           "status"
-        ]
-      },
-      "CreateLabTechnicianDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Anita Rao"
-          },
-          "email": {
-            "type": "string",
-            "example": "anita.rao@apollo.example"
-          },
-          "password": {
-            "type": "string",
-            "example": "secure-password"
-          },
-          "branchId": {
-            "type": "string",
-            "description": "Hospital branch UUID"
-          }
-        },
-        "required": [
-          "name",
-          "email",
-          "password",
-          "branchId"
         ]
       },
       "CreateDepartmentDto": {

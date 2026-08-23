@@ -1,0 +1,30 @@
+/* ── MEDBITS branch-admin lab-technicians.css ── */
+
+.lt-avatar {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+}
+
+.lt-profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Sora', sans-serif;
+  flex-shrink: 0;
+}
+
+.badge-active {
+  background: var(--green-light);
+  color: #065f46;
+}
+
+.form-help-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}

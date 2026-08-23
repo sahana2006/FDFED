@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lab Reports — MEDBITS Lab Technician</title>
+  <link rel="stylesheet" href="../../css/lab-technician/global.css"/>
+  <link rel="stylesheet" href="../../css/lab-technician/lab-reports.css"/>
+  <style>
+    .patient-summary-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      font-size: 0.86rem;
+    }
+    .ps-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .ps-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .ps-value {
+      font-weight: 600;
+      color: var(--text);
+    }
+    .file-dropzone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      text-align: center;
+      background: #fafafa;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 6px;
+    }
+    .file-dropzone:hover {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+    .attached-file-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: var(--radius-sm);
+      margin-top: 8px;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body data-page="lab-reports">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <!-- Top Toolbar: Search & Filter Tabs -->
+      <div class="card">
+        <div class="lr-toolbar">
+          <div class="search-bar-shell">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="search-input" id="searchReportInput" placeholder="Search by patient, doctor, test, or report ID..." autocomplete="off"/>
+          </div>
+
+          <div class="filter-group" id="reportStatusFilterGroup">
+            <button type="button" class="filter-btn active" data-tab="to_report">InProgress Reporting</button>
+            <button type="button" class="filter-btn" data-tab="submitted">Submitted Reports</button>
+            <button type="button" class="filter-btn" data-tab="all">All Items</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reports List Table Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" id="reportsSectionTitle">InProgress Lab Reports</span>
+          <span style="font-size:.82rem;color:var(--text-muted);" id="reportsCountBadge">0 items</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Test Name</th>
+                <th>Prescribed By</th>
+                <th>Appointment</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="reportsTableBody">
+              <tr>
+                <td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Loading laboratory items...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Send / Create Lab Report Modal -->
+<div class="modal-overlay" id="sendReportModal" aria-hidden="true">
+  <div class="modal-dialog" style="max-width:720px;max-height:92vh;overflow-y:auto;">
+    <div class="modal-header">
+      <h3 class="modal-title">Send Diagnostic Lab Report</h3>
+      <button type="button" class="modal-close-btn" id="sendReportCloseBtn">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:20px 24px;">
+
+      <!-- Patient Summary Section -->
+      <div class="patient-summary-box" id="sendModalPatientSummary">
+        <!-- Injected via JS -->
+      </div>
+
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:10px 14px;margin-bottom:18px;font-size:0.82rem;color:#1e40af;">
+        ℹ️ Once submitted, this report will be immediately sent and accessible to both the <strong>Patient</strong> and the prescribing <strong>Doctor</strong>.
+      </div>
+
+      <!-- Report Findings Form -->
+      <form id="sendReportForm">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" for="reportResultInput" style="display:block;font-weight:700;font-size:0.86rem;margin-bottom:4px;">
+            Diagnostic Result & Measured Values <span style="color:var(--red);">*</span>
+          </label>
+          <textarea class="form-textarea" id="reportResultInput" rows="3" placeholder="Enter specific diagnostic findings and test values (e.g. Hemoglobin: 13.8 g/dL, Platelets: 250,000 /mcL, Glucose: 95 mg/dL)..." required style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.88rem;"></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" for="reportFindingsInput" style="display:block;font-weight:700;font-size:0.86rem;margin-bottom:4px;">
+            Clinical Findings & Observations
+          </label>
+          <textarea class="form-textarea" id="reportFindingsInput" rows="2" placeholder="Clinical interpretation or pathologist notes..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.88rem;"></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" for="reportRemarksInput" style="display:block;font-weight:700;font-size:0.86rem;margin-bottom:4px;">
+            Remarks & Recommendations
+          </label>
+          <textarea class="form-textarea" id="reportRemarksInput" rows="2" placeholder="Recommendations or follow-up notes..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:0.88rem;"></textarea>
+        </div>
+
+        <!-- File Attachment Section -->
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" style="display:block;font-weight:700;font-size:0.86rem;margin-bottom:4px;">
+            Attach Detailed Report File (Optional)
+          </label>
+          <input type="file" id="reportFileInput" accept=".pdf,.txt,.doc,.docx,.png,.jpg,.jpeg" style="display:none;"/>
+          <div class="file-dropzone" id="fileDropzoneTrigger">
+            <div style="font-size:1.5rem;margin-bottom:4px;">📄</div>
+            <div style="font-size:0.86rem;font-weight:600;color:var(--accent);">Click to select detailed report file (PDF, TXT, DOCX, Image)</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">Attach a comprehensive lab file report</div>
+          </div>
+          <div id="attachedFileContainer" style="display:none;"></div>
+        </div>
+      </form>
+
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:space-between;">
+      <button type="button" class="btn btn-outline" id="sendReportDismissBtn">Cancel</button>
+      <div style="display:flex;gap:8px;">
+        <button type="button" class="btn btn-outline" id="btnSaveDraftReport">Save Draft</button>
+        <button type="button" class="btn btn-primary" id="btnConfirmSendReport">Send Lab Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Report Preview Modal -->
+<div class="modal-overlay" id="reportPreviewModal" aria-hidden="true">
+  <div class="modal-dialog report-paper">
+    <div class="modal-header">
+      <h3 class="modal-title">Diagnostic Lab Report</h3>
+      <button type="button" class="modal-close-btn" id="previewModalCloseBtn">&times;</button>
+    </div>
+    <div class="modal-body" id="previewModalBody">
+      <!-- Injected via JavaScript -->
+    </div>
+    <div class="modal-footer" id="previewModalFooter">
+      <button type="button" class="btn btn-outline" id="previewDismissBtn">Close</button>
+      <button type="button" class="btn btn-primary" id="btnPrintReport">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print Report
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/lab-technician/components.js"></script>
+<script src="../../js/lab-technician/lab-reports.js"></script>
+</body>
+</html>

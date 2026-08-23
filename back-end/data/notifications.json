@@ -1,0 +1,42 @@
+[
+  {
+    "id": "NOTIF1787419531793684",
+    "userId": "2db20c0c-dd5a-480a-b4fd-8d33c7a0c57b",
+    "message": "Your leave request for December 20, 2026 has been APPROVED.",
+    "type": "success",
+    "read": false,
+    "createdAt": "2026-08-22T17:25:31.793Z"
+  },
+  {
+    "id": "NOTIF1787419844830552",
+    "userId": "e13610b4-9482-478e-9a76-c1a851e0478c",
+    "message": "Your leave request for December 14, 2026 has been APPROVED.",
+    "type": "success",
+    "read": false,
+    "createdAt": "2026-08-22T17:30:44.830Z"
+  },
+  {
+    "id": "NOTIF1787420584819347",
+    "userId": "4d524e30-ea40-4373-953d-1246c1c3263a",
+    "message": "Your leave request for December 14, 2026 has been APPROVED.",
+    "type": "success",
+    "read": false,
+    "createdAt": "2026-08-22T17:43:04.819Z"
+  },
+  {
+    "id": "NOTIF1787422247908149",
+    "userId": "00ba23db-126d-4e2a-8084-2f98201b1488",
+    "message": "Your leave request for December 18, 2026 has been APPROVED.",
+    "type": "success",
+    "read": false,
+    "createdAt": "2026-08-22T18:10:47.908Z"
+  },
+  {
+    "id": "NOTIF1787430165344968",
+    "userId": "2b3da3ef-575a-4e88-8c89-5a0027b25e22",
+    "message": "Your leave request for September 10, 2026 has been APPROVED.",
+    "type": "success",
+    "read": false,
+    "createdAt": "2026-08-22T20:22:45.344Z"
+  }
+]

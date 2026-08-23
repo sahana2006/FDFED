@@ -1,4 +1,4 @@
-﻿import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBody } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -55,6 +55,7 @@ export class MedicalRecordsController {
       followUpDate: body.followUpDate?.trim(),
       appointmentId: body.appointmentId?.trim(),
       tests: body.tests?.trim(),
+      labTestDate: body.labTestDate?.trim(),
       lifestyle: body.lifestyle?.trim(),
       diet: body.diet?.trim(),
       duration: body.duration?.trim(),

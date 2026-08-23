@@ -44,6 +44,16 @@
           </div>
           <div id="recordsList"></div>
         </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Completed Lab Reports</span>
+            <span style="font-size:.82rem;color:var(--text-muted);" id="doctorReportsCountBadge">0 reports</span>
+          </div>
+          <div id="doctorReportsList">
+            <p style="color:var(--text-muted);font-size:.875rem;padding:16px 0;">Loading lab reports...</p>
+          </div>
+        </div>
       </div>
 
       <div id="noteDetailView" style="display:none;">
@@ -91,6 +101,14 @@
           </div>
 
           <div class="form-group">
+            <label class="form-label">Lab Test Date</label>
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+              <span style="font-size:.85rem;color:var(--text-muted);">Scheduled Lab Test Date</span>
+              <input type="date" class="form-control" id="labTestDate" style="max-width:200px;"/>
+            </div>
+          </div>
+
+          <div class="form-group">
             <label class="form-label">Follow Up</label>
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
               <span style="font-size:.85rem;color:var(--text-muted);">Recommend Follow Up</span>
@@ -108,6 +126,7 @@
     </main>
   </div>
 </div>
+
 <div class="cn-modal" id="recordsModal" aria-hidden="true">
   <div class="cn-modal-panel">
     <div class="cn-modal-header">
@@ -117,6 +136,25 @@
     <div id="allRecordsList"></div>
   </div>
 </div>
+
+<!-- Doctor Lab Report Details Modal -->
+<div class="cn-modal" id="doctorReportModal" aria-hidden="true">
+  <div class="cn-modal-panel" style="max-width:720px;padding:0;overflow:hidden;max-height:90vh;display:flex;flex-direction:column;">
+    <div class="cn-modal-header" style="padding:18px 24px;border-bottom:1px solid var(--border);margin-bottom:0;background:var(--white);">
+      <h3 style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;margin:0;color:var(--text);">Diagnostic Lab Report</h3>
+      <button type="button" class="cn-modal-close" id="closeDoctorReportModal" aria-label="Close">&times;</button>
+    </div>
+    <div id="doctorReportModalBody" style="padding:24px;overflow-y:auto;flex:1;"></div>
+    <div style="padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:12px;background:#f8fafc;">
+      <button type="button" class="btn btn-outline" id="dismissDoctorReportModal">Close</button>
+      <button type="button" class="btn btn-primary" id="printDoctorReportBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print Report
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toastContainer"></div>
 <script src="../../js/doctor/components.js"></script>
 <script src="../../js/doctor/consultation-notes.js"></script>

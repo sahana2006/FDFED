@@ -104,6 +104,7 @@
       notes: record.consultationNote || '',
       meds: toPipeList(record.medicines),
       labs: toPipeList(record.tests),
+      labTestDate: record.labTestDate || '',
       date: record.date || appointment?.date || '',
       slot: appointment?.slot || '',
       followUp: record.followUpDate || record.followUp || '',
@@ -204,6 +205,7 @@
     ].filter(Boolean).join(' - ');
     document.getElementById('noteDate').value = record.date || '';
     document.getElementById('noteText').value = record.notes || '';
+    document.getElementById('labTestDate').value = record.labTestDate || '';
     document.getElementById('followUpDate').value = record.followUp || '';
 
     const medList = document.getElementById('medicineList');
@@ -354,6 +356,7 @@
       notes: '',
       meds: '',
       labs: '',
+      labTestDate: '',
     });
   });
 
@@ -379,6 +382,7 @@
       meds,
       labs,
       date: dateVal,
+      labTestDate: document.getElementById('labTestDate')?.value || '',
       followUp: document.getElementById('followUpDate')?.value || '',
     };
 
@@ -390,6 +394,7 @@
         body: JSON.stringify({
           doctorId: getDoctorId(),
           patientId: note.patientId,
+          patientName: note.name || (selectedAppointment ? getPatient(selectedAppointment).name : ''),
           appointmentId: note.appointmentId,
           type: 'consultation',
           doctorName: session.name || 'Doctor',
@@ -397,7 +402,8 @@
           date: note.date,
           consultationNote: note.notes,
           medicines: note.meds.replace(/\|/g, ', '),
-          tests: note.labs.replace(/\|/g, ', '),
+          tests: note.labs,
+          labTestDate: note.labTestDate,
           followUp: note.followUp,
           followUpDate: note.followUp,
         }),
@@ -466,8 +472,176 @@
     if (event.target === recordsModal) closeRecordsModalPanel();
   });
 
+  const closeDocReportBtn = document.getElementById('closeDoctorReportModal');
+  const dismissDocReportBtn = document.getElementById('dismissDoctorReportModal');
+  const printDocReportBtn = document.getElementById('printDoctorReportBtn');
+  const docReportModal = document.getElementById('doctorReportModal');
+
+  if (closeDocReportBtn) closeDocReportBtn.addEventListener('click', closeDoctorReportModal);
+  if (dismissDocReportBtn) dismissDocReportBtn.addEventListener('click', closeDoctorReportModal);
+  if (printDocReportBtn) printDocReportBtn.addEventListener('click', () => window.print());
+  if (docReportModal) {
+    docReportModal.addEventListener('click', (e) => {
+      if (e.target === docReportModal) closeDoctorReportModal();
+    });
+  }
+
+  let doctorLabReports = [];
+
+  async function loadDoctorLabReports() {
+    const doctorId = getDoctorId();
+    const listContainer = document.getElementById('doctorReportsList');
+    const badge = document.getElementById('doctorReportsCountBadge');
+
+    if (!doctorId || !listContainer) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/lab-reports/doctor`, {
+        headers: { role: 'doctor', 'x-user-id': doctorId },
+      });
+
+      if (!response.ok) throw new Error('Failed to load lab reports');
+      doctorLabReports = await response.json();
+
+      if (badge) {
+        badge.textContent = `${doctorLabReports.length} report${doctorLabReports.length !== 1 ? 's' : ''}`;
+      }
+
+      renderDoctorLabReports();
+    } catch (_) {
+      if (listContainer) {
+        listContainer.innerHTML = '<p style="color:var(--text-muted);font-size:.875rem;padding:16px 0;">No submitted lab reports found.</p>';
+      }
+    }
+  }
+
+  function renderDoctorLabReports() {
+    const listContainer = document.getElementById('doctorReportsList');
+    if (!listContainer) return;
+
+    if (!doctorLabReports.length) {
+      listContainer.innerHTML = '<p style="color:var(--text-muted);font-size:.875rem;padding:16px 0;">No completed lab reports requested by you yet.</p>';
+      return;
+    }
+
+    listContainer.innerHTML = '';
+    doctorLabReports.forEach((report) => {
+      const initials = getInitials(report.patientName || report.patientId);
+      const row = document.createElement('div');
+      row.className = 'patient-row';
+      row.innerHTML = `
+        <div class="patient-left">
+          <div class="avatar" style="background:var(--accent);">${initials}</div>
+          <div>
+            <div class="patient-name">${escapeHtml(report.patientName || report.patientId)} &middot; <strong style="color:var(--accent);">${escapeHtml(report.testName)}</strong></div>
+            <div class="patient-meta">Report Date: ${report.submittedAt ? report.submittedAt.split('T')[0] : '—'} &middot; Tech: ${escapeHtml(report.technicianName || report.technicianId)}</div>
+          </div>
+        </div>
+        <div class="patient-right">
+          <span class="badge badge-completed">Submitted</span>
+          <button class="btn-view view-report-btn" type="button" style="padding:6px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--accent);color:var(--accent);background:transparent;cursor:pointer;">View Report</button>
+        </div>
+      `;
+
+      row.querySelector('.view-report-btn').addEventListener('click', () => {
+        openDoctorReportModal(report);
+      });
+
+      listContainer.appendChild(row);
+    });
+  }
+
+  function openDoctorReportModal(report) {
+    const modal = document.getElementById('doctorReportModal');
+    const body = document.getElementById('doctorReportModalBody');
+    if (!modal || !body) return;
+
+    const reportDateStr = report.submittedAt ? new Date(report.submittedAt).toLocaleDateString() : '—';
+
+    body.innerHTML = `
+      <div style="display:flex;justify-content:space-between;border-bottom:2px solid #e2e8f0;padding-bottom:14px;margin-bottom:18px;">
+        <div>
+          <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:1.1rem;color:#0f2858;">MEDBITS DIAGNOSTIC REPORT</div>
+          <div style="font-size:.8rem;color:#64748b;">Clinical Pathology Laboratory</div>
+        </div>
+        <div style="text-align:right;font-size:.8rem;color:#64748b;">
+          <div><strong>Report ID:</strong> ${escapeHtml(report.id)}</div>
+          <div><strong>Date:</strong> ${escapeHtml(reportDateStr)}</div>
+        </div>
+      </div>
+
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;font-size:.875rem;">
+        <div>
+          <div><span style="color:#64748b;">Patient:</span> <strong>${escapeHtml(report.patientName || report.patientId)}</strong> (${escapeHtml(report.patientId)})</div>
+          <div style="margin-top:4px;"><span style="color:#64748b;">Appointment ID:</span> <code>${escapeHtml(report.appointmentId || '—')}</code></div>
+        </div>
+        <div>
+          <div><span style="color:#64748b;">Prescribed By:</span> <strong>Dr. ${escapeHtml(report.doctorName)}</strong></div>
+          <div style="margin-top:4px;"><span style="color:#64748b;">Test Name:</span> <strong style="color:var(--accent);">${escapeHtml(report.testName)}</strong></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <div style="font-size:.8rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Diagnostic Result & Values</div>
+        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:14px 18px;font-size:.95rem;font-weight:600;color:#14532d;white-space:pre-wrap;">${escapeHtml(report.result || 'No results recorded.')}</div>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <div style="font-size:.8rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Clinical Findings & Observations</div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;font-size:.875rem;color:#0f172a;line-height:1.5;white-space:pre-wrap;">${escapeHtml(report.findings || 'No detailed findings noted.')}</div>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <div style="font-size:.8rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Remarks & Recommendations</div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;font-size:.875rem;color:#0f172a;line-height:1.5;white-space:pre-wrap;">${escapeHtml(report.remarks || 'No remarks provided.')}</div>
+      </div>
+
+      ${
+        report.fileAttachment && report.fileAttachment.fileData
+          ? `<div style="margin-bottom:18px;">
+              <div style="font-size:.8rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Attached Detailed Report File</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:1.3rem;">📄</span>
+                  <div>
+                    <div style="font-weight:600;color:#0f172a;font-size:0.9rem;">${escapeHtml(report.fileAttachment.fileName)}</div>
+                    <div style="font-size:0.75rem;color:#64748b;">${escapeHtml(report.fileAttachment.fileType || '')} ${report.fileAttachment.fileSize ? `&middot; ${Math.round(report.fileAttachment.fileSize / 1024)} KB` : ''}</div>
+                  </div>
+                </div>
+                <a href="${report.fileAttachment.fileData}" download="${escapeHtml(report.fileAttachment.fileName)}" class="btn btn-outline btn-sm" target="_blank" style="text-decoration:none;padding:4px 12px;font-size:.8rem;">
+                  Download File
+                </a>
+              </div>
+            </div>`
+          : ''
+      }
+
+      <div style="border-top:1px dashed #e2e8f0;padding-top:14px;display:flex;justify-content:space-between;font-size:.8rem;color:#64748b;">
+        <div>Electronic signature valid</div>
+        <div><strong>Verified by:</strong> ${escapeHtml(report.technicianName || report.technicianId)}</div>
+      </div>
+    `;
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeDoctorReportModal() {
+    const modal = document.getElementById('doctorReportModal');
+    if (modal) {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
   await loadAppointments();
   await loadConsultationRecords();
+  await loadDoctorLabReports();
   renderUpcomingAppointments();
   renderRecords('');
 })();

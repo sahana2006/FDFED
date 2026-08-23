@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leave Management — MEDBITS Lab Technician</title>
+  <link rel="stylesheet" href="../../css/lab-technician/global.css"/>
+  <link rel="stylesheet" href="../../css/lab-technician/leave.css"/>
+</head>
+<body data-page="leave">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <div class="leave-layout">
+
+        <!-- Apply for Leave Card -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Apply for Leave</span>
+          </div>
+
+          <form id="leaveApplyForm">
+            <div class="leave-form-group">
+              <label class="leave-label required" for="leaveDate">Leave Date</label>
+              <input type="date" class="leave-input" id="leaveDate" required/>
+            </div>
+
+            <div class="leave-form-group">
+              <label class="leave-label required" for="leaveType">Leave Type</label>
+              <select class="leave-select" id="leaveType" required>
+                <option value="Casual">Casual Leave</option>
+                <option value="Sick">Sick Leave</option>
+                <option value="Emergency">Emergency Leave</option>
+                <option value="Annual">Annual / Vacation Leave</option>
+              </select>
+            </div>
+
+            <div class="leave-form-group">
+              <label class="leave-label required" for="leaveReason">Reason</label>
+              <textarea class="leave-textarea" id="leaveReason" rows="3" placeholder="Specify reason for leave..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" id="btnSubmitLeave" style="margin-top:12px;">
+              Submit Leave Request
+            </button>
+          </form>
+        </div>
+
+        <!-- My Leave Requests History Card -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">My Leave History</span>
+            <span style="font-size:.82rem;color:var(--text-muted);" id="leaveCountBadge">0 requests</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Leave Date</th>
+                  <th>Type</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>Applied On</th>
+                  <th>Actioned Date</th>
+                </tr>
+              </thead>
+              <tbody id="leaveTableBody">
+                <tr>
+                  <td colspan="6" style="text-align:center;color:var(--text-muted);padding:32px;">Loading leave requests...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/lab-technician/components.js"></script>
+<script src="../../js/lab-technician/leave.js"></script>
+</body>
+</html>

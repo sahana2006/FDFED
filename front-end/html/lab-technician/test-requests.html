@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Test Requests — MEDBITS Lab Technician</title>
+  <link rel="stylesheet" href="../../css/lab-technician/global.css"/>
+  <link rel="stylesheet" href="../../css/lab-technician/test-requests.css"/>
+</head>
+<body data-page="test-requests">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <!-- Top Toolbar: Search & Filter Tabs -->
+      <div class="card">
+        <div class="tr-toolbar">
+          <div class="search-bar-shell">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search by patient, doctor, test, or appointment ID..." autocomplete="off"/>
+          </div>
+
+          <div class="filter-group" id="statusFilterGroup">
+            <button type="button" class="filter-btn active" data-status="all">All</button>
+            <button type="button" class="filter-btn" data-status="pending">Pending</button>
+            <button type="button" class="filter-btn" data-status="in_progress">In Progress</button>
+            <button type="button" class="filter-btn" data-status="rejected">Rejected</button>
+            <button type="button" class="filter-btn" data-status="completed">Completed</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Requests List Table Card -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" id="requestsTitle">Lab Test Requests</span>
+          <span style="font-size:.82rem;color:var(--text-muted);" id="requestCountBadge">0 requests</span>
+        </div>
+
+        <div class="table-responsive" id="requestsTableWrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Patient</th>
+                <th>Test Name</th>
+                <th>Prescribed By</th>
+                <th>Appointment</th>
+                <th>Request Date</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="requestsTableBody">
+              <tr>
+                <td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px;">Loading test requests...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Request Details Modal -->
+<div class="modal-overlay" id="requestDetailModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Lab Request Details</h3>
+      <button type="button" class="modal-close-btn" id="modalCloseBtn">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <!-- Injected via JavaScript -->
+    </div>
+    <div class="modal-footer" id="modalFooter">
+      <button type="button" class="btn btn-outline" id="modalDismissBtn">Close</button>
+      <button type="button" class="btn btn-outline" id="btnRejectModalTrigger" style="color:var(--red);border-color:var(--red);display:none;">Reject Test</button>
+      <button type="button" class="btn btn-primary" id="btnAcceptTest" style="display:none;">Accept Test</button>
+      <button type="button" class="btn btn-success" id="btnStartTest" style="display:none;">Start Test</button>
+      <a href="#" class="btn btn-primary" id="btnProcessTest" style="display:none;">Process Test</a>
+      <a href="#" class="btn btn-outline" id="btnViewReport" style="display:none;">View Report</a>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Reason Modal -->
+<div class="modal-overlay" id="rejectModal" aria-hidden="true">
+  <div class="modal-dialog" style="max-width:460px;">
+    <div class="modal-header">
+      <h3 class="modal-title" style="color:var(--red);">Reject Lab Test Request</h3>
+      <button type="button" class="modal-close-btn" id="rejectCloseBtn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:12px;">
+        Please specify the reason for rejecting this lab test request.
+      </p>
+      <div style="margin-bottom:12px;">
+        <label for="rejectReasonInput" style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:6px;">Rejection Reason</label>
+        <textarea id="rejectReasonInput" class="form-textarea" rows="3" placeholder="e.g. Sample hemolyzed, specimen quantity insufficient, patient unavailable..." style="width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-family:inherit;font-size:0.88rem;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" id="rejectCancelBtn">Cancel</button>
+      <button type="button" class="btn btn-primary" id="rejectConfirmBtn" style="background:var(--red);border-color:var(--red);">Confirm Rejection</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/lab-technician/components.js"></script>
+<script src="../../js/lab-technician/test-requests.js"></script>
+</body>
+</html>

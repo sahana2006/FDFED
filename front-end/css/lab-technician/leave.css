@@ -1,0 +1,91 @@
+/* ── MEDBITS Lab Technician leave.css ── */
+
+.leave-layout {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.leave-layout > * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1060px) {
+  .leave-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.leave-form-group {
+  margin-bottom: 16px;
+}
+.leave-form-group:last-child {
+  margin-bottom: 0;
+}
+
+.leave-label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.leave-label.required::after {
+  content: " *";
+  color: var(--red);
+}
+
+.leave-input, .leave-select, .leave-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: var(--transition);
+}
+.leave-input:focus, .leave-select:focus, .leave-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(2,132,199,0.12);
+}
+
+.leave-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Leave table adjustments */
+.leave-layout .table-responsive {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+.leave-layout .data-table {
+  width: 100%;
+  min-width: 540px;
+}
+
+.leave-layout .data-table th,
+.leave-layout .data-table td {
+  padding: 12px 14px;
+}
+
+.leave-layout .data-table td:nth-child(3) {
+  max-width: 200px;
+  white-space: normal;
+  word-break: break-word;
+}

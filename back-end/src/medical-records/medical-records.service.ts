@@ -1,7 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { AppointmentsService } from '../appointments/appointments.service';
+import { DoctorsService } from '../doctors/doctors.service';
+import { LabRequestsService } from '../lab-requests/lab-requests.service';
 import { PatientsService } from '../patients/patients.service';
 
 export type MedicalRecordType = 'consultation' | 'treatment' | 'lab';
@@ -11,6 +13,7 @@ export type MedicalRecord = {
   doctorId: string;
   patientId: string;
   type: MedicalRecordType;
+  patientName?: string;
   doctorName: string;
   specialization: string;
   date: string;
@@ -21,6 +24,7 @@ export type MedicalRecord = {
   appointmentId?: string;
   // Treatment plan specific fields
   tests?: string;
+  labTestDate?: string;
   lifestyle?: string;
   diet?: string;
   duration?: string;
@@ -29,6 +33,7 @@ export type MedicalRecord = {
 export type CreateMedicalRecordInput = {
   doctorId: string;
   patientId: string;
+  patientName?: string;
   type: MedicalRecordType;
   doctorName: string;
   specialization: string;
@@ -39,6 +44,7 @@ export type CreateMedicalRecordInput = {
   followUpDate?: string;
   appointmentId?: string;
   tests?: string;
+  labTestDate?: string;
   lifestyle?: string;
   diet?: string;
   duration?: string;
@@ -51,6 +57,8 @@ const MEDICAL_RECORDS_DATA_FILE = join(
   'data',
   'medical-records.json',
 );
+
+const DEFAULT_BRANCH_ID = '00000000-0000-4000-8000-000000000001';
 
 @Injectable()
 export class MedicalRecordsService {
@@ -94,15 +102,47 @@ export class MedicalRecordsService {
     },
   ];
 
+  private readonly logger = new Logger(MedicalRecordsService.name);
+
   constructor(
     private readonly appointmentsService: AppointmentsService,
     private readonly patientsService: PatientsService,
+    private readonly labRequestsService: LabRequestsService,
+    private readonly doctorsService: DoctorsService,
   ) {
     this.loadPersistedRecords();
   }
 
   getRecordsByPatientId(patientId: string) {
-    return this.medicalRecords.filter((record) => record.patientId === patientId);
+    const cleanId = patientId?.trim();
+    if (!cleanId) return [];
+
+    const directRecords = this.medicalRecords.filter((record) => record.patientId === cleanId);
+
+    let labReports: any[] = [];
+    try {
+      labReports = this.labRequestsService.findReportsForPatient(cleanId);
+    } catch (_) {}
+
+    const labRecordsFromReports: MedicalRecord[] = (labReports || [])
+      .filter((report) => !directRecords.some((dr) => dr.id === report.id || dr.id === report.labRequestId))
+      .map((report) => ({
+        id: report.id,
+        doctorId: report.doctorId,
+        patientId: report.patientId,
+        patientName: report.patientName,
+        type: 'lab',
+        doctorName: report.doctorName,
+        specialization: 'Diagnostic Laboratory',
+        date: report.submittedAt
+          ? report.submittedAt.split('T')[0]
+          : (report.createdAt ? report.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]),
+        tests: report.testName,
+        consultationNote: report.result ? `Diagnostic Result: ${report.result}` : undefined,
+        appointmentId: report.appointmentId,
+      }));
+
+    return [...directRecords, ...labRecordsFromReports];
   }
 
   getRecordsByDoctorId(doctorId: string) {
@@ -143,7 +183,7 @@ export class MedicalRecordsService {
     };
   }
 
-  createRecord(input: CreateMedicalRecordInput): MedicalRecord {
+  async createRecord(input: CreateMedicalRecordInput): Promise<MedicalRecord> {
     if (!input.doctorId || !input.patientId || !input.type) {
       throw new BadRequestException('doctorId, patientId, and type are required');
     }
@@ -160,6 +200,7 @@ export class MedicalRecordsService {
       id: `MR${Date.now()}`,
       doctorId: input.doctorId,
       patientId: input.patientId,
+      patientName: input.patientName?.trim(),
       type: input.type,
       doctorName: input.doctorName?.trim() || 'Unknown Doctor',
       specialization: input.specialization?.trim() || 'General',
@@ -170,22 +211,132 @@ export class MedicalRecordsService {
       followUpDate: normalizedFollowUpDate,
       appointmentId: input.appointmentId?.trim(),
       tests: input.tests?.trim(),
+      labTestDate: input.labTestDate?.trim(),
       lifestyle: input.lifestyle?.trim(),
       diet: input.diet?.trim(),
       duration: input.duration?.trim(),
     };
 
     if (record.type === 'consultation' && record.appointmentId) {
-      this.appointmentsService.completeAppointment(record.appointmentId);
+      try {
+        await this.appointmentsService.completeAppointment(record.appointmentId);
+      } catch (err) {
+        this.logger.warn(
+          `Could not complete appointment ${record.appointmentId}: ${err?.message}`,
+        );
+      }
     }
 
     this.medicalRecords.unshift(record);
     this.persistRecords();
 
+    if (record.tests) {
+      await this.createLabRequestsForRecord(record);
+    }
+
     return {
       ...record,
       followUpDate: record.followUpDate || record.followUp,
     };
+  }
+
+  private async createLabRequestsForRecord(record: MedicalRecord): Promise<void> {
+    if (!record.tests) return;
+
+    // Split tests by pipe (primary), newline, or comma outside parentheses
+    let rawTests: string[] = [];
+    if (record.tests.includes('|')) {
+      rawTests = record.tests.split('|');
+    } else if (record.tests.includes('\n')) {
+      rawTests = record.tests.split('\n');
+    } else {
+      rawTests = record.tests.split(/,(?![^(]*\))/);
+    }
+
+    const testNames = Array.from(
+      new Set(
+        rawTests
+          .map((item) => item.trim())
+          .filter(Boolean),
+      ),
+    );
+
+    if (testNames.length === 0) return;
+
+    // Determine branchId from appointment or doctor, always fallback to DEFAULT_BRANCH_ID
+    let branchId = '';
+    let appointmentDetails: any = null;
+
+    if (record.appointmentId) {
+      try {
+        appointmentDetails = await this.appointmentsService.getAppointmentById(
+          record.appointmentId,
+        );
+        branchId = appointmentDetails?.branchId || '';
+      } catch (_) {}
+    }
+
+    if (!branchId && record.doctorId) {
+      try {
+        const allDocs = await this.doctorsService.findAll(undefined, undefined);
+        const doc = allDocs.find(
+          (d) => d.id === record.doctorId || d.userId === record.doctorId,
+        );
+        branchId = doc?.branchId || '';
+      } catch (_) {}
+    }
+
+    if (!branchId) {
+      branchId = DEFAULT_BRANCH_ID;
+    }
+
+    // Determine patientName accurately
+    let patientName = record.patientName?.trim() || '';
+    if (!patientName) {
+      try {
+        const patientProfile = this.patientsService.getPatientByUserId(record.patientId);
+        patientName =
+          `${patientProfile.firstName} ${patientProfile.lastName}`.trim() ||
+          patientProfile.userId;
+      } catch (_) {
+        if (appointmentDetails?.patient?.name) {
+          patientName = appointmentDetails.patient.name;
+        }
+      }
+    }
+    if (!patientName) {
+      patientName = record.patientId;
+    }
+
+    const doctorName =
+      record.doctorName || appointmentDetails?.doctor?.name || 'Unknown Doctor';
+    const recommendationDate = record.date || new Date().toISOString().split('T')[0];
+    const labTestDate = record.labTestDate || record.date || recommendationDate;
+    const requestDate = record.labTestDate || record.date || recommendationDate;
+
+    for (const testName of testNames) {
+      try {
+        this.labRequestsService.createRequest({
+          medicalRecordId: record.id,
+          appointmentId: record.appointmentId || '',
+          patientId: record.patientId,
+          patientName,
+          doctorId: record.doctorId,
+          doctorName,
+          branchId,
+          testName,
+          recommendationDate,
+          labTestDate,
+          requestDate,
+          consultationNote: record.consultationNote || '',
+          prescriptionMedicines: record.medicines || '',
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to create lab request for test "${testName}" (medicalRecordId: ${record.id}): ${error?.message}`,
+        );
+      }
+    }
   }
 
   private loadPersistedRecords() {

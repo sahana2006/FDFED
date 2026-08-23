@@ -1,0 +1,168 @@
+/* ── MEDBITS Lab Technician lab-reports.css ── */
+
+.lr-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.lr-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+/* Printable Medical Report Modal */
+.report-paper {
+  background: var(--white);
+  border-radius: var(--radius);
+  max-width: 780px;
+  width: 100%;
+}
+
+.report-header-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+.report-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.report-brand-logo {
+  font-size: 24px;
+  color: var(--accent);
+}
+.report-brand-text {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--navy);
+}
+.report-meta-box {
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.report-patient-meta {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.rpm-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.86rem;
+}
+.rpm-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.rpm-val {
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
+}
+
+.report-section {
+  margin-bottom: 20px;
+}
+.report-section-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--navy);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+
+.report-result-box {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #14532d;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.report-text-box {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.report-signoff {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 24px;
+  border-top: 1px dashed var(--border);
+  margin-top: 24px;
+}
+.signoff-box {
+  text-align: right;
+}
+.signoff-title {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.signoff-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 4px;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #reportPreviewModal, #reportPreviewModal * {
+    visibility: visible;
+  }
+  #reportPreviewModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: transparent;
+    padding: 0;
+  }
+  .modal-dialog {
+    box-shadow: none;
+    border: none;
+    max-width: 100%;
+  }
+  .modal-header, .modal-footer {
+    display: none !important;
+  }
+}

@@ -5,6 +5,7 @@ import { DoctorsService } from '../doctors/doctors.service';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { RequestContextService } from '../common/request-context.service';
+import { LabTechniciansService } from '../lab-technicians/lab-technicians.service';
 
 export type LeaveRequestStatus = 'pending' | 'approved' | 'rejected';
 
@@ -36,35 +37,57 @@ export class LeaveRequestsService {
     private readonly appointmentsService: AppointmentsService,
     private readonly notificationsService: NotificationsService,
     private readonly requestContextService: RequestContextService,
+    private readonly labTechniciansService: LabTechniciansService,
   ) {
     this.loadPersistedRequests();
   }
 
-  createLeaveRequest(doctorId: string, date: string, type?: string, reason?: string): LeaveRequest {
-    // Validate doctor exists
-    this.doctorsService.getDoctorById(doctorId);
-    
+  async createLeaveRequest(userId: string, date: string, type?: string, reason?: string): Promise<LeaveRequest> {
+    const cleanUserId = userId?.trim();
+    if (!cleanUserId) {
+      throw new BadRequestException('User ID is required');
+    }
+
+    // Validate user exists (Doctor or Lab Technician)
+    let isDoctor = false;
+    let isLabTech = false;
+    try {
+      await this.doctorsService.getDoctorById(cleanUserId);
+      isDoctor = true;
+    } catch (_) {
+      try {
+        await this.labTechniciansService.findOne(cleanUserId);
+        isLabTech = true;
+      } catch (_) {}
+    }
+
+    if (!isDoctor && !isLabTech) {
+      throw new NotFoundException('User not found');
+    }
+
     const cleanDate = date?.trim();
     if (!cleanDate) {
       throw new BadRequestException('Date is required');
     }
 
     // Check if a request already exists for this date
-    const existing = this.requests.find(r => r.doctorId === doctorId && r.date === cleanDate && r.status !== 'rejected');
+    const existing = this.requests.find(
+      (r) => r.doctorId === cleanUserId && r.date === cleanDate && r.status !== 'rejected',
+    );
     if (existing) {
       throw new BadRequestException(`A leave request for ${cleanDate} already exists (${existing.status})`);
     }
-    
+
     const req: LeaveRequest = {
       id: `LR${Date.now()}`,
-      doctorId,
+      doctorId: cleanUserId,
       date: cleanDate,
       type: type?.trim() || 'Casual',
       reason: reason?.trim() || 'Requested via portal',
       status: 'pending',
       createdAt: new Date().toISOString(),
     };
-    
+
     this.requests.push(req);
     this.persistRequests();
     return req;
@@ -72,33 +95,46 @@ export class LeaveRequestsService {
 
   async getAllRequests(): Promise<Array<LeaveRequest & { name: string; dept: string; dateRange: string }>> {
     const branchId = this.requestContextService.getContext()?.branchId;
-    const role = this.requestContextService.getContext()?.role;
 
-    const result = (await Promise.all(this.requests.map(async (r) => {
-      let doctorName = r.doctorId;
-      let doctorDept = '';
-      let docBranchId = '';
-      try {
-        const doc = await this.doctorsService.getDoctorById(r.doctorId);
-        doctorName = doc.name;
-        doctorDept = doc.department || doc.specialization;
-        docBranchId = doc.branchId;
-      } catch (_) {}
-      
-      return {
-        ...r,
-        name: doctorName,
-        dept: doctorDept,
-        branchId: docBranchId,
-        dateRange: new Date(r.date).toLocaleDateString('en-US', {
-            month: 'short', day: 'numeric', year: 'numeric'
+    const result = (
+      await Promise.all(
+        this.requests.map(async (r) => {
+          let name = r.doctorId;
+          let dept = 'Medical Staff';
+          let reqBranchId = '';
+
+          try {
+            const doc = await this.doctorsService.getDoctorById(r.doctorId);
+            name = doc.name;
+            dept = doc.department || doc.specialization || 'Doctor';
+            reqBranchId = doc.branchId;
+          } catch (_) {
+            try {
+              const tech = await this.labTechniciansService.findOne(r.doctorId);
+              name = tech.name;
+              dept = 'Laboratory';
+              reqBranchId = tech.branchId;
+            } catch (_) {}
+          }
+
+          return {
+            ...r,
+            name,
+            dept,
+            branchId: reqBranchId,
+            dateRange: new Date(r.date).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            }),
+          };
         }),
-      };
-    }))).filter((r) => {
+      )
+    ).filter((r) => {
       if (branchId) return r.branchId === branchId;
       return true;
     });
-    
+
     return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
@@ -107,37 +143,49 @@ export class LeaveRequestsService {
     if (!req) {
       throw new NotFoundException('Leave request not found');
     }
-    
-    if (status === 'approved') {
-      // Check if there are booked appointments
-      const existingAppointments = await this.appointmentsService.getAppointmentsByDoctorId(req.doctorId);
-      const bookedSlots = existingAppointments
-        .filter((a) => a.date === req.date && a.status === 'upcoming')
-        .map((a) => a.slot);
 
-      if (bookedSlots.length > 0) {
-        throw new BadRequestException(
-          `Cannot approve leave for ${req.date} — ${bookedSlots.length} appointment(s) are already booked (slots: ${bookedSlots.join(', ')}). Please cancel them first.`,
-        );
+    if (status === 'approved') {
+      try {
+        const doc = await this.doctorsService.getDoctorById(req.doctorId);
+        if (doc) {
+          const existingAppointments = await this.appointmentsService.getAppointmentsByDoctorId(req.doctorId);
+          const bookedSlots = existingAppointments
+            .filter((a) => a.date === req.date && a.status === 'upcoming')
+            .map((a) => a.slot);
+
+          if (bookedSlots.length > 0) {
+            throw new BadRequestException(
+              `Cannot approve leave for ${req.date} — ${bookedSlots.length} appointment(s) are already booked (slots: ${bookedSlots.join(', ')}). Please cancel them first.`,
+            );
+          }
+
+          await this.doctorsService.markDateUnavailable(req.doctorId, req.date);
+        }
+      } catch (err) {
+        if (err instanceof BadRequestException) throw err;
       }
-      
-      // Mark unavailable
-      await this.doctorsService.markDateUnavailable(req.doctorId, req.date);
     }
-    
+
     req.status = status;
     req.actionedOn = new Date().toLocaleString('en-US', {
-        month: 'short', day: 'numeric', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
     this.persistRequests();
 
-    // Send notification to the doctor
-    const prettyDate = new Date(req.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    // Send notification
+    const prettyDate = new Date(req.date).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
     const notifMessage = `Your leave request for ${prettyDate} has been ${status.toUpperCase()}.`;
     const notifType = status === 'approved' ? 'success' : 'error';
     this.notificationsService.createNotification(req.doctorId, notifMessage, notifType);
-    
+
     return req;
   }
 
