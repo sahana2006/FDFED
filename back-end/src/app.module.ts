@@ -18,6 +18,7 @@ import { WalkInsModule } from './walkins/walkins.module';
 import { LeaveRequestsModule } from './leave-requests/leave-requests.module';
 import { CommonModule } from './common/common.module';
 import { RequestContextMiddleware } from './common/request-context.middleware';
+import { LoggerMiddleware } from './common/logger.middleware';
 import { RolesGuard } from './common/guards/roles.guard';
 import { HospitalBranchModule } from './hospital-branch/hospital-branch.module';
 import { LabTechniciansModule } from './lab-technicians/lab-technicians.module';
@@ -30,7 +31,8 @@ import { NotificationsModule } from './notifications/notifications.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: process.env.HOSPITAL_BRANCH_DB_PATH ?? 'data/hospital-branches.sqlite',
+      database:
+        process.env.HOSPITAL_BRANCH_DB_PATH ?? 'data/hospital-branches.sqlite',
       autoLoadEntities: true,
       synchronize: false,
       migrationsRun: true,
@@ -69,8 +71,6 @@ import { NotificationsModule } from './notifications/notifications.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestContextMiddleware).forRoutes('*');
+    consumer.apply(RequestContextMiddleware, LoggerMiddleware).forRoutes('*');
   }
 }
-
-

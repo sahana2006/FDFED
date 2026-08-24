@@ -1,8 +1,9 @@
 ﻿import { Module } from '@nestjs/common';
+import { ApplicationLogger } from './application-logger.service';
 import { RequestContextService } from './request-context.service';
 
 @Module({
-  providers: [RequestContextService],
-  exports: [RequestContextService],
+  providers: [ApplicationLogger, RequestContextService],
+  exports: [ApplicationLogger, RequestContextService],
 })
 export class CommonModule {}

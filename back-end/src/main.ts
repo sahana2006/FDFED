@@ -4,9 +4,11 @@ import { ValidationPipe } from '@nestjs/common';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { AppModule } from './app.module';
+import { ApplicationLogger } from './common/application-logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useLogger(app.get(ApplicationLogger));
   app.enableCors();
 
   // Enable global validation using class-validator
