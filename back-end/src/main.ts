@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { writeFileSync, mkdirSync } from 'fs';
@@ -9,7 +10,12 @@ import { ApplicationLogger } from './common/application-logger.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useLogger(app.get(ApplicationLogger));
-  app.enableCors();
+  
+  app.use(helmet());
+  app.enableCors({
+    origin: ['http://localhost:3000', 'http://localhost:5500', 'http://localhost:8080', 'http://127.0.0.1:5500'],
+    credentials: true,
+  });
 
   // Enable global validation using class-validator
   app.useGlobalPipes(
