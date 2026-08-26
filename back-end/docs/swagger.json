@@ -2443,6 +2443,76 @@
         ]
       }
     },
+    "/lab-requests/{id}/report/upload": {
+      "post": {
+        "operationId": "LabRequestsController_uploadReport",
+        "parameters": [
+          {
+            "name": "x-user-id",
+            "in": "header",
+            "description": "Logged-in lab technician ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (labtech)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Lab request ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "report": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "report"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lab report file uploaded"
+          }
+        },
+        "summary": "Upload a lab report file",
+        "tags": [
+          "Lab Requests"
+        ]
+      }
+    },
     "/lab-requests/{id}/report/submit": {
       "patch": {
         "operationId": "LabRequestsController_submit",

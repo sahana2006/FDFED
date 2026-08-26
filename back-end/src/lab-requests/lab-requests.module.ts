@@ -1,13 +1,20 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { LabTechniciansModule } from '../lab-technicians/lab-technicians.module';
 import { LabRequestsController } from './lab-requests.controller';
 import { LabReportsController } from './lab-reports.controller';
+import { LabReportUploadMiddleware } from './middleware/lab-report-upload.middleware';
 import { LabRequestsService } from './lab-requests.service';
 
 @Module({
   imports: [LabTechniciansModule],
   controllers: [LabRequestsController, LabReportsController],
-  providers: [LabRequestsService],
+  providers: [LabRequestsService, LabReportUploadMiddleware],
   exports: [LabRequestsService],
 })
-export class LabRequestsModule {}
+export class LabRequestsModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LabReportUploadMiddleware)
+      .forRoutes({ path: 'lab-requests/:id/report/upload', method: RequestMethod.POST });
+  }
+}

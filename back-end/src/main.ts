@@ -2,16 +2,20 @@ import { NestFactory } from '@nestjs/core';
 import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { ApplicationLogger } from './common/application-logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useLogger(app.get(ApplicationLogger));
   
   app.use(helmet());
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads',
+  });
   app.enableCors({
     origin: ['http://localhost:3000', 'http://localhost:5500', 'http://localhost:8080', 'http://127.0.0.1:5500'],
     credentials: true,
@@ -55,6 +59,7 @@ async function bootstrap() {
   const docsDir = join(process.cwd(), 'docs');
   try {
     mkdirSync(docsDir, { recursive: true });
+    mkdirSync(join(process.cwd(), 'uploads', 'lab-reports'), { recursive: true });
     writeFileSync(
       join(docsDir, 'swagger.json'),
       JSON.stringify(document, null, 2),

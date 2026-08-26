@@ -586,6 +586,8 @@ function openPatientReportModal(report, matchingReq) {
     req?.requestDate ||
     (report.createdAt ? report.createdAt.split('T')[0] : '');
 
+  const attachmentUrl = resolveLabReportAttachmentUrl(report);
+
   body.innerHTML = `
     <div style="display:flex;justify-content:space-between;border-bottom:2px solid #e2e8f0;padding-bottom:14px;margin-bottom:18px;">
       <div>
@@ -628,22 +630,22 @@ function openPatientReportModal(report, matchingReq) {
     </div>
 
     ${
-      report.fileAttachment && report.fileAttachment.fileData
+      attachmentUrl
         ? `<div style="margin-bottom:18px;">
-            <div style="font-size:.8rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Attached Detailed Report File</div>
-            <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;">
-              <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:1.3rem;">📄</span>
-                <div>
-                  <div style="font-weight:600;color:#0f172a;font-size:0.9rem;">${escapeHtml(report.fileAttachment.fileName)}</div>
-                  <div style="font-size:0.75rem;color:#64748b;">${escapeHtml(report.fileAttachment.fileType || '')} ${report.fileAttachment.fileSize ? `&middot; ${Math.round(report.fileAttachment.fileSize / 1024)} KB` : ''}</div>
+              <div style="font-size:.8rem;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Attached Detailed Report File</div>
+              <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:1.3rem;">📄</span>
+                  <div>
+                    <div style="font-weight:600;color:#0f172a;font-size:0.9rem;">${escapeHtml(getLabReportAttachmentName(report))}</div>
+                    <div style="font-size:0.75rem;color:#64748b;">${escapeHtml(getLabReportAttachmentType(report))} ${getLabReportAttachmentSize(report) ? `&middot; ${Math.round(getLabReportAttachmentSize(report) / 1024)} KB` : ''}</div>
+                  </div>
                 </div>
+                <a href="${attachmentUrl}" download="${escapeHtml(getLabReportAttachmentName(report))}" class="btn btn-outline btn-sm" target="_blank" rel="noopener noreferrer" style="text-decoration:none;padding:4px 12px;font-size:.8rem;">
+                  Download File
+                </a>
               </div>
-              <a href="${report.fileAttachment.fileData}" download="${escapeHtml(report.fileAttachment.fileName)}" class="btn btn-outline btn-sm" target="_blank" style="text-decoration:none;padding:4px 12px;font-size:.8rem;">
-                Download File
-              </a>
-            </div>
-          </div>`
+            </div>`
         : ''
     }
 
@@ -675,6 +677,40 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function resolveLabReportAttachmentUrl(report) {
+  const raw =
+    report?.fileAttachment?.fileData ||
+    report?.uploadedFilePath ||
+    report?.uploadedFileName ||
+    '';
+
+  if (!raw) return '';
+  if (/^(data:|https?:|blob:)/i.test(raw)) return raw;
+
+  try {
+    return new URL(raw.startsWith('/') ? raw : `/${raw}`, LABTESTS_API_BASE_URL).href;
+  } catch (_) {
+    return raw;
+  }
+}
+
+function getLabReportAttachmentName(report) {
+  return (
+    report?.fileAttachment?.fileName ||
+    report?.uploadedFileOriginalName ||
+    report?.uploadedFileName ||
+    'lab-report-file'
+  );
+}
+
+function getLabReportAttachmentType(report) {
+  return report?.fileAttachment?.fileType || report?.uploadedFileMimeType || '';
+}
+
+function getLabReportAttachmentSize(report) {
+  return report?.fileAttachment?.fileSize || report?.uploadedFileSize || 0;
 }
 
 function groupLabBookingsByOrderId(items) {

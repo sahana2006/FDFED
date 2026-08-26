@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Headers, Param, Patch, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, Get, Headers, Param, Patch, Post, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { ApiBody, ApiConsumes, ApiHeader, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { SaveLabReportDraftDto, SubmitLabReportDto } from './dto/lab-requests.dto';
@@ -124,6 +124,40 @@ export class LabRequestsController {
       id,
       body,
       this.requireTechnicianId(technicianId),
+    );
+  }
+
+  @Roles('labtech')
+  @Post(':id/report/upload')
+  @ApiOperation({ summary: 'Upload a lab report file' })
+  @ApiParam({ name: 'id', description: 'Lab request ID' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        report: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      required: ['report'],
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Lab report file uploaded' })
+  uploadReport(
+    @Param('id') id: string,
+    @Req() req: { file?: { filename: string; originalname: string; mimetype: string; size: number; path?: string } },
+    @Headers('x-user-id') technicianId?: string,
+  ) {
+    if (!req.file) {
+      throw new BadRequestException('Report file is required');
+    }
+
+    return this.labRequestsService.uploadReportFile(
+      id,
+      this.requireTechnicianId(technicianId),
+      req.file,
     );
   }
 

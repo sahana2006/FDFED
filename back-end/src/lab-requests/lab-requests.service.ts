@@ -60,6 +60,12 @@ export type LabReport = {
   findings: string;
   remarks: string;
   fileAttachment?: FileAttachmentDto | null;
+  uploadedFileName?: string | null;
+  uploadedFilePath?: string | null;
+  uploadedFileOriginalName?: string | null;
+  uploadedFileMimeType?: string | null;
+  uploadedFileSize?: number | null;
+  uploadedAt?: string | null;
   status: LabReportStatus;
   createdAt: string;
   updatedAt: string;
@@ -80,6 +86,14 @@ export type CreateLabRequestInput = {
   requestDate: string;
   consultationNote?: string;
   prescriptionMedicines?: string;
+};
+
+export type UploadedLabReportFile = {
+  filename: string;
+  originalname: string;
+  mimetype: string;
+  size: number;
+  path?: string;
 };
 
 const LAB_REQUESTS_DATA_FILE = join(
@@ -389,6 +403,12 @@ export class LabRequestsService {
       if (dto.fileAttachment !== undefined) {
         report.fileAttachment = dto.fileAttachment;
       }
+      report.uploadedFileName = report.uploadedFileName ?? null;
+      report.uploadedFilePath = report.uploadedFilePath ?? null;
+      report.uploadedFileOriginalName = report.uploadedFileOriginalName ?? null;
+      report.uploadedFileMimeType = report.uploadedFileMimeType ?? null;
+      report.uploadedFileSize = report.uploadedFileSize ?? null;
+      report.uploadedAt = report.uploadedAt ?? null;
       report.technicianId = technicianId;
       report.technicianName = technician.name;
       report.status = 'draft';
@@ -411,6 +431,12 @@ export class LabRequestsService {
         findings: dto.findings || '',
         remarks: dto.remarks || '',
         fileAttachment: dto.fileAttachment || null,
+        uploadedFileName: null,
+        uploadedFilePath: null,
+        uploadedFileOriginalName: null,
+        uploadedFileMimeType: null,
+        uploadedFileSize: null,
+        uploadedAt: null,
         status: 'draft',
         createdAt: now,
         updatedAt: now,
@@ -465,6 +491,12 @@ export class LabRequestsService {
       if (dto.fileAttachment !== undefined) {
         report.fileAttachment = dto.fileAttachment;
       }
+      report.uploadedFileName = report.uploadedFileName ?? null;
+      report.uploadedFilePath = report.uploadedFilePath ?? null;
+      report.uploadedFileOriginalName = report.uploadedFileOriginalName ?? null;
+      report.uploadedFileMimeType = report.uploadedFileMimeType ?? null;
+      report.uploadedFileSize = report.uploadedFileSize ?? null;
+      report.uploadedAt = report.uploadedAt ?? null;
       report.technicianId = technicianId;
       report.technicianName = technician.name;
       report.status = 'submitted';
@@ -488,6 +520,12 @@ export class LabRequestsService {
         findings: dto.findings?.trim() || '',
         remarks: dto.remarks?.trim() || '',
         fileAttachment: dto.fileAttachment || null,
+        uploadedFileName: null,
+        uploadedFilePath: null,
+        uploadedFileOriginalName: null,
+        uploadedFileMimeType: null,
+        uploadedFileSize: null,
+        uploadedAt: null,
         status: 'submitted',
         createdAt: now,
         updatedAt: now,
@@ -511,6 +549,94 @@ export class LabRequestsService {
     return this.labReports
       .filter((r) => isBranchAllowed(r.branchId, technician.branchId) && r.technicianId === technicianId)
       .map((r) => ({ ...r }));
+  }
+
+  async uploadReportFile(
+    requestId: string,
+    technicianId: string,
+    file: UploadedLabReportFile,
+  ): Promise<{ request: LabRequest; report: LabReport }> {
+    const technician = await this.labTechniciansService.findOne(technicianId);
+    const request = this.findById(requestId);
+    if (!isBranchAllowed(request.branchId, technician.branchId)) {
+      throw new ForbiddenException('Access denied for this hospital branch');
+    }
+    if (request.acceptedByTechnicianId && request.acceptedByTechnicianId !== technicianId) {
+      throw new ForbiddenException('This lab request is assigned to another lab technician');
+    }
+
+    if (
+      request.status !== 'accepted' &&
+      request.status !== 'in_progress' &&
+      request.status !== 'draft_report'
+    ) {
+      throw new BadRequestException(`Cannot upload a report for request with status "${request.status}"`);
+    }
+
+    const now = new Date().toISOString();
+    const publicFilePath = ['uploads', 'lab-reports', file.filename].join('/');
+    let report = this.labReports.find((r) => r.labRequestId === requestId);
+    const fileAttachment = {
+      fileName: file.originalname,
+      fileType: file.mimetype,
+      fileSize: file.size,
+      fileData: `/${publicFilePath}`,
+    };
+
+    if (report) {
+      report.fileAttachment = fileAttachment;
+      report.uploadedFileName = file.filename;
+      report.uploadedFilePath = publicFilePath;
+      report.uploadedFileOriginalName = file.originalname;
+      report.uploadedFileMimeType = file.mimetype;
+      report.uploadedFileSize = file.size;
+      report.uploadedAt = now;
+      report.technicianId = technicianId;
+      report.technicianName = technician.name;
+      report.updatedAt = now;
+      if (report.status !== 'submitted') {
+        report.status = 'draft';
+      }
+    } else {
+      report = {
+        id: this.generateReportId(),
+        labRequestId: request.id,
+        medicalRecordId: request.medicalRecordId,
+        appointmentId: request.appointmentId,
+        patientId: request.patientId,
+        patientName: request.patientName,
+        doctorId: request.doctorId,
+        doctorName: request.doctorName,
+        branchId: request.branchId,
+        technicianId,
+        technicianName: technician.name,
+        testName: request.testName,
+        result: '',
+        findings: '',
+        remarks: '',
+        fileAttachment,
+        uploadedFileName: file.filename,
+        uploadedFilePath: publicFilePath,
+        uploadedFileOriginalName: file.originalname,
+        uploadedFileMimeType: file.mimetype,
+        uploadedFileSize: file.size,
+        uploadedAt: now,
+        status: 'draft',
+        createdAt: now,
+        updatedAt: now,
+        submittedAt: null,
+      };
+      this.labReports.unshift(report);
+    }
+
+    const reqItem = this.labRequests.find((r) => r.id === requestId)!;
+    reqItem.status = 'draft_report';
+    reqItem.draftSavedAt = now;
+    reqItem.reportId = report.id;
+    reqItem.updatedAt = now;
+
+    this.persistData();
+    return { request: { ...reqItem }, report: { ...report } };
   }
 
   async findReportByIdForTechnician(reportId: string, technicianId: string): Promise<LabReport> {

@@ -20,9 +20,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@nestjs/common": "^11.1.29",
-    "@nestjs/core": "^11.1.29",
-    "@nestjs/platform-express": "^11.1.29",
+    "@nestjs/common": "^11.2.3",
+    "@nestjs/core": "^11.2.3",
+    "@nestjs/platform-express": "^11.2.3",
     "@nestjs/swagger": "^11.4.6",
     "@nestjs/throttler": "^6.5.0",
     "@nestjs/typeorm": "^11.0.3",
