@@ -1,20 +1,3 @@
 {
-  "testBookings": [
-    {
-      "id": "TBOOK1787428792059",
-      "userId": "PAT001",
-      "labTestId": "LAB002",
-      "status": "cart",
-      "cartId": "LABCART1778309316934",
-      "orderId": null
-    },
-    {
-      "id": "TBOOK1787428762471",
-      "userId": "PAT001",
-      "labTestId": "LAB003",
-      "status": "cart",
-      "cartId": "LABCART1778309316934",
-      "orderId": null
-    }
-  ]
+  "testBookings": []
 }

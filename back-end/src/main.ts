@@ -7,11 +7,14 @@ import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { ApplicationLogger } from './common/application-logger.service';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useLogger(app.get(ApplicationLogger));
-  
+  const logger = app.get(ApplicationLogger);
+  app.useLogger(logger);
+  app.useGlobalFilters(new HttpExceptionFilter(logger));
+
   app.use(helmet());
   app.useStaticAssets(join(process.cwd(), 'uploads'), {
     prefix: '/uploads',
