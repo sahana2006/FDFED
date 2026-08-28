@@ -2,6 +2,8 @@
 
 const APPOINTMENTS_API_BASE_URL = 'http://localhost:3000';
 const SELECTED_BRANCH_KEY = 'medbits_patient_selected_branch';
+const BILLING_CONTEXT_KEY = 'medbits_patient_billing_context';
+const STATIC_BILLING_AMOUNT = 'Rs 1,200.00';
 
 let allBranches = [];
 let allDoctors = [];
@@ -544,10 +546,16 @@ async function confirmAppointment() {
     return;
   }
 
-  await loadUserAppointments();
-  refreshApptLists();
-  showToast('Appointment booked!', 'success');
-  await loadSlotsForSelectedDoctor(date);
+  const bookingResponse = await response.json().catch(() => null);
+  sessionStorage.setItem(
+    BILLING_CONTEXT_KEY,
+    JSON.stringify({
+      appointment: bookingResponse,
+      amount: STATIC_BILLING_AMOUNT,
+    }),
+  );
+
+  window.location.href = 'billing.html';
 }
 
 async function openAppointmentEditModal(appointmentId) {

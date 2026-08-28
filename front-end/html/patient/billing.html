@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEDBITS - Billing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../css/patient/global.css">
+  <link rel="stylesheet" href="../../css/components/p_sidebar.css">
+  <link rel="stylesheet" href="../../css/components/p_navbar.css">
+  <link rel="stylesheet" href="../../css/patient/billing.css">
+</head>
+<body class="billing-shell">
+
+<div id="sidebarMount"></div>
+<div class="main-wrap">
+  <div id="navbarMount"></div>
+  <main class="content">
+    <section class="billing-hero">
+      <div class="billing-kicker">Patient Appointment Billing</div>
+      <h2>Booking confirmed. Here is your billing summary.</h2>
+      <p>
+        This is a static billing page for the appointment you just booked. It uses the
+        confirmed booking response wherever available and shows fixed placeholders for any
+        billing fields that are not returned by the backend.
+      </p>
+      <div class="billing-status" id="billingStatusBadge">CONFIRMED</div>
+    </section>
+
+    <div class="billing-grid">
+      <section class="billing-card">
+        <h3>Appointment Details</h3>
+        <div class="billing-summary">
+          <div class="billing-row">
+            <div class="billing-label">Appointment ID</div>
+            <div class="billing-value" id="billingAppointmentId">APT-XXXXXX</div>
+          </div>
+          <div class="billing-row">
+            <div class="billing-label">Patient</div>
+            <div class="billing-value" id="billingPatientName">Patient Name</div>
+          </div>
+          <div class="billing-row">
+            <div class="billing-label">Doctor</div>
+            <div class="billing-value" id="billingDoctorName">Doctor Name</div>
+          </div>
+          <div class="billing-row">
+            <div class="billing-label">Speciality</div>
+            <div class="billing-value" id="billingSpeciality">Speciality</div>
+          </div>
+          <div class="billing-row">
+            <div class="billing-label">Date</div>
+            <div class="billing-value" id="billingDate">DD MMM, YYYY</div>
+          </div>
+          <div class="billing-row">
+            <div class="billing-label">Time</div>
+            <div class="billing-value" id="billingTime">HH:MM</div>
+          </div>
+          <div class="billing-row">
+            <div class="billing-label">Branch</div>
+            <div class="billing-value" id="billingBranch">Hospital Branch</div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="billing-card">
+        <h3>Amount Due</h3>
+        <div class="billing-meta-grid">
+          <div class="billing-meta">
+            <div class="label">Consultation Fee</div>
+            <div class="value" id="billingAmount">Rs 1,200.00</div>
+          </div>
+          <div class="billing-meta">
+            <div class="label">Payment Type</div>
+            <div class="value">Static Invoice</div>
+          </div>
+          <div class="billing-meta">
+            <div class="label">Invoice Status</div>
+            <div class="value">Pending</div>
+          </div>
+          <div class="billing-meta">
+            <div class="label">Reference</div>
+            <div class="value" id="billingReference">Appointment Billing</div>
+          </div>
+        </div>
+
+        <div class="billing-note">
+          This page is intentionally static. It does not create, process, or persist any payment
+          record. It only displays the booking summary after a successful appointment confirmation.
+        </div>
+
+        <div class="billing-actions">
+          <a class="btn btn-primary" href="appointments.html">Back to Appointments</a>
+          <a class="btn btn-outline" href="dashboard.html">Go to Dashboard</a>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/patient/utils.js"></script>
+<script src="../../js/patient/components.js"></script>
+<script src="../../js/patient/billing.js"></script>
+<script>
+  (async () => {
+    await loadComponents('billing', 'Billing');
+    updateTopbarUser();
+    try {
+      await initializeBillingPage();
+    } catch (_error) {
+      showToast('Unable to load billing details', 'error');
+    }
+  })();
+</script>
+</body>
+</html>
