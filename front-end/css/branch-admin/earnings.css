@@ -1,0 +1,317 @@
+/* Branch Admin Earnings - static analytics page */
+
+.earnings-page .hero-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) auto;
+  gap: 24px;
+  align-items: end;
+}
+
+.earnings-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.earnings-kpi {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+
+.earnings-kpi-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.earnings-kpi-value {
+  font-family: 'Sora', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-top: 8px;
+}
+
+.earnings-kpi-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.earnings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, .95fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.analytics-panel,
+.side-panel,
+.table-panel {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.panel-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.panel-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.panel-copy {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.55;
+}
+
+.revenue-chart {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 10px;
+  align-items: end;
+  min-height: 250px;
+  padding-top: 10px;
+}
+
+.revenue-bar {
+  background: linear-gradient(180deg, var(--accent) 0%, #14b8a6 100%);
+  border-radius: 12px 12px 6px 6px;
+  min-height: 24px;
+  position: relative;
+  box-shadow: 0 10px 24px rgba(15, 118, 110, .18);
+}
+
+.revenue-bar::before {
+  content: attr(data-label);
+  position: absolute;
+  left: 50%;
+  bottom: -34px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.revenue-bar::after {
+  content: attr(data-value);
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.chart-footnote {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 42px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.stacked-card {
+  background: linear-gradient(180deg, #f8fffe 0%, #eefbf8 100%);
+  border: 1px solid #d1fae5;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.stacked-card-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.stacked-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stacked-card-value {
+  font-family: 'Sora', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-top: 4px;
+}
+
+.mini-list {
+  display: grid;
+  gap: 12px;
+}
+
+.mini-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.mini-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.mini-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mini-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.mini-value {
+  font-family: 'Sora', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pill-green {
+  background: var(--green-light);
+  color: #065f46;
+}
+
+.pill-blue {
+  background: var(--accent-light);
+  color: #134e4a;
+}
+
+.pill-amber {
+  background: var(--orange-light);
+  color: #92400e;
+}
+
+.branch-table-wrap {
+  margin-top: 18px;
+}
+
+.branch-table tbody tr:nth-child(odd) {
+  background: #fcfffe;
+}
+
+.revenue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: #134e4a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.branch-health {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.health-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.health-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.health-value {
+  font-family: 'Sora', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-top: 8px;
+}
+
+@media (max-width: 1100px) {
+  .earnings-kpi-row,
+  .branch-health {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .earnings-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .earnings-page .hero-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .earnings-kpi-row,
+  .branch-health {
+    grid-template-columns: 1fr;
+  }
+
+  .revenue-chart {
+    gap: 8px;
+    min-height: 220px;
+  }
+}

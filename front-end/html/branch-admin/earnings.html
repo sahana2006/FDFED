@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MEDBITS Branch Admin Earnings dashboard for branch revenue analytics">
+  <title>MEDBITS - Branch Earnings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/branch-admin/global.css">
+  <link rel="stylesheet" href="../../css/branch-admin/earnings.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">⨞</span>
+    <span class="brand-name">MEDBITS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" data-page="dashboard" href="dashboard.html"><span class="nav-icon">⨞</span><span>Dashboard</span></a>
+    <a class="nav-item" data-page="doctors" href="doctors.html"><span class="nav-icon">🩺</span><span>Manage Doctors</span></a>
+    <a class="nav-item" data-page="frontdesk" href="frontdesk.html"><span class="nav-icon">🖥️</span><span>Manage Front Desk</span></a>
+    <a class="nav-item" data-page="lab-technicians" href="lab-technicians.html"><span class="nav-icon">🔬</span><span>Lab Technicians</span></a>
+    <a class="nav-item" data-page="leave-management" href="leave-management.html"><span class="nav-icon">📅</span><span>Leave Management</span></a>
+    <a class="nav-item active" data-page="earnings" href="earnings.html"><span class="nav-icon">&#8377;</span><span>Earnings</span></a>
+  </nav>
+  <div class="sidebar-bottom">
+    <a class="nav-item logout-btn" id="logoutBtn">
+      <span class="nav-icon">⇥</span><span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<div class="main-wrap earnings-page">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle">☰</button>
+      <div>
+        <div class="page-title" id="pageTitle">Earnings</div>
+        <div class="page-sub" id="portalLabel">Branch Admin Portal</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="notif-btn" id="notifBtn">🔔</button>
+      <div class="user-chip">
+        <div class="user-avatar" id="userAvatarTop">BA</div>
+        <div>
+          <div class="user-name" id="userNameTop">Branch Admin</div>
+          <div class="user-role">Branch Admin</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="content">
+    <section class="hero-banner">
+      <div>
+        <div class="hero-greeting">MEDBITS BRANCH REVENUE OVERVIEW</div>
+        <div class="hero-name">Branch Earnings Dashboard</div>
+        <div class="hero-sub">A static revenue snapshot for the full branch. Track collections, performance trends, and service mix at a glance.</div>
+      </div>
+      <div>
+        <div class="revenue-badge">Static analytics view</div>
+      </div>
+    </section>
+
+    <section class="earnings-kpi-row">
+      <div class="earnings-kpi">
+        <div class="earnings-kpi-label">Total Branch Revenue</div>
+        <div class="earnings-kpi-value">&#8377;84.6L</div>
+        <div class="earnings-kpi-note">All-time collections from appointments, diagnostics, and ancillary services</div>
+      </div>
+      <div class="earnings-kpi">
+        <div class="earnings-kpi-label">This Month</div>
+        <div class="earnings-kpi-value">&#8377;12.4L</div>
+        <div class="earnings-kpi-note">Up 18.2% versus the previous month</div>
+      </div>
+      <div class="earnings-kpi">
+        <div class="earnings-kpi-label">Pending Dues</div>
+        <div class="earnings-kpi-value">&#8377;1.8L</div>
+        <div class="earnings-kpi-note">23 invoices still awaiting settlement</div>
+      </div>
+      <div class="earnings-kpi">
+        <div class="earnings-kpi-label">Average Daily Collection</div>
+        <div class="earnings-kpi-value">&#8377;41K</div>
+        <div class="earnings-kpi-note">Based on the last 30 days of branch billing</div>
+      </div>
+    </section>
+
+    <section class="earnings-layout">
+      <div class="analytics-panel">
+        <div class="panel-heading">
+          <div>
+            <div class="panel-eyebrow">Revenue trend</div>
+            <div class="panel-title">Monthly branch collections</div>
+            <div class="panel-copy">Static monthly revenue bars showing the branch's revenue trajectory across the current financial cycle.</div>
+          </div>
+          <span class="pill pill-green">+14.8% YoY</span>
+        </div>
+
+        <div class="revenue-chart" aria-label="Static monthly revenue chart">
+          <div class="revenue-bar" style="height: 44%" data-label="Jan" data-value="5.1L"></div>
+          <div class="revenue-bar" style="height: 54%" data-label="Feb" data-value="6.2L"></div>
+          <div class="revenue-bar" style="height: 49%" data-label="Mar" data-value="5.7L"></div>
+          <div class="revenue-bar" style="height: 60%" data-label="Apr" data-value="6.9L"></div>
+          <div class="revenue-bar" style="height: 66%" data-label="May" data-value="7.5L"></div>
+          <div class="revenue-bar" style="height: 73%" data-label="Jun" data-value="8.4L"></div>
+          <div class="revenue-bar" style="height: 69%" data-label="Jul" data-value="8.0L"></div>
+          <div class="revenue-bar" style="height: 81%" data-label="Aug" data-value="9.3L"></div>
+          <div class="revenue-bar" style="height: 78%" data-label="Sep" data-value="9.0L"></div>
+          <div class="revenue-bar" style="height: 86%" data-label="Oct" data-value="9.8L"></div>
+          <div class="revenue-bar" style="height: 92%" data-label="Nov" data-value="10.5L"></div>
+          <div class="revenue-bar" style="height: 100%" data-label="Dec" data-value="11.4L"></div>
+        </div>
+
+        <div class="chart-footnote">
+          <span>Highest month: December</span>
+          <span>Primary driver: outpatient diagnostics and follow-up packages</span>
+        </div>
+
+        <div class="branch-health">
+          <div class="health-card">
+            <div class="health-label">Collection efficiency</div>
+            <div class="health-value">96%</div>
+          </div>
+          <div class="health-card">
+            <div class="health-label">Avg. ticket size</div>
+            <div class="health-value">&#8377;2,450</div>
+          </div>
+          <div class="health-card">
+            <div class="health-label">Revenue target hit</div>
+            <div class="health-value">118%</div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side-panel">
+        <div class="stacked-card">
+          <div class="stacked-card-header">
+            <div>
+              <div class="panel-eyebrow">Revenue mix</div>
+              <div class="stacked-card-title">Where the money comes from</div>
+            </div>
+            <span class="pill pill-blue">Branch-wide</span>
+          </div>
+          <div class="mini-list">
+            <div class="mini-item">
+              <div>
+                <div class="mini-label">Consultations</div>
+                <div class="mini-meta">OPD visits and specialist appointments</div>
+              </div>
+              <div class="mini-value">42%</div>
+            </div>
+            <div class="mini-item">
+              <div>
+                <div class="mini-label">Diagnostics</div>
+                <div class="mini-meta">Lab tests and imaging services</div>
+              </div>
+              <div class="mini-value">31%</div>
+            </div>
+            <div class="mini-item">
+              <div>
+                <div class="mini-label">Pharmacy</div>
+                <div class="mini-meta">Medicine dispensation and refills</div>
+              </div>
+              <div class="mini-value">19%</div>
+            </div>
+            <div class="mini-item">
+              <div>
+                <div class="mini-label">Other services</div>
+                <div class="mini-meta">Procedures, room charges, and support services</div>
+              </div>
+              <div class="mini-value">8%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stacked-card">
+          <div class="stacked-card-header">
+            <div>
+              <div class="panel-eyebrow">Collections snapshot</div>
+              <div class="stacked-card-title">Current branch status</div>
+            </div>
+            <span class="pill pill-amber">Static</span>
+          </div>
+          <div class="mini-list">
+            <div class="mini-item">
+              <div>
+                <div class="mini-label">Cash collections</div>
+                <div class="mini-meta">Front desk and walk-in payments</div>
+              </div>
+              <div class="mini-value">&#8377;4.1L</div>
+            </div>
+            <div class="mini-item">
+              <div>
+                <div class="mini-label">Digital payments</div>
+                <div class="mini-meta">UPI, card, and net banking</div>
+              </div>
+              <div class="mini-value">&#8377;7.6L</div>
+            </div>
+            <div class="mini-item">
+              <div>
+                <div class="mini-label">Outstanding invoices</div>
+                <div class="mini-meta">Pending branch receivables</div>
+              </div>
+              <div class="mini-value">&#8377;1.8L</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="table-panel mt-20">
+      <div class="panel-heading">
+        <div>
+          <div class="panel-eyebrow">Revenue ledger</div>
+          <div class="panel-title">Recent branch collections</div>
+          <div class="panel-copy">A static ledger of representative revenue activity across the branch.</div>
+        </div>
+      </div>
+
+      <div class="table-wrap branch-table-wrap">
+        <table class="branch-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Source</th>
+              <th>Service Type</th>
+              <th>Collected By</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>28 Aug 2026</td>
+              <td>Walk-in billing</td>
+              <td>Consultation package</td>
+              <td>Front Desk</td>
+              <td><span class="revenue-badge">&#8377;18,500</span></td>
+            </tr>
+            <tr>
+              <td>27 Aug 2026</td>
+              <td>Lab services</td>
+              <td>Diagnostics bundle</td>
+              <td>Accounts</td>
+              <td><span class="revenue-badge">&#8377;42,900</span></td>
+            </tr>
+            <tr>
+              <td>26 Aug 2026</td>
+              <td>Pharmacy</td>
+              <td>Medicine refill</td>
+              <td>Pharmacy Desk</td>
+              <td><span class="revenue-badge">&#8377;26,750</span></td>
+            </tr>
+            <tr>
+              <td>25 Aug 2026</td>
+              <td>Corporate billing</td>
+              <td>Monthly settlement</td>
+              <td>Admin Office</td>
+              <td><span class="revenue-badge">&#8377;1,12,000</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../../js/branch-admin/utils.js"></script>
+<script src="../../js/branch-admin/components.js"></script>
+<script>
+  (async () => {
+    await loadComponents('earnings', 'Earnings');
+    updateTopbarUser();
+  })();
+</script>
+</body>
+</html>
