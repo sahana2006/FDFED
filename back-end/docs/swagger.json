@@ -418,6 +418,40 @@
         ]
       }
     },
+    "/hospital-branches/{id}/subscription/renew": {
+      "patch": {
+        "operationId": "HospitalBranchController_renewSubscription",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role for RBAC (admin)",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Hospital branch UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Renew branch subscription",
+        "tags": [
+          "Hospital Branches"
+        ]
+      }
+    },
     "/super-admin/hospital-branches": {
       "post": {
         "operationId": "SuperAdminHospitalBranchController_create",
@@ -474,6 +508,31 @@
           }
         },
         "summary": "List all hospital branches",
+        "tags": [
+          "Super Admin - Hospital Branches"
+        ]
+      }
+    },
+    "/super-admin/hospital-branches/earnings": {
+      "get": {
+        "operationId": "SuperAdminHospitalBranchController_getEarnings",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "Must be super_admin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get super admin earnings",
         "tags": [
           "Super Admin - Hospital Branches"
         ]
@@ -4060,6 +4119,15 @@
               "inactive"
             ],
             "default": "active"
+          },
+          "planTier": {
+            "type": "string",
+            "enum": [
+              "base",
+              "pro",
+              "enterprise"
+            ],
+            "default": "base"
           }
         },
         "required": [
@@ -4115,6 +4183,15 @@
               "inactive"
             ],
             "default": "active"
+          },
+          "planTier": {
+            "type": "string",
+            "enum": [
+              "base",
+              "pro",
+              "enterprise"
+            ],
+            "default": "base"
           }
         }
       },

@@ -39,8 +39,8 @@ import { NotificationsModule } from './notifications/notifications.module';
       database:
         process.env.HOSPITAL_BRANCH_DB_PATH ?? 'data/hospital-branches.sqlite',
       autoLoadEntities: true,
-      synchronize: false,
-      migrationsRun: true,
+      synchronize: true,
+      migrationsRun: false,
       migrations: [__dirname + '/database/migrations/*{.js,.ts}'],
     }),
     CommonModule,

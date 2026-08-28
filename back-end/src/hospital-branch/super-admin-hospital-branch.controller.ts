@@ -30,6 +30,12 @@ export class SuperAdminHospitalBranchController {
     return this.hospitalBranchService.findAll();
   }
 
+  @Get('earnings')
+  @ApiOperation({ summary: 'Get super admin earnings' })
+  getEarnings() {
+    return this.hospitalBranchService.getEarnings();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a hospital branch by ID' })
   @ApiParam({ name: 'id', description: 'Hospital branch UUID' })

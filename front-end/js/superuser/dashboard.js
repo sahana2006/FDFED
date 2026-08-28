@@ -1,4 +1,4 @@
-﻿const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://localhost:3000';
 const STORAGE_KEY = 'user';
 
 const state = {
@@ -275,7 +275,26 @@ async function createBranch(event) {
     pincode: $('create-pincode').value.trim(),
     phone: $('create-phone').value.trim(),
     email: $('create-email').value.trim(),
+    planTier: $('create-plan-tier').value,
   };
+
+  const form = $('create-branch-form');
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+
+  // Show Payment Modal
+  $('payment-tier-name').textContent = payload.planTier.toUpperCase();
+  $('payment-modal').style.display = 'flex';
+  
+  // Store payload temporarily
+  window._pendingBranchPayload = payload;
+}
+
+async function executeBranchCreation() {
+  const payload = window._pendingBranchPayload;
+  if (!payload) return;
 
   try {
     await apiRequest('/super-admin/hospital-branches', {
@@ -283,7 +302,11 @@ async function createBranch(event) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    showToast('Branch created successfully.');
+    
+    $('payment-modal').style.display = 'none';
+    window._pendingBranchPayload = null;
+    
+    showToast('Payment successful! Branch created.');
     resetCreateForm();
     await refreshDashboard();
   } catch (error) {
@@ -345,6 +368,13 @@ function bindEvents() {
   $('create-branch-form')?.addEventListener('submit', createBranch);
   $('assign-admin-form')?.addEventListener('submit', createBranchAdmin);
   $('superuser-logout')?.addEventListener('click', logoutSuperUser);
+  
+  $('payment-cancel-btn')?.addEventListener('click', () => {
+    $('payment-modal').style.display = 'none';
+    window._pendingBranchPayload = null;
+  });
+  
+  $('payment-complete-btn')?.addEventListener('click', executeBranchCreation);
 }
 
 async function init() {

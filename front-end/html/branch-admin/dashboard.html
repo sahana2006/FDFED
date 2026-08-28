@@ -104,9 +104,57 @@
         </div>
         <div id="accountGrid" class="detail-grid"></div>
       </div>
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Subscription & Plan</div>
+        </div>
+        <div id="subscriptionGrid" class="detail-grid">
+          <div class="empty-state"><p>Loading subscription info…</p></div>
+        </div>
+        <div id="renew-action-container" style="margin-top: 1rem; text-align: right; display: none;">
+          <button class="btn btn-primary" id="btn-pay-due" style="background: #0f172a; color: white;">Pay Due</button>
+        </div>
+      </div>
     </div>
 
   </main>
+</div>
+
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal-box" style="background: white; width: 100%; max-width: 420px; border-radius: 16px; padding: 2.5rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2); position: relative; overflow: hidden;">
+    <!-- Decorative top bar -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #3b82f6, #10b981, #3b82f6); background-size: 200% 100%; animation: gradient 3s ease infinite;"></div>
+    
+    <div style="margin-bottom: 1.5rem;">
+      <div style="width: 48px; height: 48px; background: #ecfdf5; color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 1.5rem;">💳</div>
+      <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; letter-spacing: -0.025em;">Secure Payment</h2>
+      <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5;">Scan the QR code to activate the <strong style="color: #0f172a; text-transform: uppercase;" id="payment-tier-name"></strong> plan.</p>
+    </div>
+    
+    <div style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px dashed #cbd5e1; margin-bottom: 1.5rem; display: inline-flex; align-items: center; justify-content: center;">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=MedBitsRenewal" alt="Payment QR" width="160" height="160" style="border-radius: 8px;">
+    </div>
+    
+    <div style="text-align: left; background: #f1f5f9; padding: 1.25rem; border-radius: 8px; margin-bottom: 2rem; font-size: 0.875rem; color: #334155; line-height: 1.6;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
+        <span style="color: #64748b;">Account Name</span>
+        <strong style="color: #0f172a;">MedBits Tech</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
+        <span style="color: #64748b;">Account No</span>
+        <strong style="color: #0f172a;">1234567890</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: #64748b;">IFSC Code</span>
+        <strong style="color: #0f172a;">HDFC0001234</strong>
+      </div>
+    </div>
+    
+    <div style="display: flex; gap: 1rem;">
+      <button class="btn" id="payment-cancel-btn" type="button" style="flex: 1; padding: 0.75rem; border-radius: 8px; font-weight: 600; background: #fff; border: 1px solid #cbd5e1; color: #475569; cursor: pointer; transition: all 0.2s;">Cancel</button>
+      <button class="btn" id="payment-complete-btn" type="button" style="flex: 1; padding: 0.75rem; border-radius: 8px; font-weight: 600; background: #10b981; color: white; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1);">Confirm Payment</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">

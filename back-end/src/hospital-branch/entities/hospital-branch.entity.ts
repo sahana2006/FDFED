@@ -5,6 +5,12 @@ export enum HospitalBranchStatus {
   INACTIVE = 'inactive',
 }
 
+export enum PlanTier {
+  BASE = 'base',
+  PRO = 'pro',
+  ENTERPRISE = 'enterprise',
+}
+
 @Entity({ name: 'hospital_branches' })
 export class HospitalBranch {
   @PrimaryGeneratedColumn('uuid')
@@ -36,6 +42,12 @@ export class HospitalBranch {
 
   @Column({ type: 'varchar', length: 20, default: HospitalBranchStatus.ACTIVE })
   status!: HospitalBranchStatus;
+
+  @Column({ type: 'varchar', length: 20, default: PlanTier.BASE })
+  planTier!: PlanTier;
+
+  @Column({ type: 'datetime', nullable: true })
+  subscriptionDue!: Date | null;
 
   @CreateDateColumn()
   createdAt!: Date;
