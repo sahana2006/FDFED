@@ -92,11 +92,11 @@ function renderTable() {
       return `
         <tr>
           <td>
-            <div class="doc-name-cell">
+            <div class="doc-name-cell" style="cursor: pointer;" onclick="openViewModal('${escapeHtml(tech.id)}')" title="Click to view technician details & lab activity">
               <div class="doc-avatar lt-avatar">${escapeHtml(initials)}</div>
               <div>
-                <div class="font-bold">${escapeHtml(tech.name)}</div>
-                <div class="text-muted text-sm">Lab Technician</div>
+                <div class="font-bold doc-name-link" style="color:var(--navy);">${escapeHtml(tech.name)}</div>
+                <div class="text-muted text-sm">${escapeHtml(tech.email || 'Lab Technician')}</div>
               </div>
             </div>
           </td>
@@ -105,7 +105,7 @@ function renderTable() {
           <td><span style="white-space:nowrap;font-size:12.5px;color:var(--text-muted);">${escapeHtml(createdStr)}</span></td>
           <td>
             <div class="action-btns">
-              <button class="btn-icon" title="View" onclick="openViewModal('${escapeHtml(tech.id)}')">👁</button>
+              <button class="action-view-btn" title="View Full Details & Lab Activity" onclick="openViewModal('${escapeHtml(tech.id)}')">👁 View</button>
               <button class="btn-icon" title="Edit" onclick="openEditModal('${escapeHtml(tech.id)}')">✏️</button>
               <button class="btn-icon" title="Remove" onclick="deleteTechnician('${escapeHtml(tech.id)}')">🗑️</button>
             </div>
@@ -164,35 +164,166 @@ function openEditModal(techId) {
   openModal(buildModalForm(tech));
 }
 
-function openViewModal(techId) {
+async function openViewModal(techId) {
   const tech = allTechnicians.find(t => t.id === techId);
   if (!tech) { showToast('Lab Technician not found', 'error'); return; }
 
   const createdStr = tech.createdAt ? formatDate(tech.createdAt.split('T')[0]) : '—';
   
   openModal(`
-    <div class="modal-title">🔬 Lab Technician Profile</div>
-    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
-      <div class="lt-profile-avatar" style="width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 20px; font-weight: 700;">
+    <div class="modal-title">🔬 Lab Technician Profile & Managed Appointments</div>
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+      <div class="lt-profile-avatar" style="width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 20px; font-weight: 700; background: var(--navy);">
         ${escapeHtml(getInitials(tech.name))}
       </div>
       <div>
         <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:700">${escapeHtml(tech.name || '—')}</div>
-        <div class="text-muted">Lab Technician · ${escapeHtml(tech.id)}</div>
+        <div class="text-muted">Lab Technician · <span class="badge badge-teal">${escapeHtml(tech.id)}</span></div>
       </div>
     </div>
-    <div style="height: 1px; background: var(--border); margin-bottom: 24px;"></div>
+    
+    <div class="divider"></div>
+    <div style="font-weight:700; font-size:14px; margin-bottom:12px; color:var(--navy);">Technician Details</div>
     <div class="detail-grid">
       ${detailItem('Email', tech.email)}
+      ${detailItem('Technician ID', tech.id)}
       ${detailItem('Branch ID', tech.branchId)}
       ${detailItem('Status', 'Active')}
       ${detailItem('Created Date', createdStr)}
     </div>
+
+    <div class="divider"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+      <div style="font-weight:700; font-size:14px; color:var(--navy);">Lab Technician Managed Appointments & Tests</div>
+      <div id="ltSummaryPills" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+    </div>
+    <div id="ltListWrap" style="max-height: 240px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px;">
+      <p style="text-align:center; color:var(--text-muted); font-size:13px; padding:16px;">Loading managed appointments...</p>
+    </div>
+
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal()">Close</button>
-      <button class="btn btn-accent" onclick="closeModal(); openEditModal('${escapeHtml(techId)}')">Edit</button>
+      <button class="btn btn-accent" onclick="closeModal(); openEditModal('${escapeHtml(techId)}')">Edit Technician</button>
     </div>
   `);
+
+  try {
+    const [requestsRes, reportsRes] = await Promise.all([
+      apiRequest('/lab-requests').catch(() => []),
+      apiRequest('/lab-reports').catch(() => []),
+    ]);
+
+    const allRequests = Array.isArray(requestsRes) ? requestsRes : [];
+    const allReports = Array.isArray(reportsRes) ? reportsRes : [];
+
+    // Filter requests managed by this technician
+    const techRequests = allRequests.filter(r => {
+      if (r.acceptedByTechnicianId && r.acceptedByTechnicianId === techId) return true;
+      if (r.rejectedByTechnicianId && r.rejectedByTechnicianId === techId) return true;
+      if (r.technicianId && r.technicianId === techId) return true;
+      if (r.reportId && allReports.some(rep => rep.id === r.reportId && rep.technicianId === techId)) return true;
+      if (!r.acceptedByTechnicianId && r.branchId === tech.branchId) return true;
+      return false;
+    });
+
+    renderTechReportsInModal(techRequests, allReports);
+  } catch (err) {
+    const listWrap = $('ltListWrap');
+    if (listWrap) {
+      listWrap.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:16px;">No lab technician managed appointments found for this technician.</p>`;
+    }
+  }
+}
+
+function renderTechReportsInModal(requests, reports) {
+  const pillsEl = $('ltSummaryPills');
+  const listEl = $('ltListWrap');
+  if (!listEl) return;
+
+  const total = requests.length;
+  const completed = requests.filter(r => r.status === 'completed' || r.status === 'submitted' || r.status === 'done');
+  const inProgress = requests.filter(r => r.status === 'in_progress' || r.status === 'accepted' || r.status === 'draft_report');
+  const pending = requests.filter(r => r.status === 'pending');
+  const rejected = requests.filter(r => r.status === 'rejected');
+
+  if (pillsEl) {
+    pillsEl.innerHTML = `
+      <span class="badge badge-teal" style="font-size:11px;">Total: ${total}</span>
+      ${completed.length ? `<span class="badge badge-green" style="font-size:11px;">Completed: ${completed.length}</span>` : ''}
+      ${inProgress.length ? `<span class="badge badge-blue" style="font-size:11px;">In Progress: ${inProgress.length}</span>` : ''}
+      ${pending.length ? `<span class="badge badge-orange" style="font-size:11px;">Pending: ${pending.length}</span>` : ''}
+      ${rejected.length ? `<span class="badge badge-red" style="font-size:11px;">Rejected: ${rejected.length}</span>` : ''}
+    `;
+  }
+
+  if (!requests.length) {
+    listEl.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:16px;">No lab technician managed appointments found for this technician.</p>';
+    return;
+  }
+
+  listEl.innerHTML = `
+    <table style="width:100%; font-size:12.5px; border-collapse:collapse;">
+      <thead>
+        <tr style="background:var(--bg); text-align:left;">
+          <th style="padding:6px 10px; font-size:11px;">Appt / Request</th>
+          <th style="padding:6px 10px; font-size:11px;">Patient</th>
+          <th style="padding:6px 10px; font-size:11px;">Doctor & Test</th>
+          <th style="padding:6px 10px; font-size:11px;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${requests.map(r => {
+          const apptId = r.appointmentId ? `Appt: ${r.appointmentId}` : r.id;
+          const patientName = r.patientName || r.patientId || 'Patient';
+          const doctorName = r.doctorName || r.doctorId || 'Doctor';
+          const testName = r.testName || 'Lab Test';
+          const dateStr = formatDate(r.labTestDate || r.requestDate || r.createdAt?.split('T')[0] || '');
+          
+          let badgeClass = 'badge-orange';
+          let statusLabel = 'Pending';
+          const st = String(r.status || '').toLowerCase();
+          if (st === 'completed' || st === 'submitted' || st === 'done') {
+            badgeClass = 'badge-green';
+            statusLabel = 'Completed';
+          } else if (st === 'in_progress' || st === 'accepted') {
+            badgeClass = 'badge-blue';
+            statusLabel = 'In Progress';
+          } else if (st === 'draft_report') {
+            badgeClass = 'badge-teal';
+            statusLabel = 'Draft Report';
+          } else if (st === 'rejected') {
+            badgeClass = 'badge-red';
+            statusLabel = 'Rejected';
+          } else if (st === 'pending') {
+            badgeClass = 'badge-orange';
+            statusLabel = 'Pending';
+          } else {
+            statusLabel = st ? st.charAt(0).toUpperCase() + st.slice(1) : 'Pending';
+          }
+
+          return `
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:8px 10px;">
+                <div style="font-weight:600; color:var(--navy);">${escapeHtml(apptId)}</div>
+                <div class="text-muted" style="font-size:11.5px;">${escapeHtml(dateStr)}</div>
+              </td>
+              <td style="padding:8px 10px;">
+                <div style="font-weight:600;">${escapeHtml(patientName)}</div>
+                <div class="text-muted" style="font-size:11px;">ID: ${escapeHtml(r.patientId || '—')}</div>
+              </td>
+              <td style="padding:8px 10px;">
+                <div style="font-weight:500;">${escapeHtml(testName)}</div>
+                <div class="text-muted" style="font-size:11px;">Dr: ${escapeHtml(doctorName)}</div>
+              </td>
+              <td style="padding:8px 10px;">
+                <span class="badge ${badgeClass}" style="font-size:11px;">${escapeHtml(statusLabel)}</span>
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
 }
 
 function detailItem(label, value) {

@@ -37,38 +37,6 @@
 
   await loadDoctors();
 
-  const STATIC_REFERRALS = [
-    {
-      patient: 'Neil Verma',
-      doctor: 'Dr. Anil Kumar - Cardiology',
-      priority: 'Urgent',
-      status: 'Pending',
-      statusClass: 'badge-pending',
-      date: 'Mar 5, 2026',
-      fromDoctorId: currentDoctorId
-    },
-    {
-      patient: 'Alisha Verma',
-      doctor: 'Dr. Meena Iyer - Endocrinology',
-      priority: 'Routine',
-      status: 'Accepted',
-      statusClass: 'badge-confirmed',
-      date: 'Feb 28, 2026',
-      fromDoctorId: currentDoctorId
-    },
-    {
-      patient: 'Arun Menon',
-      doctor: currentDoctorName,
-      fromDoctorName: 'Dr. Sarah Johnson - Cardiology',
-      fromDoctorId: 'DOC003',
-      doctorId: currentDoctorId,
-      priority: 'Emergency',
-      status: 'Assigned',
-      statusClass: 'badge-confirmed',
-      date: 'Mar 1, 2026'
-    }
-  ];
-
   const previousReferralsList = document.getElementById('previousReferralsList');
   const allReferralsList = document.getElementById('allReferralsList');
   const referralModal = document.getElementById('referralModal');
@@ -92,13 +60,13 @@
   }
 
   function getAllReferrals() {
-    return [...getSavedReferrals(), ...STATIC_REFERRALS];
+    return getSavedReferrals();
   }
 
   function buildReferralRow(ref) {
-    const initials = ref.patient.split(' ').filter(Boolean).map(word => word[0]).join('').toUpperCase().slice(0, 2);
+    const initials = (ref.patient || 'P').split(' ').filter(Boolean).map(word => word[0]).join('').toUpperCase().slice(0, 2);
     const colors = ['#5c7a60', '#3a7d44', '#7a5c60', '#5c6a7a', '#6a7a5c'];
-    const color = colors[Math.abs(ref.patient.charCodeAt(0) % colors.length)];
+    const color = colors[Math.abs((ref.patient || 'P').charCodeAt(0) % colors.length)];
     return `
       <div class="patient-row">
         <div class="patient-left">
@@ -116,9 +84,9 @@
   }
 
   function buildIncomingRow(ref) {
-    const initials = ref.patient.split(' ').filter(Boolean).map(word => word[0]).join('').toUpperCase().slice(0, 2);
+    const initials = (ref.patient || 'P').split(' ').filter(Boolean).map(word => word[0]).join('').toUpperCase().slice(0, 2);
     const colors = ['#5c7a60', '#3a7d44', '#7a5c60', '#5c6a7a', '#6a7a5c'];
-    const color = colors[Math.abs(ref.patient.charCodeAt(0) % colors.length)];
+    const color = colors[Math.abs((ref.patient || 'P').charCodeAt(0) % colors.length)];
     const fromDoctor = ref.fromDoctorName || 'Another Doctor';
     return `
       <div class="patient-row">
@@ -139,17 +107,22 @@
   function renderHistory() {
     const all = getAllReferrals();
     
-    const outgoing = all.filter(ref => ref.fromDoctorId === currentDoctorId || (!ref.fromDoctorId && !ref.doctorId));
-    previousReferralsList.innerHTML = outgoing.slice(0, 3).map(buildReferralRow).join('');
-    allReferralsList.innerHTML = outgoing.map(buildReferralRow).join('');
+    const outgoing = all.filter(ref => ref.fromDoctorId === currentDoctorId);
+    if (outgoing.length === 0) {
+      previousReferralsList.innerHTML = '<p style="color:var(--text-muted);font-size:.875rem;padding:20px 0;text-align:center;">No previous referrals</p>';
+      allReferralsList.innerHTML = '<p style="color:var(--text-muted);font-size:.875rem;padding:20px 0;text-align:center;">No previous referrals</p>';
+    } else {
+      previousReferralsList.innerHTML = outgoing.slice(0, 3).map(buildReferralRow).join('');
+      allReferralsList.innerHTML = outgoing.map(buildReferralRow).join('');
+    }
 
     const incoming = all.filter(ref => ref.doctorId === currentDoctorId);
     if (incoming.length === 0) {
-        incomingReferralsList.innerHTML = '<p style="color:var(--text-muted);font-size:.875rem;padding:20px 0;text-align:center;">No incoming referrals</p>';
-        allIncomingList.innerHTML = '<p style="color:var(--text-muted);font-size:.875rem;padding:20px 0;text-align:center;">No incoming referrals</p>';
+      incomingReferralsList.innerHTML = '<p style="color:var(--text-muted);font-size:.875rem;padding:20px 0;text-align:center;">No incoming referrals</p>';
+      allIncomingList.innerHTML = '<p style="color:var(--text-muted);font-size:.875rem;padding:20px 0;text-align:center;">No incoming referrals</p>';
     } else {
-        incomingReferralsList.innerHTML = incoming.slice(0, 3).map(buildIncomingRow).join('');
-        allIncomingList.innerHTML = incoming.map(buildIncomingRow).join('');
+      incomingReferralsList.innerHTML = incoming.slice(0, 3).map(buildIncomingRow).join('');
+      allIncomingList.innerHTML = incoming.map(buildIncomingRow).join('');
     }
   }
 

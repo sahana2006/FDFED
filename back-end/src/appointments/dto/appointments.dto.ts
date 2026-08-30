@@ -26,6 +26,21 @@ export class CreateAppointmentDto {
   @IsString()
   @IsNotEmpty()
   slot!: string;
+
+  @ApiPropertyOptional({ example: 'frontdesk' })
+  @IsString()
+  @IsOptional()
+  bookedBy?: string;
+
+  @ApiPropertyOptional({ example: 'frontdesk' })
+  @IsString()
+  @IsOptional()
+  source?: string;
+
+  @ApiPropertyOptional({ example: 'FD001' })
+  @IsString()
+  @IsOptional()
+  frontdeskId?: string;
 }
 
 export class UpdateAppointmentDto {

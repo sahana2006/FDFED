@@ -262,7 +262,7 @@ tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: var(--bg); }
 
 /* ── ACTION BUTTONS (in table) ── */
-.action-btns  { display: flex; gap: 6px; }
+.action-btns  { display: flex; gap: 6px; align-items: center; }
 .btn-icon {
   width: 32px; height: 32px;
   border-radius: var(--radius-sm);
@@ -275,6 +275,28 @@ tbody tr:hover { background: var(--bg); }
 }
 .btn-icon:hover          { border-color: var(--accent); color: var(--accent); }
 .btn-icon.btn-icon-red:hover { border-color: var(--red); color: var(--red); }
+.action-view-btn {
+  padding: 5px 11px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  color: var(--navy);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: var(--transition);
+  font-family: 'DM Sans', sans-serif;
+  height: 32px;
+}
+.action-view-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
 
 /* ── SEARCH BAR ── */
 .search-bar {
@@ -338,7 +360,7 @@ textarea { resize: vertical; min-height: 80px; }
   background: var(--white);
   border-radius: var(--radius);
   padding: 32px;
-  max-width: 620px; width: 90%;
+  max-width: 680px; width: 92%;
   max-height: 88vh; overflow-y: auto;
   position: relative;
   transform: scale(.95);
@@ -482,6 +504,12 @@ textarea { resize: vertical; min-height: 80px; }
   display: flex;
   align-items: center;
   gap: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.doc-name-cell:hover .doc-name-link {
+  color: var(--accent) !important;
+  text-decoration: underline;
 }
 .doc-avatar {
   width: 38px; height: 38px;
@@ -495,6 +523,9 @@ textarea { resize: vertical; min-height: 80px; }
 }
 .fd-avatar {
   background: linear-gradient(135deg, #5b21b6, #7c3aed);
+}
+.lt-avatar {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
 }
 
 /* ── PROFILE HEADER IN MODAL ── */

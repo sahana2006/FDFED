@@ -1276,6 +1276,22 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "role",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-user-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -1290,7 +1306,7 @@
         },
         "responses": {
           "201": {
-            "description": "Appointment created successfully"
+            "description": ""
           }
         },
         "summary": "Create an appointment",
@@ -2125,6 +2141,14 @@
             }
           },
           {
+            "name": "role",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "x-user-id",
             "required": true,
             "in": "header",
@@ -2138,7 +2162,7 @@
             "description": "Branch-scoped lab requests"
           }
         },
-        "summary": "List lab requests for the logged-in technician branch",
+        "summary": "List lab requests for the logged-in technician branch or admin",
         "tags": [
           "Lab Requests"
         ]
@@ -2656,6 +2680,14 @@
             }
           },
           {
+            "name": "role",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "x-user-id",
             "required": true,
             "in": "header",
@@ -2669,7 +2701,7 @@
             "description": "Branch-scoped lab reports"
           }
         },
-        "summary": "List all lab reports for the logged-in technician branch",
+        "summary": "List all lab reports for the logged-in technician branch or admin",
         "tags": [
           "Lab Reports"
         ]
@@ -4335,6 +4367,18 @@
           "slot": {
             "type": "string",
             "example": "10:00 AM"
+          },
+          "bookedBy": {
+            "type": "string",
+            "example": "frontdesk"
+          },
+          "source": {
+            "type": "string",
+            "example": "frontdesk"
+          },
+          "frontdeskId": {
+            "type": "string",
+            "example": "FD001"
           }
         },
         "required": [
@@ -4423,6 +4467,16 @@
           "bio": {
             "type": "string",
             "example": "Expert cardiologist."
+          },
+          "consultationFee": {
+            "type": "number",
+            "example": 500,
+            "description": "Consultation fee"
+          },
+          "percentageCut": {
+            "type": "number",
+            "example": 70,
+            "description": "Doctor percentage cut (0-100)"
           }
         },
         "required": [
@@ -4494,6 +4548,16 @@
           "bio": {
             "type": "string",
             "example": "Expert cardiologist."
+          },
+          "consultationFee": {
+            "type": "number",
+            "example": 500,
+            "description": "Consultation fee"
+          },
+          "percentageCut": {
+            "type": "number",
+            "example": 70,
+            "description": "Doctor percentage cut (0-100)"
           }
         }
       },

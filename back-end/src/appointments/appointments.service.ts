@@ -17,6 +17,10 @@ export type Appointment = {
   date: string;
   slot: string;
   status: AppointmentStatus;
+  bookedBy?: string;
+  bookedByRole?: string;
+  source?: string;
+  frontdeskId?: string;
 };
 
 export type CreateAppointmentInput = {
@@ -25,6 +29,10 @@ export type CreateAppointmentInput = {
   branchId: string;
   date: string;
   slot: string;
+  bookedBy?: string;
+  bookedByRole?: string;
+  source?: string;
+  frontdeskId?: string;
 };
 
 export type UpdateAppointmentInput = {
@@ -145,6 +153,10 @@ export class AppointmentsService {
       date: input.date,
       slot: input.slot,
       status: 'upcoming',
+      bookedBy: input.bookedBy || input.bookedByRole || (input.frontdeskId ? 'frontdesk' : 'patient'),
+      bookedByRole: input.bookedByRole || (input.frontdeskId ? 'frontdesk' : 'patient'),
+      source: input.source || (input.bookedByRole === 'frontdesk' || input.frontdeskId ? 'frontdesk' : 'patient'),
+      frontdeskId: input.frontdeskId,
     };
 
     this.appointments.unshift(appointment);

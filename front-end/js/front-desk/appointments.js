@@ -728,11 +728,18 @@ async function confirmAppointment() {
     return;
   }
 
+  let currentStaffId = '';
+  try {
+    const session = JSON.parse(localStorage.getItem('user') || '{}');
+    currentStaffId = session.id || session.userId || '';
+  } catch (_) {}
+
   const response = await fetch(`${APPOINTMENTS_API_BASE_URL}/appointments`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       role: 'frontdesk',
+      'x-user-id': currentStaffId,
     },
     body: JSON.stringify({
       userId: patient.userId,
@@ -740,6 +747,9 @@ async function confirmAppointment() {
       branchId: selectedBranchId,
       date: selectedDate,
       slot: selectedSlot,
+      source: 'frontdesk',
+      bookedBy: currentStaffId || 'frontdesk',
+      frontdeskId: currentStaffId,
     }),
   });
 

@@ -80,7 +80,7 @@ function renderTable(doctors) {
 
   if (!doctors.length) {
     tbody.innerHTML = `
-      <tr><td colspan="7">
+      <tr><td colspan="8">
         <div class="empty-state">
           <div class="empty-icon">🩺</div>
           <p>No doctors found. Add one to get started.</p>
@@ -92,10 +92,10 @@ function renderTable(doctors) {
   tbody.innerHTML = doctors.map(doc => `
     <tr>
       <td>
-        <div class="doc-name-cell">
+        <div class="doc-name-cell" style="cursor: pointer;" onclick="openViewModal('${escapeHtml(doc.id || doc.userId || '')}')" title="Click to view full doctor details & appointments">
           <div class="doc-avatar">${doctorInitials(doc.name)}</div>
           <div>
-            <div style="font-weight:600">${escapeHtml(doc.name || '—')}</div>
+            <div style="font-weight:600; color:var(--navy);" class="doc-name-link">${escapeHtml(doc.name || '—')}</div>
             <div class="text-muted text-sm">${escapeHtml(doc.email || '')}</div>
           </div>
         </div>
@@ -103,11 +103,12 @@ function renderTable(doctors) {
       <td><span class="badge badge-teal">${escapeHtml(doc.specialization || '—')}</span></td>
       <td>${escapeHtml(doc.department || '—')}</td>
       <td>${doc.experience != null ? `${doc.experience} yrs` : '—'}</td>
+      <td>${doc.consultationFee != null && doc.consultationFee > 0 ? `₹${doc.consultationFee}` : '—'}</td>
+      <td>${doc.percentageCut != null && doc.percentageCut > 0 ? `${doc.percentageCut}%` : '—'}</td>
       <td>${escapeHtml(doc.phone || '—')}</td>
-      <td>${escapeHtml(doc.qualification || '—')}</td>
       <td>
         <div class="action-btns">
-          <button class="btn-icon" title="View" onclick="openViewModal('${escapeHtml(doc.id || doc.userId || '')}')">👁</button>
+          <button class="action-view-btn" title="View Full Details & Appointments" onclick="openViewModal('${escapeHtml(doc.id || doc.userId || '')}')">👁 View</button>
           <button class="btn-icon" title="Edit" onclick="openEditModal('${escapeHtml(doc.id || doc.userId || '')}')">✏️</button>
           <button class="btn-icon" title="Remove" onclick="deleteDoctor('${escapeHtml(doc.id || doc.userId || '')}')">🗑️</button>
         </div>
@@ -123,37 +124,154 @@ function doctorInitials(name) {
 }
 
 // ── VIEW MODAL ─────────────────────────────────────────────
-function openViewModal(doctorId) {
+async function openViewModal(doctorId) {
   const doc = findDoctor(doctorId);
   if (!doc) { showToast('Doctor not found', 'error'); return; }
 
   openModal(`
-    <div class="modal-title">🩺 Doctor Profile</div>
+    <div class="modal-title">🩺 Doctor Profile & Appointments</div>
     <div class="doc-profile-header">
       <div class="doc-profile-avatar">${doctorInitials(doc.name)}</div>
       <div>
         <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:700">${escapeHtml(doc.name || '—')}</div>
-        <div class="text-muted">${escapeHtml(doc.specialization || '')} ${doc.department ? '· ' + doc.department : ''}</div>
+        <div class="text-muted">${escapeHtml(doc.specialization || '')} ${doc.department ? '· ' + doc.department : ''} · <span class="badge badge-teal">${escapeHtml(doc.id || doc.userId || '')}</span></div>
       </div>
     </div>
+    
     <div class="divider"></div>
+    <div style="font-weight:700; font-size:14px; margin-bottom:12px; color:var(--navy);">Personal & Professional Information</div>
     <div class="detail-grid">
-      ${detailItem('Email',         doc.email)}
-      ${detailItem('Phone',         doc.phone)}
-      ${detailItem('Gender',        doc.gender)}
-      ${detailItem('Age',           doc.age)}
-      ${detailItem('Qualification', doc.qualification)}
-      ${detailItem('Experience',    doc.experience != null ? doc.experience + ' years' : null)}
-      ${detailItem('License No.',   doc.licenseNo)}
-      ${detailItem('Branch ID',     doc.branchId)}
+      ${detailItem('Email',            doc.email)}
+      ${detailItem('Phone',            doc.phone)}
+      ${detailItem('Gender',           doc.gender)}
+      ${detailItem('Age',              doc.age)}
+      ${detailItem('Qualification',    doc.qualification)}
+      ${detailItem('Experience',       doc.experience != null ? doc.experience + ' years' : null)}
+      ${detailItem('Consultation Fee', doc.consultationFee != null ? '₹' + doc.consultationFee : null)}
+      ${detailItem('Doctor Cut (%)',   doc.percentageCut != null ? doc.percentageCut + '%' : null)}
+      ${detailItem('License No.',      doc.licenseNo)}
+      ${detailItem('Branch ID',        doc.branchId)}
       ${doc.bio ? `<div class="detail-item full">${detailItem('Bio', doc.bio)}</div>` : ''}
       ${doc.slots?.length ? `<div class="detail-item full">${detailItem('Available Slots', doc.slots.join(', '))}</div>` : ''}
     </div>
+
+    <div class="divider"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+      <div style="font-weight:700; font-size:14px; color:var(--navy);">Appointments Overview</div>
+      <div id="docApptSummaryPills" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+    </div>
+    <div id="docApptListWrap" style="max-height: 220px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px;">
+      <p style="text-align:center; color:var(--text-muted); font-size:13px; padding:16px;">Loading appointments...</p>
+    </div>
+
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal()">Close</button>
-      <button class="btn btn-accent" onclick="closeModal(); openEditModal('${escapeHtml(doctorId)}')">Edit</button>
+      <button class="btn btn-accent" onclick="closeModal(); openEditModal('${escapeHtml(doctorId)}')">Edit Doctor</button>
     </div>
   `);
+
+  try {
+    const appts = await apiRequest(`/appointments/doctor/${encodeURIComponent(doc.userId || doc.id || doctorId)}`);
+    renderDoctorAppointmentsInModal(Array.isArray(appts) ? appts : []);
+  } catch (err) {
+    const listWrap = $('docApptListWrap');
+    if (listWrap) {
+      listWrap.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:16px;">No appointments found for this doctor.</p>`;
+    }
+  }
+}
+
+function renderDoctorAppointmentsInModal(appointments) {
+  const pillsEl = $('docApptSummaryPills');
+  const listEl = $('docApptListWrap');
+  if (!listEl) return;
+
+  const total = appointments.length;
+  const completed = appointments.filter(a => {
+    const s = String(a.status || '').toLowerCase();
+    return s === 'completed' || s === 'done';
+  });
+  const pending = appointments.filter(a => String(a.status || '').toLowerCase() === 'pending');
+  const accepted = appointments.filter(a => String(a.status || '').toLowerCase() === 'accepted');
+  const upcoming = appointments.filter(a => String(a.status || '').toLowerCase() === 'upcoming');
+  const rejected = appointments.filter(a => {
+    const s = String(a.status || '').toLowerCase();
+    return s === 'rejected' || s === 'cancelled';
+  });
+
+  if (pillsEl) {
+    pillsEl.innerHTML = `
+      <span class="badge badge-teal" style="font-size:11px;">Total: ${total}</span>
+      ${completed.length ? `<span class="badge badge-green" style="font-size:11px;">Completed: ${completed.length}</span>` : ''}
+      ${pending.length ? `<span class="badge badge-orange" style="font-size:11px;">Pending: ${pending.length}</span>` : ''}
+      ${accepted.length ? `<span class="badge badge-teal" style="font-size:11px;">Accepted: ${accepted.length}</span>` : ''}
+      ${upcoming.length ? `<span class="badge badge-blue" style="font-size:11px;">Upcoming: ${upcoming.length}</span>` : ''}
+      ${rejected.length ? `<span class="badge badge-red" style="font-size:11px;">Rejected/Cancelled: ${rejected.length}</span>` : ''}
+    `;
+  }
+
+  if (!appointments.length) {
+    listEl.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:16px;">No appointments scheduled for this doctor.</p>';
+    return;
+  }
+
+  listEl.innerHTML = `
+    <table style="width:100%; font-size:12.5px; border-collapse:collapse;">
+      <thead>
+        <tr style="background:var(--bg); text-align:left;">
+          <th style="padding:6px 10px; font-size:11px;">Date & Time</th>
+          <th style="padding:6px 10px; font-size:11px;">Patient</th>
+          <th style="padding:6px 10px; font-size:11px;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${appointments.map(a => {
+          const patientName = a.patient?.name || a.userId || 'Patient';
+          const patientPhone = a.patient?.phone || '';
+          let badgeClass = 'badge-teal';
+          const st = String(a.status || 'upcoming').toLowerCase();
+          let statusLabel = 'Upcoming';
+          if (st === 'completed' || st === 'done') {
+            badgeClass = 'badge-green';
+            statusLabel = 'Completed';
+          } else if (st === 'pending') {
+            badgeClass = 'badge-orange';
+            statusLabel = 'Pending';
+          } else if (st === 'accepted') {
+            badgeClass = 'badge-teal';
+            statusLabel = 'Accepted';
+          } else if (st === 'rejected') {
+            badgeClass = 'badge-red';
+            statusLabel = 'Rejected';
+          } else if (st === 'cancelled') {
+            badgeClass = 'badge-red';
+            statusLabel = 'Cancelled';
+          } else if (st === 'upcoming') {
+            badgeClass = 'badge-blue';
+            statusLabel = 'Upcoming';
+          } else {
+            statusLabel = st.charAt(0).toUpperCase() + st.slice(1);
+          }
+
+          return `
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:8px 10px;">
+                <div style="font-weight:600;">${escapeHtml(formatDate(a.date))}</div>
+                <div class="text-muted" style="font-size:11.5px;">${escapeHtml(a.slot || '—')}</div>
+              </td>
+              <td style="padding:8px 10px;">
+                <div style="font-weight:600;">${escapeHtml(patientName)}</div>
+                ${patientPhone ? `<div class="text-muted" style="font-size:11px;">${escapeHtml(patientPhone)}</div>` : ''}
+              </td>
+              <td style="padding:8px 10px;">
+                <span class="badge ${badgeClass}" style="font-size:11px;">${escapeHtml(statusLabel)}</span>
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
 }
 
 function detailItem(label, value) {
@@ -216,6 +334,14 @@ function buildDoctorForm(doc) {
         <div class="form-group">
           <label for="df-experience">Experience (years)</label>
           <input id="df-experience" type="number" min="0" max="60" placeholder="10" value="${doc?.experience ?? ''}">
+        </div>
+        <div class="form-group">
+          <label for="df-fee">Consultation Fee (₹)</label>
+          <input id="df-fee" type="number" min="0" step="1" placeholder="e.g. 500" value="${doc?.consultationFee ?? ''}">
+        </div>
+        <div class="form-group">
+          <label for="df-cut">Doctor Cut (%)</label>
+          <input id="df-cut" type="number" min="0" max="100" step="0.1" placeholder="e.g. 70" value="${doc?.percentageCut ?? ''}">
         </div>
         <div class="form-group">
           <label for="df-age">Age</label>
@@ -344,6 +470,12 @@ async function submitDoctorForm(e) {
 
     const age = val('df-age');
     if (age !== '') body.age = Number(age);
+
+    const fee = val('df-fee');
+    if (fee !== '') body.consultationFee = Number(fee);
+
+    const cut = val('df-cut');
+    if (cut !== '') body.percentageCut = Number(cut);
 
     if (currentEditId) {
       // UPDATE

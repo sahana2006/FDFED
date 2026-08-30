@@ -57,15 +57,16 @@
 
   function getProfile() {
     const session = getDoctorSession();
-    const savedEdits = JSON.parse(localStorage.getItem('doctorProfile') || '{}');
+    const doctorId = getDoctorId();
+    const savedEdits = JSON.parse(localStorage.getItem(`doctorProfile_${doctorId}`) || localStorage.getItem('doctorProfile') || '{}');
 
     // Build profile from backend data, falling back to session, then saved edits
     const name = doctorData?.name || session.name || 'Doctor';
     const specialization = doctorData?.specialization || session.specialization || 'General';
     const department = doctorData?.department || 'General Medicine';
     const qualification = doctorData?.qualification || '';
-    const email = savedEdits.email || doctorData?.email || session.email || '';
-    const phone = savedEdits.phone || doctorData?.phone || '';
+    const email = doctorData?.email || savedEdits.email || session.email || '';
+    const phone = doctorData?.phone || savedEdits.phone || '';
 
     const normalizedPhone = getNormalizedPhone(phone);
 
@@ -113,6 +114,36 @@
     if (topRole) topRole.textContent = data.role;
   }
 
+  async function populatePerformance(doctorId) {
+    const patientsSeenEl = document.getElementById('patientsSeenValue');
+    const appointmentsCompletedEl = document.getElementById('appointmentsCompletedValue');
+    const satisfactionEl = document.getElementById('patientSatisfactionValue');
+    const referralFollowUpsEl = document.getElementById('referralFollowUpsValue');
+
+    if (!doctorId) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/appointments/doctor/${encodeURIComponent(doctorId)}`, {
+        headers: { role: 'doctor' },
+      });
+      if (response.ok) {
+        const appointments = await response.json();
+        const completed = appointments.filter(a => a.status === 'completed');
+        const uniquePatients = new Set(completed.map(a => a.userId)).size;
+        const completionRate = appointments.length ? Math.round((completed.length / appointments.length) * 100) : 0;
+
+        if (patientsSeenEl) patientsSeenEl.textContent = String(uniquePatients || completed.length || 0);
+        if (appointmentsCompletedEl) appointmentsCompletedEl.textContent = appointments.length ? `${completionRate}%` : '0%';
+      }
+    } catch (_) {}
+
+    try {
+      const referrals = JSON.parse(localStorage.getItem('referralHistory') || '[]');
+      const doctorRefs = referrals.filter(r => r.fromDoctorId === doctorId || r.doctorId === doctorId);
+      if (referralFollowUpsEl) referralFollowUpsEl.textContent = String(doctorRefs.length || 0);
+    } catch (_) {}
+  }
+
   function enableEditing(on) {
     editableFields.forEach(id => {
       const el = document.getElementById(id);
@@ -133,14 +164,8 @@
   /* ── Initialize ── */
   doctorData = await fetchDoctorProfile();
   populateProfile();
+  await populatePerformance(getDoctorId());
   enableEditing(false);
-
-  // Clean up any stale doctorProfile localStorage
-  const existingProfile = JSON.parse(localStorage.getItem('doctorProfile') || '{}');
-  if (existingProfile.photo || (existingProfile.phone && getNormalizedPhone(existingProfile.phone).length !== 10)) {
-    const sanitizedProfile = getProfile();
-    localStorage.setItem('doctorProfile', JSON.stringify({ email: sanitizedProfile.email, phone: sanitizedProfile.phone }));
-  }
 
   phoneInput.addEventListener('input', () => {
     phoneInput.value = getNormalizedPhone(phoneInput.value).slice(0, 10);
@@ -168,8 +193,9 @@
       return;
     }
 
-    // Persist only the editable fields
-    localStorage.setItem('doctorProfile', JSON.stringify({ email, phone: phoneDigits }));
+    // Persist only the editable fields for this specific doctor
+    const doctorId = getDoctorId();
+    localStorage.setItem(`doctorProfile_${doctorId}`, JSON.stringify({ email, phone: phoneDigits }));
     populateProfile();
     enableEditing(false);
     showToast('Profile updated successfully!', 'success');

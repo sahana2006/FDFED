@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Header, Param, Post, Put, Query, UseGuards, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Header, Headers, Param, Post, Put, Query, UseGuards, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBody } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -65,8 +65,11 @@ export class AppointmentsController {
   @Post()
   @ApiOperation({ summary: 'Create an appointment' })
   @ApiBody({ type: CreateAppointmentDto })
-  @ApiResponse({ status: 201, description: 'Appointment created successfully' })
-  createAppointment(@Body() body: CreateAppointmentDto) {
+  createAppointment(
+    @Body() body: CreateAppointmentDto,
+    @Headers('role') role?: string,
+    @Headers('x-user-id') userId?: string,
+  ) {
     const scopedBranchId = this.getScopedBranchId();
     const requestedBranchId = body.branchId?.trim() ?? '';
     const branchId = scopedBranchId ?? requestedBranchId;
@@ -75,12 +78,20 @@ export class AppointmentsController {
       throw new ForbiddenException('Access denied for this hospital branch');
     }
 
+    const normalizedRole = (role || '').trim().toLowerCase();
+    const isFrontdesk = normalizedRole === 'frontdesk' || body.source === 'frontdesk' || body.bookedBy === 'frontdesk';
+    const staffId = userId?.trim() || body.frontdeskId?.trim();
+
     return this.appointmentsService.createAppointment({
       userId: body.userId.trim(),
       doctorId: body.doctorId.trim(),
       branchId,
       date: body.date.trim(),
       slot: body.slot.trim(),
+      bookedBy: isFrontdesk ? (staffId || body.bookedBy?.trim() || 'frontdesk') : (body.bookedBy || (normalizedRole === 'patient' ? 'patient' : undefined)),
+      bookedByRole: normalizedRole || (isFrontdesk ? 'frontdesk' : 'patient'),
+      source: isFrontdesk ? 'frontdesk' : (body.source || (normalizedRole === 'patient' ? 'patient' : 'frontdesk')),
+      frontdeskId: isFrontdesk ? (staffId || body.bookedBy?.trim() || undefined) : undefined,
     });
   }
 

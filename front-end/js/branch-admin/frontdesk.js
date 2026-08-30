@@ -85,10 +85,10 @@ function renderFDTable(staff) {
     return `
       <tr>
         <td>
-          <div class="doc-name-cell">
+          <div class="doc-name-cell" style="cursor: pointer;" onclick="openFDViewModal('${escapeHtml(fd.userId || fd.id || '')}')" title="Click to view full staff details & managed appointments">
             <div class="doc-avatar fd-avatar">${staffInitials(fd.name)}</div>
             <div>
-              <div style="font-weight:600">${escapeHtml(fd.name || '—')}</div>
+              <div style="font-weight:600; color:var(--navy);" class="doc-name-link">${escapeHtml(fd.name || '—')}</div>
               <div class="text-muted text-sm">${escapeHtml(fd.email || '')}</div>
             </div>
           </div>
@@ -100,7 +100,7 @@ function renderFDTable(staff) {
         <td>${langs}</td>
         <td>
           <div class="action-btns">
-            <button class="btn-icon" title="View" onclick="openFDViewModal('${escapeHtml(fd.userId || fd.id || '')}')">👁</button>
+            <button class="action-view-btn" title="View Full Details & Appointments" onclick="openFDViewModal('${escapeHtml(fd.userId || fd.id || '')}')">👁 View</button>
             <button class="btn-icon" title="Edit" onclick="openFDEditModal('${escapeHtml(fd.userId || fd.id || '')}')">✏️</button>
             <button class="btn-icon" title="Remove" onclick="deleteFrontdesk('${escapeHtml(fd.userId || fd.id || '')}')">🗑️</button>
           </div>
@@ -115,7 +115,7 @@ function staffInitials(name) {
 }
 
 // ── VIEW MODAL ─────────────────────────────────────────────
-function openFDViewModal(staffId) {
+async function openFDViewModal(staffId) {
   const fd = findStaff(staffId);
   if (!fd) { showToast('Staff member not found', 'error'); return; }
 
@@ -124,21 +124,23 @@ function openFDViewModal(staffId) {
   const shift = (fd.shiftStart && fd.shiftEnd) ? `${fd.shiftStart} – ${fd.shiftEnd}` : '—';
 
   openModal(`
-    <div class="modal-title">🖥️ Front Desk Profile</div>
+    <div class="modal-title">🖥️ Front Desk Profile & Appointments</div>
     <div class="doc-profile-header">
       <div class="doc-profile-avatar fd-avatar">${staffInitials(fd.name)}</div>
       <div>
         <div style="font-family:'Sora',sans-serif;font-size:20px;font-weight:700">${escapeHtml(fd.name || '—')}</div>
-        <div class="text-muted">${escapeHtml(fd.counter || 'Front Desk')} ${fd.gender ? '· ' + fd.gender : ''}</div>
+        <div class="text-muted">Counter ${escapeHtml(fd.counter || '1')} · Front Desk Staff · <span class="badge badge-teal">${escapeHtml(fd.userId || fd.id || '')}</span></div>
       </div>
     </div>
+    
     <div class="divider"></div>
+    <div style="font-weight:700; font-size:14px; margin-bottom:12px; color:var(--navy);">Staff Details</div>
     <div class="detail-grid">
       ${fdDetailItem('Email',              fd.email)}
       ${fdDetailItem('Phone',              fd.phone)}
       ${fdDetailItem('Gender',             fd.gender)}
       ${fdDetailItem('Counter',            fd.counter)}
-      ${fdDetailItem('Shift',              shift)}
+      ${fdDetailItem('Shift Timing',       shift)}
       ${fdDetailItem('Reporting Manager',  fd.reportingManagerId)}
       ${fdDetailItem('Branch ID',          fd.branchId)}
       <div class="detail-item full">
@@ -146,11 +148,170 @@ function openFDViewModal(staffId) {
         <span class="detail-value">${escapeHtml(langs)}</span>
       </div>
     </div>
+
+    <div class="divider"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+      <div style="font-weight:700; font-size:14px; color:var(--navy);">Front Desk Managed Appointments</div>
+      <div id="fdApptSummaryPills" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+    </div>
+    <div id="fdApptListWrap" style="max-height: 220px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px;">
+      <p style="text-align:center; color:var(--text-muted); font-size:13px; padding:16px;">Loading managed appointments...</p>
+    </div>
+
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal()">Close</button>
-      <button class="btn btn-accent" onclick="closeModal(); openFDEditModal('${escapeHtml(staffId)}')">Edit</button>
+      <button class="btn btn-accent" onclick="closeModal(); openFDEditModal('${escapeHtml(staffId)}')">Edit Staff</button>
     </div>
   `);
+
+  try {
+    const appts = await apiRequest('/appointments');
+    const allAppts = Array.isArray(appts) ? appts : [];
+
+    const fdUserId = (fd.userId || fd.id || staffId || '').trim().toLowerCase();
+    const fdEmail = (fd.email || '').trim().toLowerCase();
+    const fdName = (fd.name || '').trim().toLowerCase();
+    const isDefaultFrontdesk = fdUserId === 'fd001' || fdEmail === 'frontdesk@medbits.com';
+
+    // Filter strictly to appointments managed/booked by THIS specific front desk staff member
+    const fdAppts = allAppts.filter(a => {
+      const src = String(a.source || a.bookedBy || a.bookedByRole || '').trim().toLowerCase();
+      const role = String(a.bookedByRole || '').trim().toLowerCase();
+
+      // Strictly exclude appointments directly booked online by patients
+      if (src === 'patient' || role === 'patient') {
+        return false;
+      }
+
+      // Check appointment frontdesk/staff identifier
+      const apptStaffId = String(a.frontdeskId || a.bookedBy || '').trim().toLowerCase();
+
+      // If appointment specifically matches this staff member (e.g. FD003 for Kumutha, FD001 for Priya)
+      if (
+        apptStaffId === fdUserId ||
+        apptStaffId === fdEmail ||
+        apptStaffId === fdName ||
+        apptStaffId === staffId.toLowerCase()
+      ) {
+        return true;
+      }
+
+      // If appointment has a specific staff ID assigned to another staff member, do NOT match
+      if (apptStaffId && apptStaffId !== 'frontdesk' && apptStaffId !== 'fd' && apptStaffId !== fdUserId) {
+        return false;
+      }
+
+      // If appointment is generic frontdesk with no specific staff ID, attribute to default frontdesk (FD001 / Priya Nair)
+      if ((apptStaffId === 'frontdesk' || apptStaffId === 'fd' || !apptStaffId) && isDefaultFrontdesk) {
+        return true;
+      }
+
+      return false;
+    });
+
+    renderFDAppointmentsInModal(fdAppts);
+  } catch (err) {
+    const listWrap = $('fdApptListWrap');
+    if (listWrap) {
+      listWrap.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:16px;">No front desk managed appointments found for this staff member.</p>`;
+    }
+  }
+}
+
+function renderFDAppointmentsInModal(appointments) {
+  const pillsEl = $('fdApptSummaryPills');
+  const listEl = $('fdApptListWrap');
+  if (!listEl) return;
+
+  const total = appointments.length;
+  const completed = appointments.filter(a => {
+    const s = String(a.status || '').toLowerCase();
+    return s === 'completed' || s === 'done';
+  });
+  const pending = appointments.filter(a => String(a.status || '').toLowerCase() === 'pending');
+  const accepted = appointments.filter(a => String(a.status || '').toLowerCase() === 'accepted');
+  const upcoming = appointments.filter(a => String(a.status || '').toLowerCase() === 'upcoming');
+  const rejected = appointments.filter(a => {
+    const s = String(a.status || '').toLowerCase();
+    return s === 'rejected' || s === 'cancelled';
+  });
+
+  if (pillsEl) {
+    pillsEl.innerHTML = `
+      <span class="badge badge-teal" style="font-size:11px;">Total: ${total}</span>
+      ${completed.length ? `<span class="badge badge-green" style="font-size:11px;">Completed: ${completed.length}</span>` : ''}
+      ${pending.length ? `<span class="badge badge-orange" style="font-size:11px;">Pending: ${pending.length}</span>` : ''}
+      ${accepted.length ? `<span class="badge badge-teal" style="font-size:11px;">Accepted: ${accepted.length}</span>` : ''}
+      ${upcoming.length ? `<span class="badge badge-blue" style="font-size:11px;">Upcoming: ${upcoming.length}</span>` : ''}
+      ${rejected.length ? `<span class="badge badge-red" style="font-size:11px;">Rejected/Cancelled: ${rejected.length}</span>` : ''}
+    `;
+  }
+
+  if (!appointments.length) {
+    listEl.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:13px; padding:16px;">No front desk managed appointments found for this staff member.</p>';
+    return;
+  }
+
+  listEl.innerHTML = `
+    <table style="width:100%; font-size:12.5px; border-collapse:collapse;">
+      <thead>
+        <tr style="background:var(--bg); text-align:left;">
+          <th style="padding:6px 10px; font-size:11px;">Date & Time</th>
+          <th style="padding:6px 10px; font-size:11px;">Patient</th>
+          <th style="padding:6px 10px; font-size:11px;">Doctor</th>
+          <th style="padding:6px 10px; font-size:11px;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${appointments.map(a => {
+          const patientName = a.patient?.name || a.userId || 'Patient';
+          const doctorName = a.doctor?.name || a.doctorId || 'Doctor';
+          let badgeClass = 'badge-teal';
+          const st = String(a.status || 'upcoming').toLowerCase();
+          let statusLabel = 'Upcoming';
+          if (st === 'completed' || st === 'done') {
+            badgeClass = 'badge-green';
+            statusLabel = 'Completed';
+          } else if (st === 'pending') {
+            badgeClass = 'badge-orange';
+            statusLabel = 'Pending';
+          } else if (st === 'accepted') {
+            badgeClass = 'badge-teal';
+            statusLabel = 'Accepted';
+          } else if (st === 'rejected') {
+            badgeClass = 'badge-red';
+            statusLabel = 'Rejected';
+          } else if (st === 'cancelled') {
+            badgeClass = 'badge-red';
+            statusLabel = 'Cancelled';
+          } else if (st === 'upcoming') {
+            badgeClass = 'badge-blue';
+            statusLabel = 'Upcoming';
+          } else {
+            statusLabel = st.charAt(0).toUpperCase() + st.slice(1);
+          }
+
+          return `
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:8px 10px;">
+                <div style="font-weight:600;">${escapeHtml(formatDate(a.date))}</div>
+                <div class="text-muted" style="font-size:11.5px;">${escapeHtml(a.slot || '—')}</div>
+              </td>
+              <td style="padding:8px 10px;">
+                <div style="font-weight:600;">${escapeHtml(patientName)}</div>
+              </td>
+              <td style="padding:8px 10px;">
+                <div style="font-weight:500;">${escapeHtml(doctorName)}</div>
+              </td>
+              <td style="padding:8px 10px;">
+                <span class="badge ${badgeClass}" style="font-size:11px;">${escapeHtml(statusLabel)}</span>
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
 }
 
 function fdDetailItem(label, value) {

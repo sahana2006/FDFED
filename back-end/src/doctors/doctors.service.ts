@@ -26,6 +26,8 @@ export type Doctor = {
   licenseNo: string;
   bio: string;
   slots: string[];
+  consultationFee?: number;
+  percentageCut?: number;
 };
 
 /**
@@ -71,6 +73,8 @@ export type CreateDoctorInput = {
   phone?: string;
   licenseNo?: string;
   bio?: string;
+  consultationFee?: number;
+  percentageCut?: number;
 };
 
 export type UpdateDoctorInput = Partial<Omit<CreateDoctorInput, 'password'>>;
@@ -97,6 +101,8 @@ function toDoctor(e: DoctorEntity): Doctor {
     licenseNo: e.licenseNo,
     bio: e.bio,
     slots: Array.isArray(e.slots) ? [...e.slots] : [],
+    consultationFee: Number(e.consultationFee) || 0,
+    percentageCut: Number(e.percentageCut) || 0,
   };
 }
 
@@ -191,6 +197,8 @@ export class DoctorsService implements OnModuleInit {
       licenseNo: input.licenseNo?.trim() || '',
       bio: input.bio?.trim() || '',
       slots,
+      consultationFee: Number(input.consultationFee) || 0,
+      percentageCut: Number(input.percentageCut) || 0,
     });
 
     const saved = await this.doctorRepository.save(entity);
@@ -219,6 +227,8 @@ export class DoctorsService implements OnModuleInit {
     if (input.phone !== undefined)        row.phone        = input.phone.trim();
     if (input.licenseNo !== undefined)    row.licenseNo    = input.licenseNo.trim();
     if (input.bio !== undefined)          row.bio          = input.bio.trim();
+    if (input.consultationFee !== undefined) row.consultationFee = Number(input.consultationFee) || 0;
+    if (input.percentageCut !== undefined)   row.percentageCut   = Number(input.percentageCut) || 0;
 
     if (input.branchId !== undefined) {
       const branchId = input.branchId.trim();

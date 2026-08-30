@@ -530,6 +530,7 @@ async function confirmAppointment() {
     headers: {
       'Content-Type': 'application/json',
       role: 'patient',
+      'x-user-id': session.id || '',
     },
     body: JSON.stringify({
       userId: session.id,
@@ -537,6 +538,8 @@ async function confirmAppointment() {
       branchId: selectedBranchId,
       date,
       slot: selectedSlot,
+      source: 'patient',
+      bookedBy: 'patient',
     }),
   });
 

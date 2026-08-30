@@ -53,6 +53,8 @@ export class DoctorsController {
       phone: body.phone?.trim(),
       licenseNo: body.licenseNo?.trim(),
       bio: body.bio?.trim(),
+      consultationFee: body.consultationFee,
+      percentageCut: body.percentageCut,
     });
   }
 
@@ -78,6 +80,8 @@ export class DoctorsController {
       phone: body.phone?.trim(),
       licenseNo: body.licenseNo?.trim(),
       bio: body.bio?.trim(),
+      consultationFee: body.consultationFee,
+      percentageCut: body.percentageCut,
     });
   }
 

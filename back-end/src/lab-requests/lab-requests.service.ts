@@ -649,6 +649,10 @@ export class LabRequestsService {
     return { ...report };
   }
 
+  findAllReports(): LabReport[] {
+    return this.labReports.map((r) => ({ ...r }));
+  }
+
   findReportsForDoctor(doctorId: string): LabReport[] {
     const cleanDoctorId = doctorId?.trim();
     if (!cleanDoctorId) throw new BadRequestException('Doctor ID is required');

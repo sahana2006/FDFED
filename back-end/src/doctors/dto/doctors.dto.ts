@@ -72,6 +72,16 @@ export class CreateDoctorDto {
   @IsString()
   @IsOptional()
   bio?: string;
+
+  @ApiPropertyOptional({ example: 500, description: 'Consultation fee' })
+  @IsNumber()
+  @IsOptional()
+  consultationFee?: number;
+
+  @ApiPropertyOptional({ example: 70, description: 'Doctor percentage cut (0-100)' })
+  @IsNumber()
+  @IsOptional()
+  percentageCut?: number;
 }
 
 export class UpdateDoctorDto {
@@ -140,6 +150,16 @@ export class UpdateDoctorDto {
   @IsString()
   @IsOptional()
   bio?: string;
+
+  @ApiPropertyOptional({ example: 500, description: 'Consultation fee' })
+  @IsNumber()
+  @IsOptional()
+  consultationFee?: number;
+
+  @ApiPropertyOptional({ example: 70, description: 'Doctor percentage cut (0-100)' })
+  @IsNumber()
+  @IsOptional()
+  percentageCut?: number;
 }
 
 export class CreateSlotBlockDto {

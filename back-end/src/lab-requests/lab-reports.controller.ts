@@ -12,11 +12,18 @@ import { LabRequestsService } from './lab-requests.service';
 export class LabReportsController {
   constructor(private readonly labRequestsService: LabRequestsService) {}
 
-  @Roles('labtech')
+  @Roles('labtech', 'admin')
   @Get()
-  @ApiOperation({ summary: 'List all lab reports for the logged-in technician branch' })
+  @ApiOperation({ summary: 'List all lab reports for the logged-in technician branch or admin' })
   @ApiResponse({ status: 200, description: 'Branch-scoped lab reports' })
-  findAll(@Headers('x-user-id') technicianId?: string) {
+  findAll(
+    @Headers('role') role?: string,
+    @Headers('x-user-id') technicianId?: string,
+  ) {
+    const normalizedRole = (role || '').trim().toLowerCase();
+    if (normalizedRole === 'admin' || normalizedRole === 'branch_admin') {
+      return this.labRequestsService.findAllReports();
+    }
     return this.labRequestsService.findAllReportsForTechnician(
       this.requireUserId(technicianId),
     );

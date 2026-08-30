@@ -26,6 +26,8 @@ async function loadDashboardData(doctorId) {
   const queueContainer = document.getElementById('doctorQueueList');
   const statToday = document.getElementById('statToday');
   const statCompleted = document.getElementById('statCompleted');
+  const statPendingLabs = document.getElementById('statPendingLabs');
+  const statPendingLabsDelta = document.getElementById('statPendingLabsDelta');
 
   if (!doctorId) {
     if (appointmentsContainer) {
@@ -38,17 +40,22 @@ async function loadDashboardData(doctorId) {
     }
     if (statToday) statToday.textContent = '0';
     if (statCompleted) statCompleted.textContent = '0';
+    if (statPendingLabs) statPendingLabs.textContent = '0';
+    if (statPendingLabsDelta) statPendingLabsDelta.textContent = '0 awaiting results';
     return;
   }
 
   try {
-    const [appointmentsResponse, queueResponse] = await Promise.all([
+    const [appointmentsResponse, queueResponse, labReportsResponse] = await Promise.all([
       fetch(`${DOCTOR_API_BASE}/appointments/doctor/${encodeURIComponent(doctorId)}`, {
         headers: { role: 'doctor' },
       }),
       fetch(`${DOCTOR_API_BASE}/queue/${encodeURIComponent(doctorId)}`, {
         headers: { role: 'doctor' },
       }),
+      fetch(`${DOCTOR_API_BASE}/lab-reports/doctor`, {
+        headers: { role: 'doctor', 'x-user-id': doctorId },
+      }).catch(() => null),
     ]);
 
     if (!appointmentsResponse.ok) throw new Error('Failed to load appointments');
@@ -56,11 +63,18 @@ async function loadDashboardData(doctorId) {
 
     const appointments = await appointmentsResponse.json();
     const queueItems = await queueResponse.json();
+    let submittedLabReports = [];
+    if (labReportsResponse && labReportsResponse.ok) {
+      submittedLabReports = await labReportsResponse.json().catch(() => []);
+    }
+
     const upcoming = appointments.filter((item) => item.status === 'upcoming');
     const completed = appointments.filter((item) => item.status === 'completed');
 
     if (statToday) statToday.textContent = upcoming.length;
     if (statCompleted) statCompleted.textContent = completed.length;
+    if (statPendingLabs) statPendingLabs.textContent = '0';
+    if (statPendingLabsDelta) statPendingLabsDelta.textContent = '0 awaiting results';
 
     const bannerSub = document.querySelector('.banner-sub');
     if (bannerSub) {

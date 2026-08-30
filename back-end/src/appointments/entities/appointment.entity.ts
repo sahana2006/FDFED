@@ -28,6 +28,15 @@ export class AppointmentEntity {
   @Column({ type: 'varchar', length: 20, default: 'upcoming' })
   status!: string;
 
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  bookedBy?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  source?: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  frontdeskId?: string;
+
   @CreateDateColumn()
   createdAt!: Date;
 

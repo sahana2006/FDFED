@@ -52,6 +52,12 @@ export class DoctorEntity {
   @Column({ type: 'simple-json' })
   slots!: string[];
 
+  @Column({ type: 'real', default: 0 })
+  consultationFee!: number;
+
+  @Column({ type: 'real', default: 0 })
+  percentageCut!: number;
+
   @CreateDateColumn()
   createdAt!: Date;
 
