@@ -56,13 +56,6 @@ function showToast(message, type = 'success') {
   window.setTimeout(() => toast.remove(), 3000);
 }
 
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
 async function loadShell() {
   const [sidebarResponse, headerResponse] = await Promise.all([
     fetch('./components/sidebar.html'),
@@ -81,7 +74,7 @@ async function loadShell() {
   if (headerTitle) headerTitle.textContent = 'Earnings';
   const userName = document.querySelector('.user-name');
   if (userName) userName.textContent = session?.name || 'Super Admin';
-  
+
   lucide.createIcons();
 }
 
@@ -92,28 +85,9 @@ function formatCurrency(amount) {
 async function loadEarnings() {
   try {
     const data = await apiRequest('/super-admin/hospital-branches/earnings');
-    
+
     $('this-month-earnings').textContent = formatCurrency(data.thisMonthEarnings);
     $('total-earnings').textContent = formatCurrency(data.totalEarnings);
-    
-    const tbody = $('earnings-table-body');
-    if (!data.recentPayments || data.recentPayments.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No subscription payments yet.</td></tr>';
-      return;
-    }
-    
-    tbody.innerHTML = data.recentPayments.map(p => `
-      <tr>
-        <td>${new Date(p.paymentDate).toLocaleString()}</td>
-        <td>
-          <div style="font-weight: 500">${escapeHtml(p.branchName)}</div>
-          <div style="font-size: 0.8rem; color: #666">${escapeHtml(p.hospitalName)}</div>
-        </td>
-        <td><span style="padding: 4px 8px; background: #e2e8f0; border-radius: 4px; text-transform: uppercase; font-size: 0.8rem; font-weight: 600;">${escapeHtml(p.planTier)}</span></td>
-        <td style="font-weight: bold; color: #16a34a;">${formatCurrency(p.amount)}</td>
-      </tr>
-    `).join('');
-    
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -122,11 +96,6 @@ async function loadEarnings() {
 async function init() {
   await loadShell();
   await loadEarnings();
-  
-  $('refresh-earnings-btn')?.addEventListener('click', () => {
-    loadEarnings();
-    showToast('Earnings refreshed');
-  });
 }
 
 document.addEventListener('DOMContentLoaded', init);

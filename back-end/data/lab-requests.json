@@ -14,10 +14,10 @@
     "requestDate": "2028-05-05",
     "consultationNote": "Check thyroid levels.",
     "prescriptionMedicines": "Paracetamol 500mg",
-    "status": "pending",
-    "acceptedByTechnicianId": null,
-    "acceptedAt": null,
-    "startedAt": null,
+    "status": "in_progress",
+    "acceptedByTechnicianId": "c6bae3c7-060f-4235-ad7f-ceaa30292ae6",
+    "acceptedAt": "2026-08-29T12:10:04.844Z",
+    "startedAt": "2026-08-29T12:10:04.844Z",
     "draftSavedAt": null,
     "completedAt": null,
     "rejectedAt": null,
@@ -25,7 +25,7 @@
     "rejectionReason": null,
     "reportId": null,
     "createdAt": "2026-08-23T04:45:17.981Z",
-    "updatedAt": "2026-08-23T04:45:17.981Z"
+    "updatedAt": "2026-08-29T12:10:04.844Z"
   },
   {
     "id": "LREQ1787460317954418",

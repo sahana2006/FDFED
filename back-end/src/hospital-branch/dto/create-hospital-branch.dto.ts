@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
-import { HospitalBranchStatus, PlanTier } from '../entities/hospital-branch.entity';
+import { HospitalBranchStatus } from '../entities/hospital-branch.entity';
 
 export class CreateHospitalBranchDto {
   @ApiProperty({ example: 'Medbits Hospitals' })
@@ -51,9 +51,4 @@ export class CreateHospitalBranchDto {
   @IsEnum(HospitalBranchStatus)
   @IsOptional()
   status?: HospitalBranchStatus;
-
-  @ApiPropertyOptional({ enum: PlanTier, default: PlanTier.BASE })
-  @IsEnum(PlanTier)
-  @IsOptional()
-  planTier?: PlanTier;
 }

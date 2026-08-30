@@ -31,9 +31,17 @@ export class SuperAdminHospitalBranchController {
   }
 
   @Get('earnings')
-  @ApiOperation({ summary: 'Get super admin earnings' })
+  @ApiOperation({ summary: 'Get super admin earnings snapshot' })
   getEarnings() {
     return this.hospitalBranchService.getEarnings();
+  }
+
+  @Get(':id/statistics')
+  @ApiOperation({ summary: 'Get statistics for a hospital branch' })
+  @ApiParam({ name: 'id', description: 'Hospital branch UUID' })
+  @ApiResponse({ status: 200, description: 'Branch statistics snapshot' })
+  getStatistics(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.hospitalBranchService.getBranchStatistics(id);
   }
 
   @Get(':id')

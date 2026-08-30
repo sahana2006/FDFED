@@ -20,17 +20,10 @@ function getSession() {
 
 function getAuthHeaders(extra = {}) {
   const session = getSession();
-  const headers = {
-    ...extra,
-  };
+  const headers = { ...extra };
 
-  if (session?.role) {
-    headers.role = session.role;
-  }
-
-  if (session?.id) {
-    headers['x-user-id'] = session.id;
-  }
+  if (session?.role) headers.role = session.role;
+  if (session?.id) headers['x-user-id'] = session.id;
 
   return headers;
 }
@@ -179,6 +172,10 @@ function branchAdminMarkup(branchAdmin) {
   `;
 }
 
+function openBranchStatistics(branchId) {
+  window.location.href = `./branch-statistics.html?branchId=${encodeURIComponent(branchId)}`;
+}
+
 function renderBranches(branches) {
   const tbody = $('branch-table-body');
   if (!tbody) return;
@@ -186,7 +183,7 @@ function renderBranches(branches) {
   if (!branches.length) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="empty-state">No branches match your search.</td>
+        <td colspan="6" class="empty-state">No branches match your search.</td>
       </tr>
     `;
     lucide.createIcons();
@@ -205,10 +202,17 @@ function renderBranches(branches) {
         <td>${escapeHtml(branch.city || '-')}</td>
         <td>${escapeHtml(branch.state || '-')}</td>
         <td><span class="status-badge ${isInactive ? 'inactive' : 'active'}">${escapeHtml(formatStatus(branch.status))}</span></td>
-        <td>${formatNumber(branch.totalDoctors)}</td>
-        <td>${formatNullableNumber(branch.totalPatients)}</td>
-        <td>${formatNumber(branch.totalAppointments)}</td>
         <td>${branchAdminMarkup(branch.branchAdmin)}</td>
+        <td>
+          <button
+            type="button"
+            class="primary-btn"
+            style="padding: 0.55rem 0.9rem; font-size: 0.85rem;"
+            onclick="openBranchStatistics('${escapeHtml(branch.id)}')"
+          >
+            View
+          </button>
+        </td>
       </tr>
     `;
   }).join('');
@@ -275,7 +279,6 @@ async function createBranch(event) {
     pincode: $('create-pincode').value.trim(),
     phone: $('create-phone').value.trim(),
     email: $('create-email').value.trim(),
-    planTier: $('create-plan-tier').value,
   };
 
   const form = $('create-branch-form');
@@ -284,29 +287,14 @@ async function createBranch(event) {
     return;
   }
 
-  // Show Payment Modal
-  $('payment-tier-name').textContent = payload.planTier.toUpperCase();
-  $('payment-modal').style.display = 'flex';
-  
-  // Store payload temporarily
-  window._pendingBranchPayload = payload;
-}
-
-async function executeBranchCreation() {
-  const payload = window._pendingBranchPayload;
-  if (!payload) return;
-
   try {
     await apiRequest('/super-admin/hospital-branches', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    
-    $('payment-modal').style.display = 'none';
-    window._pendingBranchPayload = null;
-    
-    showToast('Payment successful! Branch created.');
+
+    showToast('Branch created successfully.');
     resetCreateForm();
     await refreshDashboard();
   } catch (error) {
@@ -337,11 +325,11 @@ async function createBranchAdmin(event) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    showToast('Branch Admin created successfully.');
+    showToast('Branch admin created successfully.');
     resetAssignForm();
     await refreshDashboard();
   } catch (error) {
-    showToast(error.message || 'Unable to create Branch Admin.', 'error');
+    showToast(error.message || 'Unable to create branch admin.', 'error');
   }
 }
 
@@ -355,26 +343,10 @@ async function refreshDashboard() {
 }
 
 function bindEvents() {
-  $('refresh-dashboard-btn')?.addEventListener('click', async () => {
-    try {
-      await refreshDashboard();
-      showToast('Dashboard refreshed.');
-    } catch (error) {
-      showToast(error.message || 'Unable to refresh dashboard.', 'error');
-    }
-  });
-
   $('branch-search-input')?.addEventListener('input', applySearch);
   $('create-branch-form')?.addEventListener('submit', createBranch);
   $('assign-admin-form')?.addEventListener('submit', createBranchAdmin);
   $('superuser-logout')?.addEventListener('click', logoutSuperUser);
-  
-  $('payment-cancel-btn')?.addEventListener('click', () => {
-    $('payment-modal').style.display = 'none';
-    window._pendingBranchPayload = null;
-  });
-  
-  $('payment-complete-btn')?.addEventListener('click', executeBranchCreation);
 }
 
 async function init() {

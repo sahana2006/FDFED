@@ -60,11 +60,4 @@ export class HospitalBranchController {
     return this.hospitalBranchService.remove(id);
   }
 
-  @Roles('branch_admin', 'super_admin')
-  @Patch(':id/subscription/renew')
-  @ApiOperation({ summary: 'Renew branch subscription' })
-  @ApiParam({ name: 'id', description: 'Hospital branch UUID' })
-  renewSubscription(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.hospitalBranchService.renewSubscription(id);
-  }
 }

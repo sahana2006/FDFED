@@ -1,27 +1,27 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AppointmentEntity } from '../appointments/entities/appointment.entity';
+import { DoctorEntity } from '../doctors/entities/doctor.entity';
+import { FrontdeskEntity } from '../frontdesk/entities/frontdesk.entity';
+import { LabTechnician } from '../lab-technicians/entities/lab-technician.entity';
 import { CreateHospitalBranchDto } from './dto/create-hospital-branch.dto';
 import { UpdateHospitalBranchDto } from './dto/update-hospital-branch.dto';
-import { HospitalBranch, PlanTier } from './entities/hospital-branch.entity';
-import { SubscriptionPayment } from './entities/subscription-payment.entity';
-
-function getPlanCost(tier: PlanTier): number {
-  switch (tier) {
-    case PlanTier.BASE: return 999;
-    case PlanTier.PRO: return 2999;
-    case PlanTier.ENTERPRISE: return 9999;
-    default: return 999;
-  }
-}
+import { HospitalBranch } from './entities/hospital-branch.entity';
 
 @Injectable()
 export class HospitalBranchService {
   constructor(
     @InjectRepository(HospitalBranch)
     private readonly hospitalBranchRepository: Repository<HospitalBranch>,
-    @InjectRepository(SubscriptionPayment)
-    private readonly subscriptionPaymentRepository: Repository<SubscriptionPayment>,
+    @InjectRepository(DoctorEntity)
+    private readonly doctorRepository: Repository<DoctorEntity>,
+    @InjectRepository(FrontdeskEntity)
+    private readonly frontdeskRepository: Repository<FrontdeskEntity>,
+    @InjectRepository(LabTechnician)
+    private readonly labTechnicianRepository: Repository<LabTechnician>,
+    @InjectRepository(AppointmentEntity)
+    private readonly appointmentRepository: Repository<AppointmentEntity>,
   ) {}
 
   async create(createHospitalBranchDto: CreateHospitalBranchDto): Promise<HospitalBranch> {
@@ -31,26 +31,11 @@ export class HospitalBranchService {
       throw new ConflictException('A hospital branch with this email already exists');
     }
 
-    const dueDate = new Date();
-    dueDate.setMonth(dueDate.getMonth() + 1); // 1 month from now
-
     const branch = this.hospitalBranchRepository.create({
       ...this.cleanTextFields(createHospitalBranchDto),
       email,
-      planTier: createHospitalBranchDto.planTier || PlanTier.BASE,
-      subscriptionDue: dueDate,
     });
-    const savedBranch = await this.hospitalBranchRepository.save(branch);
-
-    // Record the initial subscription payment
-    const payment = this.subscriptionPaymentRepository.create({
-      branchId: savedBranch.id,
-      planTier: savedBranch.planTier,
-      amount: getPlanCost(savedBranch.planTier),
-    });
-    await this.subscriptionPaymentRepository.save(payment);
-
-    return savedBranch;
+    return this.hospitalBranchRepository.save(branch);
   }
 
   findAll(): Promise<HospitalBranch[]> {
@@ -87,53 +72,79 @@ export class HospitalBranchService {
   }
 
   async getEarnings() {
-    const payments = await this.subscriptionPaymentRepository.find({
-      relations: ['branch'],
-      order: { paymentDate: 'DESC' },
-    });
-
-    const totalEarnings = payments.reduce((sum, p) => sum + Number(p.amount), 0);
-    
-    // Optional: Calculate this month's earnings
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const thisMonthEarnings = payments
-      .filter(p => p.paymentDate.getMonth() === currentMonth && p.paymentDate.getFullYear() === currentYear)
-      .reduce((sum, p) => sum + Number(p.amount), 0);
-
     return {
-      totalEarnings,
-      thisMonthEarnings,
-      recentPayments: payments.slice(0, 50).map(p => ({
-        id: p.id,
-        branchName: p.branch?.branchName || 'Unknown',
-        hospitalName: p.branch?.hospitalName || 'Unknown',
-        amount: p.amount,
-        planTier: p.planTier,
-        paymentDate: p.paymentDate,
-      })),
+      totalEarnings: 0,
+      thisMonthEarnings: 0,
+      recentPayments: [],
     };
   }
 
-  async renewSubscription(branchId: string): Promise<HospitalBranch> {
+  async getBranchStatistics(branchId: string) {
     const branch = await this.findOne(branchId);
-    
-    // Extend due date by 1 month
-    const currentDue = branch.subscriptionDue ? new Date(branch.subscriptionDue) : new Date();
-    currentDue.setMonth(currentDue.getMonth() + 1);
-    branch.subscriptionDue = currentDue;
-    
-    const savedBranch = await this.hospitalBranchRepository.save(branch);
+    const [doctors, frontdesk, labTechnicians, appointments] = await Promise.all([
+      this.doctorRepository.find({ where: { branchId, isActive: true } }),
+      this.frontdeskRepository.find({ where: { branchId, isActive: true } }),
+      this.labTechnicianRepository.find({ where: { branchId } }),
+      this.appointmentRepository.find({ where: { branchId } }),
+    ]);
 
-    // Log payment
-    const payment = this.subscriptionPaymentRepository.create({
-      branchId: savedBranch.id,
-      planTier: savedBranch.planTier,
-      amount: getPlanCost(savedBranch.planTier),
-    });
-    await this.subscriptionPaymentRepository.save(payment);
+    const safeDoctors = doctors.map((doctor) => ({
+      id: doctor.id,
+      userId: doctor.userId,
+      name: doctor.name,
+      specialization: doctor.specialization,
+      branchId: doctor.branchId,
+      department: doctor.department,
+      qualification: doctor.qualification,
+      experience: doctor.experience,
+      age: doctor.age,
+      gender: doctor.gender,
+      email: doctor.email,
+      phone: doctor.phone,
+      licenseNo: doctor.licenseNo,
+      bio: doctor.bio,
+      slots: Array.isArray(doctor.slots) ? [...doctor.slots] : [],
+      createdAt: doctor.createdAt,
+      updatedAt: doctor.updatedAt,
+    }));
 
-    return savedBranch;
+    const safeFrontdesk = frontdesk.map((staff) => ({
+      userId: staff.userId,
+      branchId: staff.branchId,
+      name: staff.name,
+      email: staff.email,
+      phone: staff.phone,
+      gender: staff.gender,
+      reportingManagerId: staff.reportingManagerId,
+      languages: Array.isArray(staff.languages) ? [...staff.languages] : [],
+      counter: staff.counter,
+      shiftStart: staff.shiftStart,
+      shiftEnd: staff.shiftEnd,
+      createdAt: staff.createdAt,
+      updatedAt: staff.updatedAt,
+    }));
+
+    const safeLabTechnicians = labTechnicians.map((tech) => ({
+      id: tech.id,
+      name: tech.name,
+      email: tech.email,
+      branchId: tech.branchId,
+      createdAt: tech.createdAt,
+      updatedAt: tech.updatedAt,
+    }));
+
+    return {
+      branch,
+      summary: {
+        totalDoctors: safeDoctors.length,
+        totalAppointments: appointments.length,
+        totalFrontdesks: safeFrontdesk.length,
+        totalLabTechnicians: safeLabTechnicians.length,
+      },
+      doctors: safeDoctors,
+      frontdesk: safeFrontdesk,
+      labTechnicians: safeLabTechnicians,
+    };
   }
 
   private cleanTextFields(

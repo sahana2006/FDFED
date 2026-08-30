@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MEDBITS - Branch Statistics</title>
+    <link rel="stylesheet" href="../../css/superuser/components/sidebar.css" />
+    <link rel="stylesheet" href="../../css/superuser/components/header.css" />
+    <link rel="stylesheet" href="../../css/superuser/dashboard.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      .stats-hero {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .mini-stat {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
+      }
+      .mini-stat .label {
+        color: #64748b;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+      }
+      .mini-stat .value {
+        margin-top: 0.35rem;
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+      .detail-banner {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem 1.5rem;
+      }
+      .detail-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      .detail-row .label {
+        font-size: 0.78rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+      }
+      .detail-row .value {
+        font-size: 0.96rem;
+        color: #0f172a;
+        font-weight: 600;
+      }
+      .section-spacer {
+        margin-top: 1.5rem;
+      }
+      .table-shell {
+        max-height: 420px;
+        overflow: auto;
+      }
+      .table-shell table {
+        min-width: 900px;
+      }
+      .table-shell thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f8fafc;
+      }
+      @media (max-width: 1000px) {
+        .stats-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .detail-banner {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 640px) {
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user || user.role !== 'super_admin') {
+        window.location.href = '../login.html';
+      }
+    </script>
+
+    <div class="container">
+      <div id="sidebar-slot"></div>
+
+      <div class="main-content">
+        <div id="header-slot"></div>
+
+        <main class="content dashboard-content">
+          <section class="hero-card">
+            <div class="stats-hero">
+              <div class="hero-copy">
+                <span class="eyebrow">Branch Statistics Board</span>
+                <h1 id="branch-title">Loading branch...</h1>
+                <p id="branch-subtitle">Branch-level team and activity overview.</p>
+              </div>
+              <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                <button class="refresh-btn" id="back-btn" type="button">
+                  <i data-lucide="arrow-left"></i>
+                  <span>Back</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card section-spacer">
+            <div class="panel-header">
+              <div>
+                <h2>Branch Profile</h2>
+                <p>Basic hospital branch details and contact information.</p>
+              </div>
+            </div>
+            <div class="detail-banner" id="branch-details">
+              <div class="empty-state"><p>Loading branch details…</p></div>
+            </div>
+          </section>
+
+          <section class="stats-grid section-spacer">
+            <div class="mini-stat">
+              <div class="label">Doctors</div>
+              <div class="value" id="count-doctors">0</div>
+            </div>
+            <div class="mini-stat">
+              <div class="label">Appointments</div>
+              <div class="value" id="count-appointments">0</div>
+            </div>
+            <div class="mini-stat">
+              <div class="label">Front Desks</div>
+              <div class="value" id="count-frontdesks">0</div>
+            </div>
+            <div class="mini-stat">
+              <div class="label">Lab Techs</div>
+              <div class="value" id="count-labtechs">0</div>
+            </div>
+          </section>
+
+          <section class="panel-card section-spacer">
+            <div class="panel-header">
+              <div>
+                <h2>Doctors</h2>
+                <p>Doctor profiles attached to this branch.</p>
+              </div>
+              <label class="search-field" for="doctor-search">
+                <i data-lucide="search"></i>
+                <input id="doctor-search" type="search" placeholder="Search doctors" />
+              </label>
+            </div>
+            <div class="table-shell">
+              <table class="branch-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Specialization</th>
+                    <th>Department</th>
+                    <th>Experience</th>
+                    <th>Contact</th>
+                    <th>Qualification</th>
+                  </tr>
+                </thead>
+                <tbody id="doctors-body">
+                  <tr><td colspan="6" class="empty-state">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel-card section-spacer">
+            <div class="panel-header">
+              <div>
+                <h2>Front Desks</h2>
+                <p>Front desk staff and shift details for this branch.</p>
+              </div>
+              <label class="search-field" for="frontdesk-search">
+                <i data-lucide="search"></i>
+                <input id="frontdesk-search" type="search" placeholder="Search front desk staff" />
+              </label>
+            </div>
+            <div class="table-shell">
+              <table class="branch-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Counter</th>
+                    <th>Shift</th>
+                    <th>Languages</th>
+                    <th>Contact</th>
+                    <th>Manager</th>
+                  </tr>
+                </thead>
+                <tbody id="frontdesk-body">
+                  <tr><td colspan="6" class="empty-state">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel-card section-spacer">
+            <div class="panel-header">
+              <div>
+                <h2>Lab Technicians</h2>
+                <p>Lab technician accounts assigned to this branch.</p>
+              </div>
+              <label class="search-field" for="labtech-search">
+                <i data-lucide="search"></i>
+                <input id="labtech-search" type="search" placeholder="Search lab technicians" />
+              </label>
+            </div>
+            <div class="table-shell">
+              <table class="branch-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Branch</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody id="labtech-body">
+                  <tr><td colspan="4" class="empty-state">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="toast-host"></div>
+    <script src="../../js/superuser/branch-statistics.js"></script>
+  </body>
+</html>
