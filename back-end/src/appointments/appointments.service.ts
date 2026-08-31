@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { DoctorsService } from '../doctors/doctors.service';
@@ -73,6 +73,32 @@ export type BranchEarningsSummary = {
   entries: EarningsEntry[];
 };
 
+export type PlatformEarningsSummary = BranchEarningsSummary & {
+  totalBranchesWithRevenue: number;
+  branches: Array<{
+    branchId: string;
+    hospitalName: string;
+    branchName: string;
+    completedAppointmentsCount: number;
+    totalRevenue: number;
+    currentMonthRevenue: number;
+    totalDoctorCuts: number;
+    branchProfit: number;
+  }>;
+  recentPayments: Array<{
+    appointmentId: string;
+    branchId: string;
+    branchName: string;
+    hospitalName: string;
+    doctorName: string;
+    date: string;
+    slot: string;
+    consultationFee: number;
+    doctorEarning: number;
+    branchProfit: number;
+  }>;
+};
+
 export type ListAppointmentsInput = {
   userId?: string;
   doctorId?: string;
@@ -94,6 +120,7 @@ export class AppointmentsService {
   constructor(
     private readonly doctorsService: DoctorsService,
     private readonly patientsService: PatientsService,
+    @Inject(forwardRef(() => HospitalBranchService))
     private readonly hospitalBranchService: HospitalBranchService,
   ) {
     this.loadPersistedAppointments();
@@ -496,6 +523,134 @@ export class AppointmentsService {
       currentMonthProfit: sum(currentMonthEntries, 'branchProfit'),
       completedAppointmentsCount: entries.length,
       entries,
+    };
+  }
+
+  async getEarningsForAllBranches(): Promise<PlatformEarningsSummary> {
+    const branches = await this.hospitalBranchService.findAll();
+    const branchMap = new Map(branches.map((branch) => [branch.id, branch] as const));
+    const completed = this.appointments.filter((a) => a.status === 'completed');
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const entries: EarningsEntry[] = await Promise.all(
+      completed.map(async (a) => {
+        let doctor: any = { id: a.doctorId, name: 'Unknown', consultationFee: 0, percentageCut: 0 };
+        try {
+          doctor = await this.doctorsService.getDoctorById(a.doctorId);
+        } catch (_) {}
+
+        const fee = doctor.consultationFee || 0;
+        const cut = doctor.percentageCut || 0;
+        const doctorEarning = (fee * cut) / 100;
+        const branchProfit = fee - doctorEarning;
+
+        let patientName = a.userId;
+        try {
+          const p = this.patientsService.getPatientByUserId(a.userId);
+          patientName = `${p.firstName} ${p.lastName}`.trim() || a.userId;
+        } catch (_) {}
+
+        return {
+          appointmentId: a.id,
+          date: a.date,
+          slot: a.slot,
+          patientName,
+          doctorId: doctor.id,
+          doctorName: doctor.name,
+          consultationFee: fee,
+          percentageCut: cut,
+          doctorEarning,
+          branchProfit,
+        };
+      }),
+    );
+
+    const currentMonthEntries = entries.filter((e) => {
+      const d = new Date(`${e.date}T00:00:00`);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    const branchSummaries = Array.from(
+      entries.reduce((acc, entry) => {
+        const appointment = completed.find((item) => item.id === entry.appointmentId);
+        const branchId = appointment?.branchId || 'unknown';
+        const branch = branchMap.get(branchId);
+        const current = acc.get(branchId) ?? {
+          branchId,
+          hospitalName: branch?.hospitalName ?? 'Unknown Hospital',
+          branchName: branch?.branchName ?? 'Unknown Branch',
+          completedAppointmentsCount: 0,
+          totalRevenue: 0,
+          currentMonthRevenue: 0,
+          totalDoctorCuts: 0,
+          branchProfit: 0,
+        };
+
+        current.completedAppointmentsCount += 1;
+        current.totalRevenue += entry.consultationFee;
+        current.totalDoctorCuts += entry.doctorEarning;
+        current.branchProfit += entry.branchProfit;
+
+        const entryDate = new Date(`${entry.date}T00:00:00`);
+        if (entryDate.getMonth() === currentMonth && entryDate.getFullYear() === currentYear) {
+          current.currentMonthRevenue += entry.consultationFee;
+        }
+
+        acc.set(branchId, current);
+        return acc;
+      }, new Map<string, {
+        branchId: string;
+        hospitalName: string;
+        branchName: string;
+        completedAppointmentsCount: number;
+        totalRevenue: number;
+        currentMonthRevenue: number;
+        totalDoctorCuts: number;
+        branchProfit: number;
+      }>()),
+    ).map(([, summary]) => summary).sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+    const recentPayments = [...entries]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 6)
+      .map((entry) => {
+        const appointment = completed.find((item) => item.id === entry.appointmentId);
+        const branch = branchMap.get(appointment?.branchId || '');
+        return {
+          appointmentId: entry.appointmentId,
+          branchId: appointment?.branchId || '',
+          branchName: branch?.branchName ?? 'Unknown Branch',
+          hospitalName: branch?.hospitalName ?? 'Unknown Hospital',
+          doctorName: entry.doctorName,
+          date: entry.date,
+          slot: entry.slot,
+          consultationFee: entry.consultationFee,
+          doctorEarning: entry.doctorEarning,
+          branchProfit: entry.branchProfit,
+        };
+      });
+
+    const totalRevenue = entries.reduce((sum, entry) => sum + entry.consultationFee, 0);
+    const totalDoctorCuts = entries.reduce((sum, entry) => sum + entry.doctorEarning, 0);
+    const branchProfit = entries.reduce((sum, entry) => sum + entry.branchProfit, 0);
+    const currentMonthRevenue = currentMonthEntries.reduce((sum, entry) => sum + entry.consultationFee, 0);
+    const currentMonthDoctorCuts = currentMonthEntries.reduce((sum, entry) => sum + entry.doctorEarning, 0);
+    const currentMonthProfit = currentMonthEntries.reduce((sum, entry) => sum + entry.branchProfit, 0);
+
+    return {
+      totalRevenue,
+      totalDoctorCuts,
+      branchProfit,
+      currentMonthRevenue,
+      currentMonthDoctorCuts,
+      currentMonthProfit,
+      completedAppointmentsCount: entries.length,
+      entries,
+      totalBranchesWithRevenue: branchSummaries.length,
+      branches: branchSummaries,
+      recentPayments,
     };
   }
 

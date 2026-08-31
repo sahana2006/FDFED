@@ -14,7 +14,7 @@ import { AppointmentEntity } from './entities/appointment.entity';
     CommonModule,
     forwardRef(() => DoctorsModule),
     PatientsModule,
-    HospitalBranchModule,
+    forwardRef(() => HospitalBranchModule),
   ],
   controllers: [AppointmentsController],
   providers: [AppointmentsService],
