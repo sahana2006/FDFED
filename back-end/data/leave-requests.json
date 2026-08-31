@@ -64,8 +64,9 @@
     "date": "2026-08-15",
     "type": "Casual",
     "reason": "Requested via portal",
-    "status": "pending",
-    "createdAt": "2026-08-07T07:25:54.135Z"
+    "status": "approved",
+    "createdAt": "2026-08-07T07:25:54.135Z",
+    "actionedOn": "Aug 31, 2026, 04:18 PM"
   },
   {
     "id": "LR1786087627287",

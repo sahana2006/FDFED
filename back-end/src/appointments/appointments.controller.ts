@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Header, Headers, Param, Post, Put, Query, UseGuards, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, Header, Headers, NotFoundException, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBody } from '@nestjs/swagger';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -150,5 +150,36 @@ export class AppointmentsController {
   cancelAppointment(@Param('id') id: string) {
     this.requireAppointmentInScope(id);
     return this.appointmentsService.cancelAppointment(id);
+  }
+
+  @Roles('doctor', 'frontdesk', 'admin')
+  @Post(':id/complete')
+  @ApiOperation({ summary: 'Mark an appointment as completed' })
+  @ApiResponse({ status: 200, description: 'Appointment marked as completed' })
+  async completeAppointment(@Param('id') id: string) {
+    await this.requireAppointmentInScope(id);
+    return this.appointmentsService.completeAppointment(id);
+  }
+
+  @Header('Cache-Control', 'no-store')
+  @Roles('doctor', 'admin')
+  @Get('earnings/doctor/:doctorId')
+  @ApiOperation({ summary: 'Get earnings summary for a doctor (completed appointments)' })
+  @ApiResponse({ status: 200, description: 'Doctor earnings summary with per-appointment breakdown' })
+  getDoctorEarnings(@Param('doctorId') doctorId: string) {
+    return this.appointmentsService.getEarningsForDoctor(doctorId);
+  }
+
+  @Header('Cache-Control', 'no-store')
+  @Roles('admin')
+  @Get('earnings/branch')
+  @ApiOperation({ summary: 'Get branch earnings summary (all completed appointments for admin branch)' })
+  @ApiResponse({ status: 200, description: 'Branch earnings summary with revenue, doctor cuts, and profit' })
+  async getBranchEarnings() {
+    const branchId = this.getScopedBranchId();
+    if (!branchId) {
+      throw new BadRequestException('Branch context required');
+    }
+    return this.appointmentsService.getEarningsForBranch(branchId);
   }
 }

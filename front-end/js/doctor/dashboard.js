@@ -108,12 +108,16 @@ function renderDoctorAppointments(container, appointments) {
   appointments.slice(0, 5).forEach((appointment) => {
     const patientName = appointment.patient?.name || appointment.userId || 'Patient';
     const initials = getInitials(patientName);
-    const statusClass =
-      appointment.status === 'upcoming' ? 'badge-confirm-outline' : 'badge-completed';
-    const statusLabel = appointment.status === 'upcoming' ? 'Upcoming' : 'Completed';
+    const isUpcoming = appointment.status === 'upcoming';
+    const statusClass = isUpcoming ? 'badge-confirm-outline' : 'badge-completed';
+    const statusLabel = isUpcoming ? 'Upcoming' : 'Completed';
 
     const row = document.createElement('div');
     row.className = 'patient-row';
+    if (isUpcoming) {
+      row.style.cursor = 'pointer';
+      row.title = 'Click to start consultation note';
+    }
     row.innerHTML = `
       <div class="patient-left">
         <div class="avatar">${initials}</div>
@@ -124,8 +128,17 @@ function renderDoctorAppointments(container, appointments) {
       </div>
       <div class="patient-right">
         <span class="badge ${statusClass}">${statusLabel}</span>
-        <span class="appt-time">${appointment.slot}</span>
+        ${isUpcoming
+          ? `<span class="appt-time" style="color:var(--accent);font-size:.75rem;font-weight:600;">▶ Consult</span>`
+          : `<span class="appt-time">${appointment.slot}</span>`
+        }
       </div>`;
+
+    if (isUpcoming) {
+      row.addEventListener('click', () => {
+        window.location.href = `consultation-notes.html?appointmentId=${encodeURIComponent(appointment.id)}`;
+      });
+    }
     container.appendChild(row);
   });
 }

@@ -416,6 +416,18 @@
 
       const savedRecord = await response.json();
       note.id = savedRecord.id || note.id;
+
+      // Mark the appointment as completed
+      if (note.appointmentId) {
+        try {
+          await fetch(`${API_BASE}/appointments/${encodeURIComponent(note.appointmentId)}/complete`, {
+            method: 'POST',
+            headers: { role: 'doctor' },
+          });
+        } catch (_) {
+          // non-fatal — note is saved
+        }
+      }
     } catch (error) {
       showToast(error.message || 'Unable to save consultation note', 'error');
       return;
@@ -644,4 +656,31 @@
   await loadDoctorLabReports();
   renderUpcomingAppointments();
   renderRecords('');
+
+  // Auto-select appointment from URL query param (e.g. ?appointmentId=APT123)
+  const urlParams = new URLSearchParams(window.location.search);
+  const preselectedId = urlParams.get('appointmentId');
+  if (preselectedId) {
+    const target = doctorAppointments.find((a) => a.id === preselectedId && a.status === 'upcoming');
+    if (target) {
+      selectAppointment(target);
+      // Immediately open the note detail form
+      const patient = getPatient(target);
+      showDetail({
+        id: `REC${Date.now()}`,
+        appointmentId: target.id,
+        patientId: patient.id,
+        name: patient.name,
+        age: patient.age,
+        gender: patient.gender,
+        initials: patient.initials,
+        date: target.date,
+        slot: target.slot,
+        notes: '',
+        meds: '',
+        labs: '',
+        labTestDate: '',
+      });
+    }
+  }
 })();

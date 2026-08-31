@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="MEDBITS Branch Admin Earnings dashboard for branch revenue analytics">
+  <meta name="description" content="MEDBITS Branch Admin Earnings — live appointment revenue, doctor cuts, and branch profit">
   <title>MEDBITS - Branch Earnings</title>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/branch-admin/global.css">
@@ -53,124 +53,115 @@
   </header>
 
   <main class="content">
-    <section class="hero-banner">
+
+    <!-- Hero Banner -->
+    <section class="hero-banner earnings-hero-dynamic">
       <div>
         <div class="hero-greeting">MEDBITS BRANCH REVENUE OVERVIEW</div>
-        <div class="hero-name">Branch Earnings Dashboard</div>
-        <div class="hero-sub">A static revenue snapshot for the full branch. Track collections, performance trends, and service mix at a glance.</div>
+        <div class="hero-name" id="branchHeroTitle">Branch Earnings Dashboard</div>
+        <div class="hero-sub" id="branchHeroSub">Live revenue data from completed appointments across this branch.</div>
       </div>
       <div>
-        <div class="revenue-badge">Static analytics view</div>
+        <div class="revenue-badge-dynamic" id="heroBadge">
+          <div class="rbd-label">Current Month</div>
+          <div class="rbd-value" id="heroBadgeValue">₹—</div>
+          <div class="rbd-note" id="heroBadgeNote">Loading…</div>
+        </div>
       </div>
     </section>
 
-    <section class="earnings-kpi-row">
+    <!-- KPI Row -->
+    <section class="earnings-kpi-row" id="kpiRow">
       <div class="earnings-kpi">
         <div class="earnings-kpi-label">Total Branch Revenue</div>
-        <div class="earnings-kpi-value">&#8377;84.6L</div>
-        <div class="earnings-kpi-note">All-time collections from appointments, diagnostics, and ancillary services</div>
+        <div class="earnings-kpi-value" id="kpiTotalRevenue">₹—</div>
+        <div class="earnings-kpi-note">All-time completed appointment fees</div>
       </div>
       <div class="earnings-kpi">
-        <div class="earnings-kpi-label">This Month</div>
-        <div class="earnings-kpi-value">&#8377;12.4L</div>
-        <div class="earnings-kpi-note">Up 18.2% versus the previous month</div>
+        <div class="earnings-kpi-label">This Month Revenue</div>
+        <div class="earnings-kpi-value kpi-accent" id="kpiMonthRevenue">₹—</div>
+        <div class="earnings-kpi-note" id="kpiMonthLabel">Current month collections</div>
       </div>
       <div class="earnings-kpi">
-        <div class="earnings-kpi-label">Pending Dues</div>
-        <div class="earnings-kpi-value">&#8377;1.8L</div>
-        <div class="earnings-kpi-note">23 invoices still awaiting settlement</div>
+        <div class="earnings-kpi-label">Total Doctor Cuts</div>
+        <div class="earnings-kpi-value kpi-orange" id="kpiTotalCuts">₹—</div>
+        <div class="earnings-kpi-note">Doctor earnings across all time</div>
       </div>
       <div class="earnings-kpi">
-        <div class="earnings-kpi-label">Average Daily Collection</div>
-        <div class="earnings-kpi-value">&#8377;41K</div>
-        <div class="earnings-kpi-note">Based on the last 30 days of branch billing</div>
+        <div class="earnings-kpi-label">Branch Profit (This Month)</div>
+        <div class="earnings-kpi-value kpi-green" id="kpiMonthProfit">₹—</div>
+        <div class="earnings-kpi-note">Revenue minus all doctor cuts</div>
       </div>
     </section>
 
+    <!-- Summary Cards + Breakdown -->
     <section class="earnings-layout">
+      <!-- Left: Month Summary -->
       <div class="analytics-panel">
         <div class="panel-heading">
           <div>
-            <div class="panel-eyebrow">Revenue trend</div>
-            <div class="panel-title">Monthly branch collections</div>
-            <div class="panel-copy">Static monthly revenue bars showing the branch's revenue trajectory across the current financial cycle.</div>
+            <div class="panel-eyebrow">This Month's Summary</div>
+            <div class="panel-title" id="summaryMonthTitle">Loading…</div>
+            <div class="panel-copy">Revenue vs doctor cuts vs branch profit for the current month.</div>
           </div>
-          <span class="pill pill-green">+14.8% YoY</span>
+          <span class="pill pill-green" id="summaryCount">— Completed</span>
         </div>
 
-        <div class="revenue-chart" aria-label="Static monthly revenue chart">
-          <div class="revenue-bar" style="height: 44%" data-label="Jan" data-value="5.1L"></div>
-          <div class="revenue-bar" style="height: 54%" data-label="Feb" data-value="6.2L"></div>
-          <div class="revenue-bar" style="height: 49%" data-label="Mar" data-value="5.7L"></div>
-          <div class="revenue-bar" style="height: 60%" data-label="Apr" data-value="6.9L"></div>
-          <div class="revenue-bar" style="height: 66%" data-label="May" data-value="7.5L"></div>
-          <div class="revenue-bar" style="height: 73%" data-label="Jun" data-value="8.4L"></div>
-          <div class="revenue-bar" style="height: 69%" data-label="Jul" data-value="8.0L"></div>
-          <div class="revenue-bar" style="height: 81%" data-label="Aug" data-value="9.3L"></div>
-          <div class="revenue-bar" style="height: 78%" data-label="Sep" data-value="9.0L"></div>
-          <div class="revenue-bar" style="height: 86%" data-label="Oct" data-value="9.8L"></div>
-          <div class="revenue-bar" style="height: 92%" data-label="Nov" data-value="10.5L"></div>
-          <div class="revenue-bar" style="height: 100%" data-label="Dec" data-value="11.4L"></div>
+        <!-- Summary Bars -->
+        <div class="summary-bars" id="summaryBars">
+          <div class="summary-bar-row">
+            <div class="summary-bar-label">Gross Revenue</div>
+            <div class="summary-bar-track">
+              <div class="summary-bar-fill fill-revenue" id="barRevenue" style="width:100%"></div>
+            </div>
+            <div class="summary-bar-value" id="barRevenueVal">₹—</div>
+          </div>
+          <div class="summary-bar-row">
+            <div class="summary-bar-label">Doctor Cuts</div>
+            <div class="summary-bar-track">
+              <div class="summary-bar-fill fill-cuts" id="barCuts" style="width:0%"></div>
+            </div>
+            <div class="summary-bar-value" id="barCutsVal">₹—</div>
+          </div>
+          <div class="summary-bar-row">
+            <div class="summary-bar-label">Branch Profit</div>
+            <div class="summary-bar-track">
+              <div class="summary-bar-fill fill-profit" id="barProfit" style="width:0%"></div>
+            </div>
+            <div class="summary-bar-value" id="barProfitVal">₹—</div>
+          </div>
         </div>
 
-        <div class="chart-footnote">
-          <span>Highest month: December</span>
-          <span>Primary driver: outpatient diagnostics and follow-up packages</span>
-        </div>
-
-        <div class="branch-health">
+        <div class="branch-health" style="margin-top:20px;">
           <div class="health-card">
-            <div class="health-label">Collection efficiency</div>
-            <div class="health-value">96%</div>
+            <div class="health-label">Total Appointments</div>
+            <div class="health-value" id="healthTotal">—</div>
           </div>
           <div class="health-card">
-            <div class="health-label">Avg. ticket size</div>
-            <div class="health-value">&#8377;2,450</div>
+            <div class="health-label">Month Appointments</div>
+            <div class="health-value" id="healthMonth">—</div>
           </div>
           <div class="health-card">
-            <div class="health-label">Revenue target hit</div>
-            <div class="health-value">118%</div>
+            <div class="health-label">Profit Margin</div>
+            <div class="health-value" id="healthMargin">—</div>
           </div>
         </div>
       </div>
 
+      <!-- Right: Doctor Breakdown -->
       <aside class="side-panel">
         <div class="stacked-card">
           <div class="stacked-card-header">
             <div>
-              <div class="panel-eyebrow">Revenue mix</div>
-              <div class="stacked-card-title">Where the money comes from</div>
+              <div class="panel-eyebrow">Doctor Breakdown</div>
+              <div class="stacked-card-title">Cuts per doctor (this month)</div>
             </div>
-            <span class="pill pill-blue">Branch-wide</span>
+            <span class="pill pill-blue">Live</span>
           </div>
-          <div class="mini-list">
+          <div class="mini-list" id="doctorBreakdownList">
             <div class="mini-item">
-              <div>
-                <div class="mini-label">Consultations</div>
-                <div class="mini-meta">OPD visits and specialist appointments</div>
-              </div>
-              <div class="mini-value">42%</div>
-            </div>
-            <div class="mini-item">
-              <div>
-                <div class="mini-label">Diagnostics</div>
-                <div class="mini-meta">Lab tests and imaging services</div>
-              </div>
-              <div class="mini-value">31%</div>
-            </div>
-            <div class="mini-item">
-              <div>
-                <div class="mini-label">Pharmacy</div>
-                <div class="mini-meta">Medicine dispensation and refills</div>
-              </div>
-              <div class="mini-value">19%</div>
-            </div>
-            <div class="mini-item">
-              <div>
-                <div class="mini-label">Other services</div>
-                <div class="mini-meta">Procedures, room charges, and support services</div>
-              </div>
-              <div class="mini-value">8%</div>
+              <div><div class="mini-label skeleton-text" style="width:130px;height:12px;"></div></div>
+              <div class="mini-value skeleton-text" style="width:60px;height:12px;"></div>
             </div>
           </div>
         </div>
@@ -178,91 +169,74 @@
         <div class="stacked-card">
           <div class="stacked-card-header">
             <div>
-              <div class="panel-eyebrow">Collections snapshot</div>
-              <div class="stacked-card-title">Current branch status</div>
+              <div class="panel-eyebrow">All-time Summary</div>
+              <div class="stacked-card-title">Cumulative branch status</div>
             </div>
-            <span class="pill pill-amber">Static</span>
+            <span class="pill pill-amber">All Time</span>
           </div>
           <div class="mini-list">
             <div class="mini-item">
               <div>
-                <div class="mini-label">Cash collections</div>
-                <div class="mini-meta">Front desk and walk-in payments</div>
+                <div class="mini-label">Total Revenue</div>
+                <div class="mini-meta">All completed appointments</div>
               </div>
-              <div class="mini-value">&#8377;4.1L</div>
+              <div class="mini-value" id="allTimeRevenue">₹—</div>
             </div>
             <div class="mini-item">
               <div>
-                <div class="mini-label">Digital payments</div>
-                <div class="mini-meta">UPI, card, and net banking</div>
+                <div class="mini-label">Total Doctor Cuts</div>
+                <div class="mini-meta">Sum of all doctor earnings</div>
               </div>
-              <div class="mini-value">&#8377;7.6L</div>
+              <div class="mini-value" id="allTimeCuts">₹—</div>
             </div>
             <div class="mini-item">
               <div>
-                <div class="mini-label">Outstanding invoices</div>
-                <div class="mini-meta">Pending branch receivables</div>
+                <div class="mini-label">Branch Profit</div>
+                <div class="mini-meta">Revenue minus doctor cuts</div>
               </div>
-              <div class="mini-value">&#8377;1.8L</div>
+              <div class="mini-value" id="allTimeProfit">₹—</div>
             </div>
           </div>
         </div>
       </aside>
     </section>
 
+    <!-- Appointments Ledger Table -->
     <section class="table-panel mt-20">
       <div class="panel-heading">
         <div>
-          <div class="panel-eyebrow">Revenue ledger</div>
-          <div class="panel-title">Recent branch collections</div>
-          <div class="panel-copy">A static ledger of representative revenue activity across the branch.</div>
+          <div class="panel-eyebrow">Revenue Ledger</div>
+          <div class="panel-title">Completed Appointments — <span id="ledgerMonthLabel">This Month</span></div>
+          <div class="panel-copy">Live ledger of completed appointments showing fees, doctor cuts, and branch profit per row.</div>
         </div>
+        <span class="pill pill-green" id="ledgerCount">—</span>
       </div>
 
       <div class="table-wrap branch-table-wrap">
-        <table class="branch-table">
+        <table class="branch-table earnings-ledger-table" id="ledgerTable">
           <thead>
             <tr>
               <th>Date</th>
-              <th>Source</th>
-              <th>Service Type</th>
-              <th>Collected By</th>
-              <th>Amount</th>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Apt. ID</th>
+              <th>Consultation Fee</th>
+              <th>Doctor Cut (%)</th>
+              <th>Doctor Earning</th>
+              <th>Branch Profit</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="ledgerTbody">
             <tr>
-              <td>28 Aug 2026</td>
-              <td>Walk-in billing</td>
-              <td>Consultation package</td>
-              <td>Front Desk</td>
-              <td><span class="revenue-badge">&#8377;18,500</span></td>
-            </tr>
-            <tr>
-              <td>27 Aug 2026</td>
-              <td>Lab services</td>
-              <td>Diagnostics bundle</td>
-              <td>Accounts</td>
-              <td><span class="revenue-badge">&#8377;42,900</span></td>
-            </tr>
-            <tr>
-              <td>26 Aug 2026</td>
-              <td>Pharmacy</td>
-              <td>Medicine refill</td>
-              <td>Pharmacy Desk</td>
-              <td><span class="revenue-badge">&#8377;26,750</span></td>
-            </tr>
-            <tr>
-              <td>25 Aug 2026</td>
-              <td>Corporate billing</td>
-              <td>Monthly settlement</td>
-              <td>Admin Office</td>
-              <td><span class="revenue-badge">&#8377;1,12,000</span></td>
+              <td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted);">
+                Loading ledger data…
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
+
   </main>
 </div>
 
@@ -276,11 +250,6 @@
 
 <script src="../../js/branch-admin/utils.js"></script>
 <script src="../../js/branch-admin/components.js"></script>
-<script>
-  (async () => {
-    await loadComponents('earnings', 'Earnings');
-    updateTopbarUser();
-  })();
-</script>
+<script src="../../js/branch-admin/earnings.js"></script>
 </body>
 </html>

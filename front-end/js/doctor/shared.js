@@ -29,6 +29,7 @@ function getSidebarTemplate() {
     <a href="internal-referral.html" class="nav-item" data-page="internal-referral" data-tooltip="Internal Referral"><span class="nav-icon">🔗</span><span class="nav-label">Internal Referral</span></a>
     <a href="treatment-plan.html" class="nav-item" data-page="treatment-plan" data-tooltip="Treatment Plan"><span class="nav-icon">💊</span><span class="nav-label">Treatment Plan</span></a>
     <a href="slot-management.html" class="nav-item" data-page="slot-management" data-tooltip="Slot Management"><span class="nav-icon">🕐</span><span class="nav-label">Slot Management</span></a>
+    <a href="earnings.html" class="nav-item" data-page="earnings" data-tooltip="Earnings"><span class="nav-icon">₹</span><span class="nav-label">Earnings</span></a>
   </nav>
   <div class="sidebar-bottom">
     <a href="../login.html" class="nav-item nav-logout" data-logout="true">

@@ -1496,6 +1496,97 @@
         ]
       }
     },
+    "/appointments/{id}/complete": {
+      "post": {
+        "operationId": "AppointmentsController_completeAppointment",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment marked as completed"
+          }
+        },
+        "summary": "Mark an appointment as completed",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/appointments/earnings/doctor/{doctorId}": {
+      "get": {
+        "operationId": "AppointmentsController_getDoctorEarnings",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "doctorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor earnings summary with per-appointment breakdown"
+          }
+        },
+        "summary": "Get earnings summary for a doctor (completed appointments)",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
+    "/appointments/earnings/branch": {
+      "get": {
+        "operationId": "AppointmentsController_getBranchEarnings",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Branch earnings summary with revenue, doctor cuts, and profit"
+          }
+        },
+        "summary": "Get branch earnings summary (all completed appointments for admin branch)",
+        "tags": [
+          "Appointments"
+        ]
+      }
+    },
     "/doctors": {
       "get": {
         "operationId": "DoctorsController_listDoctors",

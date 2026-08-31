@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="MEDBITS Doctor Portal — My Earnings from completed consultations"/>
+  <title>Earnings — MEDBITS Doctor</title>
+  <link rel="stylesheet" href="../../css/doctor/global.css"/>
+  <link rel="stylesheet" href="../../css/doctor/earnings.css"/>
+</head>
+<body data-page="earnings">
+<div class="app-shell">
+  <div id="sidebarMount"></div>
+  <div class="main-wrapper" id="mainWrapper">
+    <div id="headerMount"></div>
+    <main class="page-content">
+
+      <!-- Hero Banner -->
+      <div class="earnings-hero" id="earningsHero">
+        <div class="earnings-hero-left">
+          <div class="earnings-hero-eyebrow">MY EARNINGS</div>
+          <div class="earnings-hero-title" id="heroTitle">Loading earnings…</div>
+          <div class="earnings-hero-sub" id="heroSub">Fetching your consultation revenue data</div>
+        </div>
+        <div class="earnings-hero-badge">
+          <div class="earnings-hero-badge-label">This Month</div>
+          <div class="earnings-hero-badge-value" id="heroMonthValue">₹—</div>
+          <div class="earnings-hero-badge-note" id="heroMonthNote">Current month earnings</div>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="earnings-kpi-row">
+        <div class="earnings-kpi-card">
+          <div class="earnings-kpi-label">Total Earned (All Time)</div>
+          <div class="earnings-kpi-value" id="kpiTotal">₹—</div>
+          <div class="earnings-kpi-note">Across all completed consultations</div>
+        </div>
+        <div class="earnings-kpi-card">
+          <div class="earnings-kpi-label">This Month's Earnings</div>
+          <div class="earnings-kpi-value" id="kpiMonth">₹—</div>
+          <div class="earnings-kpi-note" id="kpiMonthNote">Current month</div>
+        </div>
+        <div class="earnings-kpi-card">
+          <div class="earnings-kpi-label">Completed Consultations</div>
+          <div class="earnings-kpi-value" id="kpiCount">—</div>
+          <div class="earnings-kpi-note">All time completed appointments</div>
+        </div>
+      </div>
+
+      <!-- Earnings Details Card -->
+      <div class="card">
+
+        <!-- Cut info band -->
+        <div class="cut-info-band" id="cutInfoBand" style="display:none;">
+          <div class="cut-pct" id="cutPct">—%</div>
+          <div class="cut-text">
+            <strong>Your consultation earnings cut</strong><br>
+            You receive <span id="cutPctInline">—%</span> of the consultation fee for each completed appointment.
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="earnings-toolbar">
+          <div class="earnings-toolbar-title">
+            Monthly Earnings Ledger
+          </div>
+          <div class="month-badge" id="monthBadge">
+            📅 <span id="currentMonthLabel">Loading…</span>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="earnings-table-wrap">
+          <table class="earnings-table" id="earningsTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Patient</th>
+                <th>Slot</th>
+                <th>Consultation Fee</th>
+                <th>Your Cut (%)</th>
+                <th>Your Earning</th>
+              </tr>
+            </thead>
+            <tbody id="earningsTbody">
+              <tr class="skeleton-row">
+                <td><div class="skeleton-cell" style="width:80px;"></div></td>
+                <td><div class="skeleton-cell" style="width:120px;"></div></td>
+                <td><div class="skeleton-cell" style="width:70px;"></div></td>
+                <td><div class="skeleton-cell" style="width:80px;"></div></td>
+                <td><div class="skeleton-cell" style="width:60px;"></div></td>
+                <td><div class="skeleton-cell" style="width:90px;"></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<script src="../../js/doctor/components.js"></script>
+<script src="../../js/doctor/earnings.js"></script>
+</body>
+</html>

@@ -46,5 +46,13 @@
     "type": "error",
     "read": false,
     "createdAt": "2026-08-23T10:59:51.754Z"
+  },
+  {
+    "id": "NOTIF1788173285488934",
+    "userId": "DOC001",
+    "message": "Your leave request for August 15, 2026 has been APPROVED.",
+    "type": "success",
+    "read": false,
+    "createdAt": "2026-08-31T10:48:05.488Z"
   }
 ]

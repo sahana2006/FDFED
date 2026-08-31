@@ -40,6 +40,39 @@ export type UpdateAppointmentInput = {
   slot?: string;
 };
 
+export type EarningsEntry = {
+  appointmentId: string;
+  date: string;
+  slot: string;
+  patientName: string;
+  doctorId: string;
+  doctorName: string;
+  consultationFee: number;
+  percentageCut: number;
+  doctorEarning: number;
+  branchProfit: number;
+};
+
+export type DoctorEarningsSummary = {
+  doctorId: string;
+  doctorName: string;
+  percentageCut: number;
+  totalEarnings: number;
+  currentMonthEarnings: number;
+  entries: EarningsEntry[];
+};
+
+export type BranchEarningsSummary = {
+  totalRevenue: number;
+  totalDoctorCuts: number;
+  branchProfit: number;
+  currentMonthRevenue: number;
+  currentMonthDoctorCuts: number;
+  currentMonthProfit: number;
+  completedAppointmentsCount: number;
+  entries: EarningsEntry[];
+};
+
 export type ListAppointmentsInput = {
   userId?: string;
   doctorId?: string;
@@ -351,6 +384,119 @@ export class AppointmentsService {
       APPOINTMENTS_DATA_FILE,
       JSON.stringify(this.appointments, null, 2),
     );
+  }
+
+  async getEarningsForDoctor(doctorId: string): Promise<DoctorEarningsSummary> {
+    const doctor = await this.doctorsService.getDoctorById(doctorId);
+    const completed = this.appointments.filter(
+      (a) => a.doctorId === doctorId && a.status === 'completed',
+    );
+
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const entries: EarningsEntry[] = completed.map((a) => {
+      const fee = doctor.consultationFee || 0;
+      const cut = doctor.percentageCut || 0;
+      const doctorEarning = (fee * cut) / 100;
+      const branchProfit = fee - doctorEarning;
+
+      let patientName = a.userId;
+      try {
+        const p = this.patientsService.getPatientByUserId(a.userId);
+        patientName = `${p.firstName} ${p.lastName}`.trim() || a.userId;
+      } catch (_) {}
+
+      return {
+        appointmentId: a.id,
+        date: a.date,
+        slot: a.slot,
+        patientName,
+        doctorId: doctor.id,
+        doctorName: doctor.name,
+        consultationFee: fee,
+        percentageCut: cut,
+        doctorEarning,
+        branchProfit,
+      };
+    });
+
+    const currentMonthEntries = entries.filter((e) => {
+      const d = new Date(e.date);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    return {
+      doctorId: doctor.id,
+      doctorName: doctor.name,
+      percentageCut: doctor.percentageCut || 0,
+      totalEarnings: entries.reduce((s, e) => s + e.doctorEarning, 0),
+      currentMonthEarnings: currentMonthEntries.reduce((s, e) => s + e.doctorEarning, 0),
+      entries,
+    };
+  }
+
+  async getEarningsForBranch(branchId: string): Promise<BranchEarningsSummary> {
+    const completed = this.appointments.filter(
+      (a) => a.branchId === branchId && a.status === 'completed',
+    );
+
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const entries: EarningsEntry[] = await Promise.all(
+      completed.map(async (a) => {
+        let doctor: any = { id: a.doctorId, name: 'Unknown', consultationFee: 0, percentageCut: 0 };
+        try {
+          doctor = await this.doctorsService.getDoctorById(a.doctorId);
+        } catch (_) {}
+
+        const fee = doctor.consultationFee || 0;
+        const cut = doctor.percentageCut || 0;
+        const doctorEarning = (fee * cut) / 100;
+        const branchProfit = fee - doctorEarning;
+
+        let patientName = a.userId;
+        try {
+          const p = this.patientsService.getPatientByUserId(a.userId);
+          patientName = `${p.firstName} ${p.lastName}`.trim() || a.userId;
+        } catch (_) {}
+
+        return {
+          appointmentId: a.id,
+          date: a.date,
+          slot: a.slot,
+          patientName,
+          doctorId: doctor.id,
+          doctorName: doctor.name,
+          consultationFee: fee,
+          percentageCut: cut,
+          doctorEarning,
+          branchProfit,
+        };
+      }),
+    );
+
+    const currentMonthEntries = entries.filter((e) => {
+      const d = new Date(e.date);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    const sum = (arr: EarningsEntry[], key: keyof EarningsEntry) =>
+      arr.reduce((s, e) => s + (e[key] as number), 0);
+
+    return {
+      totalRevenue: sum(entries, 'consultationFee'),
+      totalDoctorCuts: sum(entries, 'doctorEarning'),
+      branchProfit: sum(entries, 'branchProfit'),
+      currentMonthRevenue: sum(currentMonthEntries, 'consultationFee'),
+      currentMonthDoctorCuts: sum(currentMonthEntries, 'doctorEarning'),
+      currentMonthProfit: sum(currentMonthEntries, 'branchProfit'),
+      completedAppointmentsCount: entries.length,
+      entries,
+    };
   }
 
   private async toAppointmentDetails(appointment: Appointment) {
