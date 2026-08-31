@@ -103,6 +103,13 @@ function pct(part, total) {
   return Math.max(Math.round((part / total) * 100), 2);
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(`${dateStr}T00:00:00`);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 function setText(id, value) {
   const el = $(id);
   if (el) el.textContent = value;
@@ -112,6 +119,12 @@ function setBar(barId, valueId, value, total) {
   const bar = $(barId);
   if (bar) bar.style.width = `${pct(value, total)}%`;
   setText(valueId, formatCurrency(value));
+}
+
+function logoutSuperUser(event) {
+  event?.preventDefault();
+  localStorage.removeItem(STORAGE_KEY);
+  window.location.href = '../login.html';
 }
 
 async function loadShell() {
@@ -220,6 +233,7 @@ function renderDoctorBreakdown(entries) {
 function renderBranchEarnings(data) {
   const branch = data?.branch || {};
   const entries = Array.isArray(data?.entries) ? data.entries : [];
+  const allLabEntries = Array.isArray(data?.labEntries) ? data.labEntries : [];
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
@@ -230,10 +244,20 @@ function renderBranchEarnings(data) {
     return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   });
 
-  const monthRevenue = monthEntries.reduce((sum, entry) => sum + Number(entry.consultationFee || 0), 0);
+  const monthLabEntries = allLabEntries.filter((entry) => {
+    const date = new Date(entry.date);
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+  });
+
+  const monthAppointmentRevenue = monthEntries.reduce((sum, entry) => sum + Number(entry.consultationFee || 0), 0);
+  const monthLabRevenue = monthLabEntries.reduce((sum, entry) => sum + Number(entry.testPrice || 0), 0);
+  
+  const monthRevenue = monthAppointmentRevenue + monthLabRevenue;
   const monthCuts = monthEntries.reduce((sum, entry) => sum + Number(entry.doctorEarning || 0), 0);
-  const monthProfit = monthEntries.reduce((sum, entry) => sum + Number(entry.branchProfit || 0), 0);
-  const averageTicket = monthEntries.length ? monthRevenue / monthEntries.length : 0;
+  
+  const monthAppointmentProfit = monthEntries.reduce((sum, entry) => sum + Number(entry.branchProfit || 0), 0);
+  const monthProfit = monthAppointmentProfit + monthLabRevenue;
+  const averageTicket = (monthEntries.length || monthLabEntries.length) ? monthRevenue / (monthEntries.length + monthLabEntries.length) : 0;
 
   const doctorCutTotals = monthEntries.reduce((acc, entry) => {
     const doctorKey = entry.doctorId || entry.doctorName || 'Unknown';
@@ -252,11 +276,14 @@ function renderBranchEarnings(data) {
   setText('kpiTotalRevenue', formatCurrency(data.totalRevenue ?? 0));
   setText('kpiMonthRevenue', formatCurrency(monthRevenue));
   setText('kpiTotalCuts', formatCurrency(data.totalDoctorCuts ?? 0));
+  setText('kpiLabRevenue', formatCurrency(data.totalLabTestRevenue ?? 0));
   setText('kpiMonthProfit', formatCurrency(monthProfit));
   setText('kpiMonthLabel', monthLabel);
 
+  setText('kpiMonthLabel', monthLabel);
+
   setText('summaryMonthTitle', monthLabel);
-  setText('summaryCount', `${monthEntries.length} Completed`);
+  setText('summaryCount', `${monthEntries.length} Appointments · ${monthLabEntries.length} Lab Tests`);
   setBar('barRevenue', 'barRevenueVal', monthRevenue, monthRevenue);
   setBar('barCuts', 'barCutsVal', monthCuts, monthRevenue);
   setBar('barProfit', 'barProfitVal', monthProfit, monthRevenue);
@@ -270,6 +297,32 @@ function renderBranchEarnings(data) {
   setText('insightProfitEfficiency', `${profitEfficiency}%`);
 
   renderDoctorBreakdown(monthEntries);
+  renderLabBreakdown(monthLabEntries);
+}
+
+function renderLabBreakdown(entries) {
+  const container = $('labBreakdownList');
+  if (!container) return;
+
+  if (!entries.length) {
+    container.innerHTML = `
+      <div class="mini-item">
+        <div style="color:var(--text-muted);font-size:.875rem;">
+          No completed lab tests this month.
+        </div>
+      </div>`;
+    return;
+  }
+
+  const sorted = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
+  container.innerHTML = sorted.slice(0, 6).map((entry) => `
+    <div class="mini-item">
+      <div>
+        <div class="mini-label">${escapeHtml(entry.testName || 'Lab Test')}</div>
+        <div class="mini-meta">${escapeHtml(entry.patientName || 'Unknown patient')} · ${formatDate(entry.date)} · ${escapeHtml(entry.technicianName || 'Lab Technician')}</div>
+      </div>
+      <div class="mini-value cut-value">${formatCurrency(entry.testPrice || 0)}</div>
+    </div>`).join('');
 }
 
 async function loadBranches() {
@@ -325,6 +378,8 @@ async function init() {
       showToast(error.message || 'Unable to load branch earnings.', 'error');
     }
   });
+
+  $('superuser-logout')?.addEventListener('click', logoutSuperUser);
 }
 
 document.addEventListener('DOMContentLoaded', init);

@@ -81,6 +81,12 @@ function formatDate(value) {
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString();
 }
 
+function logoutSuperUser(event) {
+  event?.preventDefault();
+  localStorage.removeItem(STORAGE_KEY);
+  window.location.href = '../login.html';
+}
+
 function renderHeaderShell() {
   const session = getSession();
   const title = $('header-page-title');
@@ -321,6 +327,7 @@ async function init() {
   $('doctor-search')?.addEventListener('input', applyDoctorSearch);
   $('frontdesk-search')?.addEventListener('input', applyFrontdeskSearch);
   $('labtech-search')?.addEventListener('input', applyLabTechSearch);
+  $('superuser-logout')?.addEventListener('click', logoutSuperUser);
 }
 
 document.addEventListener('DOMContentLoaded', init);

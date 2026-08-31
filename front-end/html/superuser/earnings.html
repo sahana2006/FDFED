@@ -101,7 +101,7 @@
 
     .branch-kpis {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 1rem;
     }
 
@@ -494,7 +494,6 @@
             <div class="overview-title">Branches With Revenue</div>
             <div class="overview-value" id="overview-branches">0</div>
             <div class="overview-note">Contributing to platform revenue</div>
-          </div>
         </section>
 
         <section class="panel-card">
@@ -544,6 +543,11 @@
               <div class="branch-kpi-label">Total Doctor Cuts</div>
               <div class="branch-kpi-value" id="kpiTotalCuts">₹0</div>
               <div class="branch-kpi-note">Doctor earnings across all time</div>
+            </div>
+            <div class="branch-kpi">
+              <div class="branch-kpi-label">Lab Test Revenue</div>
+              <div class="branch-kpi-value" id="kpiLabRevenue">₹0</div>
+              <div class="branch-kpi-note">Completed lab tests billed to this branch</div>
             </div>
             <div class="branch-kpi">
               <div class="branch-kpi-label">Branch Profit (This Month)</div>
@@ -613,6 +617,22 @@
                   <span class="pill pill-blue">Live</span>
                 </div>
                 <div class="mini-list" id="doctorBreakdownList">
+                  <div class="mini-item">
+                    <div class="mini-label" style="width: 130px;">Loading...</div>
+                    <div class="mini-value" style="width: 80px;">₹0</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stacked-card">
+                <div class="stacked-card-header">
+                  <div>
+                    <div class="panel-eyebrow">Lab Breakdown</div>
+                    <div class="stacked-card-title">Completed lab tests (this month)</div>
+                  </div>
+                  <span class="pill pill-blue">Live</span>
+                </div>
+                <div class="mini-list" id="labBreakdownList">
                   <div class="mini-item">
                     <div class="mini-label" style="width: 130px;">Loading...</div>
                     <div class="mini-value" style="width: 80px;">₹0</div>

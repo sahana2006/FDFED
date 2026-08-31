@@ -401,7 +401,16 @@
     const dateVal = document.getElementById('noteDate').value;
     const notesText = document.getElementById('noteText').value.trim();
     const meds = [...document.querySelectorAll('#medicineList .prescription-item span')].map((s) => s.textContent).join('|');
-    const labs = [...document.querySelectorAll('#labList .prescription-item span')].map((s) => s.textContent).join('|');
+    
+    let labs = [...document.querySelectorAll('#labList .prescription-item span')].map((s) => s.textContent).join('|');
+    const select = document.getElementById('labTestSelect');
+    if (select && select.value) {
+      const selectedOption = select.options[select.selectedIndex];
+      const labName = selectedOption?.textContent?.trim();
+      if (labName && labName !== 'Select a lab test...') {
+        labs = labs ? `${labs}|${labName}` : labName;
+      }
+    }
 
     if (!notesText && !meds && !labs) {
       showToast('Enter consultation details before saving.', 'error');

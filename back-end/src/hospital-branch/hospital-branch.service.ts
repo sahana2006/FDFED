@@ -40,7 +40,7 @@ export class HospitalBranchService {
     const target = this.normalizeLabTestName(name);
     if (!target) return 0;
     const test = this.labTestsService.findAllTests().find((item) => this.normalizeLabTestName(item.name) === target);
-    return test?.price ?? 0;
+    return test?.price ?? 500;
   }
 
   async create(createHospitalBranchDto: CreateHospitalBranchDto): Promise<HospitalBranch> {
