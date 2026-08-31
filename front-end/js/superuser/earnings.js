@@ -89,12 +89,6 @@ function formatNumber(value) {
   return new Intl.NumberFormat('en-IN').format(Number(value) || 0);
 }
 
-function formatDate(value) {
-  if (!value) return '—';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('en-IN');
-}
-
 function escapeHtml(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -182,27 +176,23 @@ function renderBranchOptions(branches) {
   setText('branch-select-note', selectedId ? 'Showing earnings for the selected branch.' : 'Choose a branch to view its earnings.');
 }
 
-function monthLabelForToday() {
-  const now = new Date();
-  return `${MONTHS_LONG[now.getMonth()]} ${now.getFullYear()}`;
-}
-
 function renderDoctorBreakdown(entries) {
   const container = $('doctorBreakdownList');
   if (!container) return;
 
   const byDoctor = {};
   entries.forEach((entry) => {
-    if (!byDoctor[entry.doctorId]) {
-      byDoctor[entry.doctorId] = {
-        name: entry.doctorName || entry.doctorId,
+    const doctorId = entry.doctorId || entry.doctorName || 'unknown-doctor';
+    if (!byDoctor[doctorId]) {
+      byDoctor[doctorId] = {
+        name: entry.doctorName || entry.doctorId || 'Unknown doctor',
         cut: 0,
-        pct: entry.percentageCut || 0,
+        pct: Number(entry.percentageCut || 0),
         count: 0,
       };
     }
-    byDoctor[entry.doctorId].cut += Number(entry.doctorEarning || 0);
-    byDoctor[entry.doctorId].count += 1;
+    byDoctor[doctorId].cut += Number(entry.doctorEarning || 0);
+    byDoctor[doctorId].count += 1;
   });
 
   const doctors = Object.values(byDoctor).sort((a, b) => b.cut - a.cut);
@@ -227,37 +217,6 @@ function renderDoctorBreakdown(entries) {
   `).join('');
 }
 
-function renderLedger(entries) {
-  const tbody = $('ledgerTbody');
-  if (!tbody) return;
-
-  if (!entries.length) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" style="text-align:center;padding:32px;color:#64748b;">
-          No completed appointments for this branch.
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  const sorted = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  tbody.innerHTML = sorted.map((entry) => `
-    <tr>
-      <td>${formatDate(entry.date)}</td>
-      <td><strong>${escapeHtml(entry.patientName)}</strong></td>
-      <td>${escapeHtml(entry.doctorName)}</td>
-      <td><code style="font-size:.78rem;color:#64748b;">${escapeHtml(entry.appointmentId)}</code></td>
-      <td><span class="revenue-badge">${formatCurrency(entry.consultationFee)}</span></td>
-      <td class="td-cut-col">${escapeHtml(entry.percentageCut)}% → ${formatCurrency(entry.doctorEarning)}</td>
-      <td class="td-doc-earn">${formatCurrency(entry.doctorEarning)}</td>
-      <td class="td-branch-profit">${formatCurrency(entry.branchProfit)}</td>
-    </tr>
-  `).join('');
-}
-
 function renderBranchEarnings(data) {
   const branch = data?.branch || {};
   const entries = Array.isArray(data?.entries) ? data.entries : [];
@@ -274,6 +233,16 @@ function renderBranchEarnings(data) {
   const monthRevenue = monthEntries.reduce((sum, entry) => sum + Number(entry.consultationFee || 0), 0);
   const monthCuts = monthEntries.reduce((sum, entry) => sum + Number(entry.doctorEarning || 0), 0);
   const monthProfit = monthEntries.reduce((sum, entry) => sum + Number(entry.branchProfit || 0), 0);
+  const averageTicket = monthEntries.length ? monthRevenue / monthEntries.length : 0;
+
+  const doctorCutTotals = monthEntries.reduce((acc, entry) => {
+    const doctorKey = entry.doctorId || entry.doctorName || 'Unknown';
+    acc[doctorKey] = (acc[doctorKey] || 0) + Number(entry.doctorEarning || 0);
+    return acc;
+  }, {});
+  const topDoctorCut = Object.values(doctorCutTotals).reduce((max, value) => Math.max(max, value), 0);
+  const topDoctorShare = monthCuts ? Math.round((topDoctorCut / monthCuts) * 100) : 0;
+  const profitEfficiency = monthRevenue ? Math.round((monthProfit / monthRevenue) * 100) : 0;
 
   setText('branchHeroTitle', `${branch.branchName || 'Branch'} - ${branch.hospitalName || 'Hospital'}`);
   setText('branchHeroSub', `${branch.city || '—'}, ${branch.state || '—'} | ${branch.email || 'No email provided'}`);
@@ -296,14 +265,11 @@ function renderBranchEarnings(data) {
   setText('healthMonth', formatNumber(monthEntries.length));
   setText('healthMargin', monthRevenue ? `${Math.round((monthProfit / monthRevenue) * 100)}%` : '—');
 
-  setText('allTimeRevenue', formatCurrency(data.totalRevenue ?? 0));
-  setText('allTimeCuts', formatCurrency(data.totalDoctorCuts ?? 0));
-  setText('allTimeProfit', formatCurrency(data.branchProfit ?? 0));
+  setText('insightAvgTicket', formatCurrency(averageTicket));
+  setText('insightTopDoctorShare', `${topDoctorShare}%`);
+  setText('insightProfitEfficiency', `${profitEfficiency}%`);
 
-  setText('ledgerMonthLabel', monthLabel);
-  setText('ledgerCount', `${monthEntries.length} appointments`);
   renderDoctorBreakdown(monthEntries);
-  renderLedger(monthEntries);
 }
 
 async function loadBranches() {

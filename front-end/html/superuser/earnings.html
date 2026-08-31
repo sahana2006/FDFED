@@ -136,7 +136,7 @@
 
     .branch-layout {
       display: grid;
-      grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.95fr);
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr);
       gap: 1rem;
       align-items: start;
     }
@@ -241,6 +241,29 @@
     .health-value {
       margin-top: 0.35rem;
       font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .insight-highlight {
+      display: grid;
+      gap: 0.45rem;
+      padding: 0.95rem;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #f8fffe 0%, #eefbf8 100%);
+      border: 1px solid #d1fae5;
+    }
+
+    .insight-highlight-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #0f766e;
+    }
+
+    .insight-highlight-value {
+      font-size: 1.4rem;
       font-weight: 800;
       color: #0f172a;
     }
@@ -600,71 +623,34 @@
               <div class="stacked-card">
                 <div class="stacked-card-header">
                   <div>
-                    <div class="panel-eyebrow">All-time Summary</div>
-                    <div class="stacked-card-title">Cumulative branch status</div>
+                    <div class="panel-eyebrow">Month Insights</div>
+                    <div class="stacked-card-title">Sharper view of this branch</div>
                   </div>
-                  <span class="pill pill-amber">All Time</span>
+                  <span class="pill pill-amber">Analytic</span>
                 </div>
                 <div class="mini-list">
-                  <div class="mini-item">
-                    <div>
-                      <div class="mini-label">Total Revenue</div>
-                      <div class="mini-meta">All completed appointments</div>
-                    </div>
-                    <div class="mini-value" id="allTimeRevenue">₹0</div>
+                  <div class="insight-highlight">
+                    <div class="insight-highlight-label">Average ticket</div>
+                    <div class="insight-highlight-value" id="insightAvgTicket">₹0</div>
+                    <div class="mini-meta">Revenue per completed appointment this month</div>
                   </div>
                   <div class="mini-item">
                     <div>
-                      <div class="mini-label">Total Doctor Cuts</div>
-                      <div class="mini-meta">Sum of all doctor earnings</div>
+                      <div class="mini-label">Top doctor share</div>
+                      <div class="mini-meta">Largest contributor to monthly doctor cuts</div>
                     </div>
-                    <div class="mini-value" id="allTimeCuts">₹0</div>
+                    <div class="mini-value" id="insightTopDoctorShare">0%</div>
                   </div>
                   <div class="mini-item">
                     <div>
-                      <div class="mini-label">Branch Profit</div>
-                      <div class="mini-meta">Revenue minus doctor cuts</div>
+                      <div class="mini-label">Profit efficiency</div>
+                      <div class="mini-meta">Branch profit as a share of revenue</div>
                     </div>
-                    <div class="mini-value" id="allTimeProfit">₹0</div>
+                    <div class="mini-value" id="insightProfitEfficiency">0%</div>
                   </div>
                 </div>
               </div>
             </aside>
-          </section>
-
-          <section class="table-panel">
-            <div class="panel-heading">
-              <div>
-                <div class="panel-eyebrow">Revenue Ledger</div>
-                <div class="panel-title">Completed Appointments - <span id="ledgerMonthLabel">This Month</span></div>
-                <div class="panel-copy">Live ledger of completed appointments showing fees, doctor cuts, and branch profit per row.</div>
-              </div>
-              <span class="pill pill-green" id="ledgerCount">0</span>
-            </div>
-
-            <div class="branch-table-wrap">
-              <table class="branch-table" id="ledgerTable">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Patient</th>
-                    <th>Doctor</th>
-                    <th>Apt. ID</th>
-                    <th>Consultation Fee</th>
-                    <th>Doctor Cut (%)</th>
-                    <th>Doctor Earning</th>
-                    <th>Branch Profit</th>
-                  </tr>
-                </thead>
-                <tbody id="ledgerTbody">
-                  <tr>
-                    <td colspan="8" style="text-align:center;padding:24px;color:#64748b;">
-                      Loading branch earnings...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
           </section>
         </section>
       </main>

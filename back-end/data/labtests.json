@@ -1,3 +1,12 @@
 {
-  "testBookings": []
+  "testBookings": [
+    {
+      "id": "TBOOK1788186390075",
+      "userId": "PAT001",
+      "labTestId": "LAB001",
+      "status": "cart",
+      "cartId": "LABCART1788186390076",
+      "orderId": null
+    }
+  ]
 }
