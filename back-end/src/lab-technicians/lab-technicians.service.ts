@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException, OnModuleInit, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HospitalBranchService } from '../hospital-branch/hospital-branch.service';
@@ -43,6 +43,7 @@ export class LabTechniciansService implements OnModuleInit {
   constructor(
     @InjectRepository(LabTechnician)
     private readonly labTechnicianRepository: Repository<LabTechnician>,
+    @Inject(forwardRef(() => HospitalBranchService))
     private readonly hospitalBranchService: HospitalBranchService,
   ) {}
 

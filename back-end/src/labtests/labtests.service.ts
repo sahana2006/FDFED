@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { LabRequestsService } from '../lab-requests/lab-requests.service';
@@ -91,7 +91,10 @@ export class LabTestsService {
   private testBookings: TestBooking[] = [];
   private readonly activeCartIds = new Map<string, string>();
 
-  constructor(private readonly labRequestsService: LabRequestsService) {
+  constructor(
+    @Inject(forwardRef(() => LabRequestsService))
+    private readonly labRequestsService: LabRequestsService,
+  ) {
     this.loadPersistedState();
   }
 

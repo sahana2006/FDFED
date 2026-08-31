@@ -2,6 +2,7 @@
   await loadComponents('consultation-notes', 'Consultation Notes');
 
   const API_BASE = 'http://localhost:3000';
+  const LABTESTS_API_BASE = 'http://localhost:3000';
 
   const listView = document.getElementById('listView');
   const noteDetailView = document.getElementById('noteDetailView');
@@ -15,6 +16,7 @@
   let doctorAppointments = [];
   let selectedAppointment = null;
   let currentRecord = null;
+  let labTestCatalog = [];
 
   let consultationRecords = [];
 
@@ -117,6 +119,38 @@
     div.innerHTML = `<span>${text}</span><button class="remove-btn" title="Remove">&times;</button>`;
     div.querySelector('.remove-btn').addEventListener('click', () => div.remove());
     container.appendChild(div);
+  }
+
+  async function loadLabTestCatalog() {
+    try {
+      const response = await fetch(`${LABTESTS_API_BASE}/labtests`, {
+        headers: { role: 'doctor' },
+      });
+      if (!response.ok) throw new Error('Unable to load lab tests');
+      const payload = await response.json();
+      labTestCatalog = Array.isArray(payload) ? payload : [];
+    } catch (_) {
+      labTestCatalog = [];
+    }
+  }
+
+  function populateLabTestDropdown() {
+    const select = document.getElementById('labTestSelect');
+    if (!select) return;
+
+    if (!labTestCatalog.length) {
+      select.innerHTML = '<option value="">No lab tests available</option>';
+      select.disabled = true;
+      return;
+    }
+
+    select.disabled = false;
+    select.innerHTML = [
+      '<option value="">Select a lab test...</option>',
+      ...labTestCatalog.map((test) => `
+        <option value="${escapeHtml(test.id)}">${escapeHtml(test.name)}${test.category ? ` · ${escapeHtml(test.category)}` : ''}</option>
+      `),
+    ].join('');
   }
 
   async function loadAppointments() {
@@ -444,6 +478,8 @@
     searchInput.value = '';
     await loadAppointments();
     await loadConsultationRecords();
+    await loadLabTestCatalog();
+    populateLabTestDropdown();
     renderUpcomingAppointments();
     renderRecords('');
     showToast('Consultation note saved and appointment marked completed.', 'success');
@@ -456,8 +492,19 @@
   });
 
   document.getElementById('addLabBtn').addEventListener('click', () => {
-    const lab = prompt('Lab test name:');
-    if (lab) addPrescriptionItem(document.getElementById('labList'), lab);
+    const select = document.getElementById('labTestSelect');
+    if (!select) return;
+
+    const selectedOption = select.options[select.selectedIndex];
+    const labName = selectedOption?.textContent?.trim();
+    if (!select.value || !labName || labName === 'Select a lab test...') {
+      showToast('Select a lab test first.', 'error');
+      select.focus();
+      return;
+    }
+
+    addPrescriptionItem(document.getElementById('labList'), labName);
+    select.value = '';
   });
 
   searchInput.addEventListener('input', function () {
@@ -653,6 +700,8 @@
 
   await loadAppointments();
   await loadConsultationRecords();
+  await loadLabTestCatalog();
+  populateLabTestDropdown();
   await loadDoctorLabReports();
   renderUpcomingAppointments();
   renderRecords('');

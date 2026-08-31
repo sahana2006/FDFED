@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { LabTechniciansService } from '../lab-technicians/lab-technicians.service';
@@ -69,6 +69,7 @@ export type LabReport = {
   uploadedFileSize?: number | null;
   uploadedAt?: string | null;
   status: LabReportStatus;
+  sourceType?: 'doctor_order' | 'patient_labtest';
   createdAt: string;
   updatedAt: string;
   submittedAt: string | null;
@@ -138,7 +139,10 @@ export class LabRequestsService {
   private labRequests: LabRequest[] = [];
   private labReports: LabReport[] = [];
 
-  constructor(private readonly labTechniciansService: LabTechniciansService) {
+  constructor(
+    @Inject(forwardRef(() => LabTechniciansService))
+    private readonly labTechniciansService: LabTechniciansService,
+  ) {
     this.loadPersistedData();
   }
 
