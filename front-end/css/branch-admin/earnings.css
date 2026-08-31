@@ -9,7 +9,7 @@
 
 .earnings-kpi-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -153,6 +153,11 @@
   margin-bottom: 16px;
 }
 
+.stacked-card-lab {
+  background: linear-gradient(180deg, #eff6ff 0%, #f8fbff 100%);
+  border-color: #bfdbfe;
+}
+
 .stacked-card-header {
   display: flex;
   align-items: start;
@@ -261,7 +266,7 @@
 
 .branch-health {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-top: 16px;
 }
@@ -337,6 +342,7 @@
 .earnings-kpi-value.kpi-accent { color: var(--accent); }
 .earnings-kpi-value.kpi-orange { color: #d97706; }
 .earnings-kpi-value.kpi-green  { color: #16a34a; }
+.earnings-kpi-value.kpi-blue   { color: #2563eb; }
 
 /* ── Summary bars ── */
 .summary-bars { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }

@@ -97,7 +97,8 @@ function renderRecentRequests(container, requests) {
         <div class="req-avatar">${initials}</div>
         <div>
           <div class="req-title">${escapeHtml(req.testName)} — <strong>${escapeHtml(req.patientName || req.patientId)}</strong></div>
-          <div class="req-meta">Dr. ${escapeHtml(req.doctorName)} &middot; ${escapeHtml(req.requestDate)} &middot; ${escapeHtml(req.appointmentId || 'Direct')}</div>
+          <div class="req-meta">${req.sourceType === 'patient_labtest' ? 'Booked from Patient Portal' : `Dr. ${escapeHtml(req.doctorName)}`} &middot; ${escapeHtml(req.requestDate)} &middot; ${escapeHtml(req.appointmentId || 'Direct')}</div>
+          ${req.branchId ? `<div class="req-meta">Branch: ${escapeHtml(req.branchName || req.branchId)}</div>` : ''}
         </div>
       </div>
       <div class="req-right">

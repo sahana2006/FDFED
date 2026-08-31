@@ -504,6 +504,40 @@
         ]
       }
     },
+    "/super-admin/hospital-branches/{id}/earnings": {
+      "get": {
+        "operationId": "SuperAdminHospitalBranchController_getBranchEarnings",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "Must be super_admin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Hospital branch UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Branch earnings summary"
+          }
+        },
+        "summary": "Get earnings for a hospital branch",
+        "tags": [
+          "Super Admin - Hospital Branches"
+        ]
+      }
+    },
     "/super-admin/hospital-branches/{id}/statistics": {
       "get": {
         "operationId": "SuperAdminHospitalBranchController_getStatistics",
@@ -679,557 +713,6 @@
         "summary": "Disable a hospital branch",
         "tags": [
           "Super Admin - Hospital Branches"
-        ]
-      }
-    },
-    "/medicines": {
-      "get": {
-        "operationId": "MedicinesController_listMedicines",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of medicines"
-          }
-        },
-        "summary": "List all medicines",
-        "tags": [
-          "Medicines"
-        ]
-      }
-    },
-    "/orders": {
-      "post": {
-        "operationId": "OrdersController_createOrder",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateOrderDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Order added to cart successfully"
-          }
-        },
-        "summary": "Add a medicine to cart",
-        "tags": [
-          "Orders"
-        ]
-      }
-    },
-    "/orders/cart/{userId}": {
-      "get": {
-        "operationId": "OrdersController_getCartOrdersByUserId",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Get current cart for a user",
-        "tags": [
-          "Orders"
-        ]
-      }
-    },
-    "/orders/place/{userId}": {
-      "post": {
-        "operationId": "OrdersController_placeCartOrdersByUserId",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "summary": "Place order for all items in the cart",
-        "tags": [
-          "Orders"
-        ]
-      }
-    },
-    "/orders/history/{userId}": {
-      "get": {
-        "operationId": "OrdersController_getPlacedOrdersByUserId",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Get order history for a user",
-        "tags": [
-          "Orders"
-        ]
-      }
-    },
-    "/orders/cart/{orderId}": {
-      "put": {
-        "operationId": "OrdersController_updateCartOrder",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCartOrderDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Update quantity of an order in cart",
-        "tags": [
-          "Orders"
-        ]
-      },
-      "delete": {
-        "operationId": "OrdersController_removeCartOrder",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "orderId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Remove an order from cart",
-        "tags": [
-          "Orders"
-        ]
-      }
-    },
-    "/labtests": {
-      "get": {
-        "operationId": "LabTestsController_listLabTests",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of lab tests"
-          }
-        },
-        "summary": "List all available lab tests",
-        "tags": [
-          "Lab Tests"
-        ]
-      }
-    },
-    "/labtests/book": {
-      "post": {
-        "operationId": "LabTestsController_createBooking",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateTestBookingDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Lab test booked successfully"
-          }
-        },
-        "summary": "Add a lab test to cart/booking",
-        "tags": [
-          "Lab Tests"
-        ]
-      }
-    },
-    "/labtests/cart/{userId}": {
-      "get": {
-        "operationId": "LabTestsController_getCartBookings",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Get current lab test cart for a user",
-        "tags": [
-          "Lab Tests"
-        ]
-      }
-    },
-    "/labtests/confirm/{userId}": {
-      "post": {
-        "operationId": "LabTestsController_confirmBookings",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "summary": "Confirm cart bookings for a user",
-        "tags": [
-          "Lab Tests"
-        ]
-      }
-    },
-    "/labtests/history/{userId}": {
-      "get": {
-        "operationId": "LabTestsController_getBookingHistory",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "userId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Get confirmed lab tests history for a user",
-        "tags": [
-          "Lab Tests"
-        ]
-      }
-    },
-    "/labtests/cart/{bookingId}": {
-      "delete": {
-        "operationId": "LabTestsController_removeCartBooking",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "bookingId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Remove a lab test from cart",
-        "tags": [
-          "Lab Tests"
-        ]
-      }
-    },
-    "/medical-records/doctor/{doctorId}": {
-      "get": {
-        "operationId": "MedicalRecordsController_getRecordsByDoctorId",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "doctorId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of doctor medical records"
-          }
-        },
-        "summary": "Get medical records by doctor ID",
-        "tags": [
-          "Medical Records"
-        ]
-      }
-    },
-    "/medical-records/{patientId}": {
-      "get": {
-        "operationId": "MedicalRecordsController_getRecordsByPatientId",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "patientId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of patient medical records"
-          }
-        },
-        "summary": "Get medical records by patient ID",
-        "tags": [
-          "Medical Records"
-        ]
-      }
-    },
-    "/medical-records": {
-      "post": {
-        "operationId": "MedicalRecordsController_createRecord",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMedicalRecordDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Medical record created successfully"
-          }
-        },
-        "summary": "Create a new medical record",
-        "tags": [
-          "Medical Records"
-        ]
-      }
-    },
-    "/followups": {
-      "get": {
-        "operationId": "FollowUpsController_getFollowUps",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of followups"
-          }
-        },
-        "summary": "Get followups list",
-        "tags": [
-          "Followups"
         ]
       }
     },
@@ -3099,6 +2582,567 @@
         ]
       }
     },
+    "/labtests": {
+      "get": {
+        "operationId": "LabTestsController_listLabTests",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of lab tests"
+          }
+        },
+        "summary": "List all available lab tests",
+        "tags": [
+          "Lab Tests"
+        ]
+      }
+    },
+    "/labtests/book": {
+      "post": {
+        "operationId": "LabTestsController_createBooking",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTestBookingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lab test booked successfully"
+          }
+        },
+        "summary": "Add a lab test to cart/booking",
+        "tags": [
+          "Lab Tests"
+        ]
+      }
+    },
+    "/labtests/cart/{userId}": {
+      "get": {
+        "operationId": "LabTestsController_getCartBookings",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get current lab test cart for a user",
+        "tags": [
+          "Lab Tests"
+        ]
+      }
+    },
+    "/labtests/confirm/{userId}": {
+      "post": {
+        "operationId": "LabTestsController_confirmBookings",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmTestBookingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Confirm cart bookings for a user",
+        "tags": [
+          "Lab Tests"
+        ]
+      }
+    },
+    "/labtests/history/{userId}": {
+      "get": {
+        "operationId": "LabTestsController_getBookingHistory",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get confirmed lab tests history for a user",
+        "tags": [
+          "Lab Tests"
+        ]
+      }
+    },
+    "/labtests/cart/{bookingId}": {
+      "delete": {
+        "operationId": "LabTestsController_removeCartBooking",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bookingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Remove a lab test from cart",
+        "tags": [
+          "Lab Tests"
+        ]
+      }
+    },
+    "/medicines": {
+      "get": {
+        "operationId": "MedicinesController_listMedicines",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of medicines"
+          }
+        },
+        "summary": "List all medicines",
+        "tags": [
+          "Medicines"
+        ]
+      }
+    },
+    "/orders": {
+      "post": {
+        "operationId": "OrdersController_createOrder",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order added to cart successfully"
+          }
+        },
+        "summary": "Add a medicine to cart",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/orders/cart/{userId}": {
+      "get": {
+        "operationId": "OrdersController_getCartOrdersByUserId",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get current cart for a user",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/orders/place/{userId}": {
+      "post": {
+        "operationId": "OrdersController_placeCartOrdersByUserId",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Place order for all items in the cart",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/orders/history/{userId}": {
+      "get": {
+        "operationId": "OrdersController_getPlacedOrdersByUserId",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get order history for a user",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/orders/cart/{orderId}": {
+      "put": {
+        "operationId": "OrdersController_updateCartOrder",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCartOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update quantity of an order in cart",
+        "tags": [
+          "Orders"
+        ]
+      },
+      "delete": {
+        "operationId": "OrdersController_removeCartOrder",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Remove an order from cart",
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/medical-records/doctor/{doctorId}": {
+      "get": {
+        "operationId": "MedicalRecordsController_getRecordsByDoctorId",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "doctorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of doctor medical records"
+          }
+        },
+        "summary": "Get medical records by doctor ID",
+        "tags": [
+          "Medical Records"
+        ]
+      }
+    },
+    "/medical-records/{patientId}": {
+      "get": {
+        "operationId": "MedicalRecordsController_getRecordsByPatientId",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "patientId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of patient medical records"
+          }
+        },
+        "summary": "Get medical records by patient ID",
+        "tags": [
+          "Medical Records"
+        ]
+      }
+    },
+    "/medical-records": {
+      "post": {
+        "operationId": "MedicalRecordsController_createRecord",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMedicalRecordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Medical record created successfully"
+          }
+        },
+        "summary": "Create a new medical record",
+        "tags": [
+          "Medical Records"
+        ]
+      }
+    },
+    "/followups": {
+      "get": {
+        "operationId": "FollowUpsController_getFollowUps",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of followups"
+          }
+        },
+        "summary": "Get followups list",
+        "tags": [
+          "Followups"
+        ]
+      }
+    },
     "/queue": {
       "post": {
         "operationId": "QueueController_createQueueToken",
@@ -4300,141 +4344,6 @@
           }
         }
       },
-      "CreateOrderDto": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string",
-            "example": "PAT001"
-          },
-          "medicineId": {
-            "type": "string",
-            "example": "MED001"
-          },
-          "quantity": {
-            "type": "number",
-            "example": 2
-          }
-        },
-        "required": [
-          "userId",
-          "medicineId",
-          "quantity"
-        ]
-      },
-      "UpdateCartOrderDto": {
-        "type": "object",
-        "properties": {
-          "quantity": {
-            "type": "number",
-            "example": 3
-          }
-        },
-        "required": [
-          "quantity"
-        ]
-      },
-      "CreateTestBookingDto": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string",
-            "example": "PAT001"
-          },
-          "labTestId": {
-            "type": "string",
-            "example": "TEST001"
-          }
-        },
-        "required": [
-          "userId",
-          "labTestId"
-        ]
-      },
-      "CreateMedicalRecordDto": {
-        "type": "object",
-        "properties": {
-          "doctorId": {
-            "type": "string",
-            "example": "DOC001"
-          },
-          "patientId": {
-            "type": "string",
-            "example": "PAT001"
-          },
-          "patientName": {
-            "type": "string",
-            "example": "Ria Sharma"
-          },
-          "type": {
-            "type": "string",
-            "example": "consultation",
-            "enum": [
-              "consultation",
-              "treatment",
-              "lab"
-            ]
-          },
-          "doctorName": {
-            "type": "string",
-            "example": "Dr. Smith"
-          },
-          "specialization": {
-            "type": "string",
-            "example": "Cardiology"
-          },
-          "date": {
-            "type": "string",
-            "example": "2026-05-10"
-          },
-          "consultationNote": {
-            "type": "string",
-            "example": "Patient complains of chest pain."
-          },
-          "medicines": {
-            "type": "string",
-            "example": "Aspirin 75mg"
-          },
-          "followUp": {
-            "type": "string",
-            "example": "Review after 1 week"
-          },
-          "followUpDate": {
-            "type": "string",
-            "example": "2026-05-17"
-          },
-          "appointmentId": {
-            "type": "string",
-            "example": "APT001"
-          },
-          "tests": {
-            "type": "string",
-            "example": "ECG"
-          },
-          "labTestDate": {
-            "type": "string",
-            "example": "2026-05-12"
-          },
-          "lifestyle": {
-            "type": "string",
-            "example": "Avoid spicy food"
-          },
-          "diet": {
-            "type": "string",
-            "example": "Low sodium"
-          },
-          "duration": {
-            "type": "string",
-            "example": "15 mins"
-          }
-        },
-        "required": [
-          "doctorId",
-          "patientId",
-          "doctorName",
-          "specialization"
-        ]
-      },
       "CreateAppointmentDto": {
         "type": "object",
         "properties": {
@@ -4778,6 +4687,155 @@
           "email",
           "password",
           "branchId"
+        ]
+      },
+      "CreateTestBookingDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "example": "PAT001"
+          },
+          "labTestId": {
+            "type": "string",
+            "example": "TEST001"
+          },
+          "branchId": {
+            "type": "string",
+            "example": "00000000-0000-4000-8000-000000000001"
+          }
+        },
+        "required": [
+          "userId",
+          "labTestId",
+          "branchId"
+        ]
+      },
+      "ConfirmTestBookingsDto": {
+        "type": "object",
+        "properties": {
+          "patientName": {
+            "type": "string",
+            "example": "Ria Sharma"
+          }
+        }
+      },
+      "CreateOrderDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "example": "PAT001"
+          },
+          "medicineId": {
+            "type": "string",
+            "example": "MED001"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 2
+          }
+        },
+        "required": [
+          "userId",
+          "medicineId",
+          "quantity"
+        ]
+      },
+      "UpdateCartOrderDto": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "example": 3
+          }
+        },
+        "required": [
+          "quantity"
+        ]
+      },
+      "CreateMedicalRecordDto": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string",
+            "example": "DOC001"
+          },
+          "patientId": {
+            "type": "string",
+            "example": "PAT001"
+          },
+          "patientName": {
+            "type": "string",
+            "example": "Ria Sharma"
+          },
+          "type": {
+            "type": "string",
+            "example": "consultation",
+            "enum": [
+              "consultation",
+              "treatment",
+              "lab"
+            ]
+          },
+          "doctorName": {
+            "type": "string",
+            "example": "Dr. Smith"
+          },
+          "specialization": {
+            "type": "string",
+            "example": "Cardiology"
+          },
+          "date": {
+            "type": "string",
+            "example": "2026-05-10"
+          },
+          "consultationNote": {
+            "type": "string",
+            "example": "Patient complains of chest pain."
+          },
+          "medicines": {
+            "type": "string",
+            "example": "Aspirin 75mg"
+          },
+          "followUp": {
+            "type": "string",
+            "example": "Review after 1 week"
+          },
+          "followUpDate": {
+            "type": "string",
+            "example": "2026-05-17"
+          },
+          "appointmentId": {
+            "type": "string",
+            "example": "APT001"
+          },
+          "tests": {
+            "type": "string",
+            "example": "ECG"
+          },
+          "labTestDate": {
+            "type": "string",
+            "example": "2026-05-12"
+          },
+          "lifestyle": {
+            "type": "string",
+            "example": "Avoid spicy food"
+          },
+          "diet": {
+            "type": "string",
+            "example": "Low sodium"
+          },
+          "duration": {
+            "type": "string",
+            "example": "15 mins"
+          }
+        },
+        "required": [
+          "doctorId",
+          "patientId",
+          "doctorName",
+          "specialization"
         ]
       },
       "CreateQueueDto": {

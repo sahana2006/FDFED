@@ -9,31 +9,445 @@
   <link rel="stylesheet" href="../../css/superuser/dashboard.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    .earnings-stats {
+    .earnings-overview {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
-    .stat-card {
+
+    .overview-card {
       background: white;
       padding: 1.5rem;
       border-radius: 8px;
       border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
-    .stat-title {
+
+    .overview-title {
       color: #64748b;
       font-size: 0.875rem;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .stat-value {
+
+    .overview-value {
       font-size: 2.5rem;
       font-weight: 700;
       color: #0f172a;
       margin-top: 0.5rem;
+    }
+
+    .overview-note {
+      margin-top: 0.35rem;
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+
+    .branch-select-row {
+      display: flex;
+      align-items: end;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .branch-select-field {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .super-branch-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .branch-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) auto;
+      gap: 1rem;
+      align-items: end;
+    }
+
+    .branch-badge {
+      background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+      color: #fff;
+      border-radius: 14px;
+      padding: 1rem 1.15rem;
+      min-width: 220px;
+      box-shadow: 0 12px 28px rgba(15, 118, 110, 0.22);
+    }
+
+    .branch-badge-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    .branch-badge-value {
+      margin-top: 0.35rem;
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .branch-badge-note {
+      margin-top: 0.45rem;
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+
+    .branch-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .branch-kpi {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.1rem 1.15rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .branch-kpi-label {
+      font-size: 0.78rem;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .branch-kpi-value {
+      margin-top: 0.45rem;
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .branch-kpi-note {
+      margin-top: 0.35rem;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+
+    .branch-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .analytics-panel,
+    .side-panel,
+    .table-panel {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      padding: 1.25rem;
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .panel-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #0f766e;
+      margin-bottom: 0.3rem;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .panel-copy {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-top: 0.35rem;
+      line-height: 1.55;
+    }
+
+    .summary-bars {
+      display: grid;
+      gap: 0.9rem;
+      padding-top: 0.35rem;
+    }
+
+    .summary-bar-row {
+      display: grid;
+      grid-template-columns: 140px minmax(0, 1fr) 120px;
+      gap: 0.9rem;
+      align-items: center;
+    }
+
+    .summary-bar-label,
+    .summary-bar-value,
+    .mini-meta,
+    .health-label,
+    .mini-label {
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+
+    .summary-bar-track {
+      height: 12px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .summary-bar-fill {
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .fill-revenue { background: linear-gradient(90deg, #0f766e, #14b8a6); }
+    .fill-cuts { background: linear-gradient(90deg, #f59e0b, #fb923c); }
+    .fill-profit { background: linear-gradient(90deg, #16a34a, #22c55e); }
+
+    .summary-bar-value {
+      text-align: right;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .branch-health {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .health-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 0.9rem;
+    }
+
+    .health-value {
+      margin-top: 0.35rem;
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .insight-highlight {
+      display: grid;
+      gap: 0.45rem;
+      padding: 0.95rem;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #f8fffe 0%, #eefbf8 100%);
+      border: 1px solid #d1fae5;
+    }
+
+    .insight-highlight-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #0f766e;
+    }
+
+    .insight-highlight-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .stacked-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .stacked-card + .stacked-card {
+      margin-top: 0.85rem;
+    }
+
+    .stacked-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .stacked-card-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 0.1rem;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .mini-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: 10px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+    }
+
+    .mini-label {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .mini-value {
+      font-weight: 800;
+      color: #0f172a;
+      white-space: nowrap;
+    }
+
+    .mini-value.cut-value {
+      color: #0f766e;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.32rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .pill-green { background: #dcfce7; color: #166534; }
+    .pill-blue { background: #dbeafe; color: #1d4ed8; }
+    .pill-amber { background: #fef3c7; color: #b45309; }
+
+    .revenue-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.7rem;
+      border-radius: 999px;
+      font-weight: 700;
+      color: #0f766e;
+      background: #ccfbf1;
+    }
+
+    .table-panel {
+      margin-top: 1rem;
+    }
+
+    .branch-table-wrap {
+      overflow: auto;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .branch-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+      background: #fff;
+    }
+
+    .branch-table thead tr {
+      background: #f8fafc;
+    }
+
+    .branch-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      padding: 0.9rem 1rem;
+      text-align: left;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #475569;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+
+    .branch-table tbody td {
+      padding: 0.95rem 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    .branch-table tbody tr:nth-child(odd) {
+      background: #fcfefe;
+    }
+
+    .branch-table tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    .td-cut-col {
+      color: #64748b;
+    }
+
+    .td-doc-earn {
+      color: #0284c7;
+      font-weight: 700;
+    }
+
+    .td-branch-profit {
+      color: #16a34a;
+      font-weight: 800;
+    }
+
+    .branch-select-prompt {
+      margin: 0;
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 1100px) {
+      .earnings-overview,
+      .branch-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .branch-hero,
+      .branch-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-bar-row {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-bar-value {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .earnings-overview,
+      .branch-kpis,
+      .branch-health {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -56,28 +470,188 @@
           <div class="hero-copy">
             <span class="eyebrow">Financial Overview</span>
             <h1>Earnings</h1>
-            <p>Track platform earnings at a glance.</p>
+            <p>Track overall platform revenue, then drill into a single branch using the selector below.</p>
           </div>
         </section>
 
-        <section class="earnings-stats">
-          <div class="stat-card">
-            <div class="stat-title">This Month's Earnings</div>
-            <div class="stat-value" id="this-month-earnings">₹0</div>
+        <section class="earnings-overview">
+          <div class="overview-card">
+            <div class="overview-title">This Month Revenue</div>
+            <div class="overview-value" id="overview-this-month">₹0</div>
+            <div class="overview-note">Across all branches</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-title">Total Lifetime Earnings</div>
-            <div class="stat-value" id="total-earnings">₹0</div>
+          <div class="overview-card">
+            <div class="overview-title">Total Revenue</div>
+            <div class="overview-value" id="overview-total">₹0</div>
+            <div class="overview-note">Across all branches</div>
+          </div>
+          <div class="overview-card">
+            <div class="overview-title">Completed Appointments</div>
+            <div class="overview-value" id="overview-completed">0</div>
+            <div class="overview-note">Completed consultations</div>
+          </div>
+          <div class="overview-card">
+            <div class="overview-title">Branches With Revenue</div>
+            <div class="overview-value" id="overview-branches">0</div>
+            <div class="overview-note">Contributing to platform revenue</div>
           </div>
         </section>
 
         <section class="panel-card">
           <div class="panel-header">
             <div>
-              <h2>Subscription Purchases</h2>
-              <p>Subscription purchase tracking has been removed.</p>
+              <h2>Branch Selection</h2>
+              <p>Select a branch to view the same earnings metrics used in the branch admin portal.</p>
             </div>
           </div>
+          <div class="branch-select-row">
+            <label class="field branch-select-field">
+              <span>Branch</span>
+              <select id="branch-select" aria-label="Select branch"></select>
+            </label>
+            <div style="min-width:220px;">
+              <p class="branch-select-prompt" id="branch-select-note">Loading branches...</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="super-branch-shell" id="branch-earnings-shell">
+          <section class="hero-card branch-hero">
+            <div class="hero-copy">
+              <span class="eyebrow">Branch Revenue Overview</span>
+              <h1 id="branchHeroTitle">Select a branch</h1>
+              <p id="branchHeroSub">Branch-specific earnings will appear here.</p>
+            </div>
+            <div class="branch-badge" id="heroBadge">
+              <div class="branch-badge-label">Current Month</div>
+              <div class="branch-badge-value" id="heroBadgeValue">₹0</div>
+              <div class="branch-badge-note" id="heroBadgeNote">Choose a branch to load revenue</div>
+            </div>
+          </section>
+
+          <section class="branch-kpis">
+            <div class="branch-kpi">
+              <div class="branch-kpi-label">Total Branch Revenue</div>
+              <div class="branch-kpi-value" id="kpiTotalRevenue">₹0</div>
+              <div class="branch-kpi-note">All completed appointment fees</div>
+            </div>
+            <div class="branch-kpi">
+              <div class="branch-kpi-label">This Month Revenue</div>
+              <div class="branch-kpi-value" id="kpiMonthRevenue">₹0</div>
+              <div class="branch-kpi-note" id="kpiMonthLabel">Current month collections</div>
+            </div>
+            <div class="branch-kpi">
+              <div class="branch-kpi-label">Total Doctor Cuts</div>
+              <div class="branch-kpi-value" id="kpiTotalCuts">₹0</div>
+              <div class="branch-kpi-note">Doctor earnings across all time</div>
+            </div>
+            <div class="branch-kpi">
+              <div class="branch-kpi-label">Branch Profit (This Month)</div>
+              <div class="branch-kpi-value" id="kpiMonthProfit">₹0</div>
+              <div class="branch-kpi-note">Revenue minus all doctor cuts</div>
+            </div>
+          </section>
+
+          <section class="branch-layout">
+            <div class="analytics-panel">
+              <div class="panel-heading">
+                <div>
+                  <div class="panel-eyebrow">This Month's Summary</div>
+                  <div class="panel-title" id="summaryMonthTitle">Loading...</div>
+                  <div class="panel-copy">Revenue vs doctor cuts vs branch profit for the current month.</div>
+                </div>
+                <span class="pill pill-green" id="summaryCount">0 Completed</span>
+              </div>
+
+              <div class="summary-bars" id="summaryBars">
+                <div class="summary-bar-row">
+                  <div class="summary-bar-label">Gross Revenue</div>
+                  <div class="summary-bar-track">
+                    <div class="summary-bar-fill fill-revenue" id="barRevenue" style="width:100%"></div>
+                  </div>
+                  <div class="summary-bar-value" id="barRevenueVal">₹0</div>
+                </div>
+                <div class="summary-bar-row">
+                  <div class="summary-bar-label">Doctor Cuts</div>
+                  <div class="summary-bar-track">
+                    <div class="summary-bar-fill fill-cuts" id="barCuts" style="width:0%"></div>
+                  </div>
+                  <div class="summary-bar-value" id="barCutsVal">₹0</div>
+                </div>
+                <div class="summary-bar-row">
+                  <div class="summary-bar-label">Branch Profit</div>
+                  <div class="summary-bar-track">
+                    <div class="summary-bar-fill fill-profit" id="barProfit" style="width:0%"></div>
+                  </div>
+                  <div class="summary-bar-value" id="barProfitVal">₹0</div>
+                </div>
+              </div>
+
+              <div class="branch-health" style="margin-top: 1rem;">
+                <div class="health-card">
+                  <div class="health-label">Total Appointments</div>
+                  <div class="health-value" id="healthTotal">0</div>
+                </div>
+                <div class="health-card">
+                  <div class="health-label">Month Appointments</div>
+                  <div class="health-value" id="healthMonth">0</div>
+                </div>
+                <div class="health-card">
+                  <div class="health-label">Profit Margin</div>
+                  <div class="health-value" id="healthMargin">—</div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="side-panel">
+              <div class="stacked-card">
+                <div class="stacked-card-header">
+                  <div>
+                    <div class="panel-eyebrow">Doctor Breakdown</div>
+                    <div class="stacked-card-title">Cuts per doctor (this month)</div>
+                  </div>
+                  <span class="pill pill-blue">Live</span>
+                </div>
+                <div class="mini-list" id="doctorBreakdownList">
+                  <div class="mini-item">
+                    <div class="mini-label" style="width: 130px;">Loading...</div>
+                    <div class="mini-value" style="width: 80px;">₹0</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="stacked-card">
+                <div class="stacked-card-header">
+                  <div>
+                    <div class="panel-eyebrow">Month Insights</div>
+                    <div class="stacked-card-title">Sharper view of this branch</div>
+                  </div>
+                  <span class="pill pill-amber">Analytic</span>
+                </div>
+                <div class="mini-list">
+                  <div class="insight-highlight">
+                    <div class="insight-highlight-label">Average ticket</div>
+                    <div class="insight-highlight-value" id="insightAvgTicket">₹0</div>
+                    <div class="mini-meta">Revenue per completed appointment this month</div>
+                  </div>
+                  <div class="mini-item">
+                    <div>
+                      <div class="mini-label">Top doctor share</div>
+                      <div class="mini-meta">Largest contributor to monthly doctor cuts</div>
+                    </div>
+                    <div class="mini-value" id="insightTopDoctorShare">0%</div>
+                  </div>
+                  <div class="mini-item">
+                    <div>
+                      <div class="mini-label">Profit efficiency</div>
+                      <div class="mini-meta">Branch profit as a share of revenue</div>
+                    </div>
+                    <div class="mini-value" id="insightProfitEfficiency">0%</div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </section>
         </section>
       </main>
     </div>

@@ -5,6 +5,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { CreateHospitalBranchDto } from './dto/create-hospital-branch.dto';
 import { UpdateHospitalBranchDto } from './dto/update-hospital-branch.dto';
 import { HospitalBranchStatus } from './entities/hospital-branch.entity';
+import { AppointmentsService } from '../appointments/appointments.service';
 import { HospitalBranchService } from './hospital-branch.service';
 
 @ApiTags('Super Admin - Hospital Branches')
@@ -12,7 +13,10 @@ import { HospitalBranchService } from './hospital-branch.service';
 @Controller('super-admin/hospital-branches')
 @Roles(Role.SUPER_ADMIN)
 export class SuperAdminHospitalBranchController {
-  constructor(private readonly hospitalBranchService: HospitalBranchService) {}
+  constructor(
+    private readonly hospitalBranchService: HospitalBranchService,
+    private readonly appointmentsService: AppointmentsService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a hospital branch' })
@@ -33,7 +37,15 @@ export class SuperAdminHospitalBranchController {
   @Get('earnings')
   @ApiOperation({ summary: 'Get super admin earnings snapshot' })
   getEarnings() {
-    return this.hospitalBranchService.getEarnings();
+    return this.appointmentsService.getEarningsForAllBranches();
+  }
+
+  @Get(':id/earnings')
+  @ApiOperation({ summary: 'Get earnings for a hospital branch' })
+  @ApiParam({ name: 'id', description: 'Hospital branch UUID' })
+  @ApiResponse({ status: 200, description: 'Branch earnings summary' })
+  getBranchEarnings(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.appointmentsService.getEarningsForBranch(id);
   }
 
   @Get(':id/statistics')

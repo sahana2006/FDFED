@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBody } from '@nestjs/
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { LabTestsService } from './labtests.service';
-import { CreateTestBookingDto } from './dto/labtests.dto';
+import { ConfirmTestBookingsDto, CreateTestBookingDto } from './dto/labtests.dto';
 
 @ApiTags('Lab Tests')
 @ApiHeader({ name: 'role', required: false, description: 'User role (admin, doctor, patient, frontdesk)' })
@@ -29,6 +29,7 @@ export class LabTestsController {
     return this.labTestsService.createBooking({
       userId: body.userId.trim(),
       labTestId: body.labTestId.trim(),
+      branchId: body.branchId.trim(),
     });
   }
 
@@ -42,8 +43,10 @@ export class LabTestsController {
   @Roles('patient', 'frontdesk', 'admin')
   @Post('confirm/:userId')
   @ApiOperation({ summary: 'Confirm cart bookings for a user' })
-  confirmBookings(@Param('userId') userId: string) {
-    return this.labTestsService.confirmBookingsByUserId(userId);
+  confirmBookings(@Param('userId') userId: string, @Body() body: ConfirmTestBookingsDto) {
+    return this.labTestsService.confirmBookingsByUserId(userId, {
+      patientName: body.patientName?.trim(),
+    });
   }
 
   @Roles('patient', 'frontdesk', 'admin')

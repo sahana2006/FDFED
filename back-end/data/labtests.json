@@ -1,3 +1,22 @@
 {
-  "testBookings": []
+  "testBookings": [
+    {
+      "id": "TBOOK1788190456845",
+      "userId": "PAT001",
+      "labTestId": "LAB001",
+      "branchId": "00000000-0000-4000-8000-000000000001",
+      "status": "booked",
+      "cartId": "LABCART1788190456845",
+      "orderId": "LABORD1788190505311"
+    },
+    {
+      "id": "TBOOK1788188223810",
+      "userId": "PAT001",
+      "labTestId": "LAB003",
+      "branchId": "00000000-0000-4000-8000-000000000001",
+      "status": "booked",
+      "cartId": "LABCART1788188223810",
+      "orderId": "LABORD1788188231340"
+    }
+  ]
 }

@@ -1,10 +1,10 @@
 /* ============================================================
-   Branch Admin — Earnings Page   (earnings.js)
+   Branch Admin - Earnings Page
    Live data from GET /appointments/earnings/branch
    ============================================================ */
 
-const MONTHS_LONG = ['January','February','March','April','May','June',
-                     'July','August','September','October','November','December'];
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December'];
 
 (async () => {
   try {
@@ -15,15 +15,14 @@ const MONTHS_LONG = ['January','February','March','April','May','June',
 
   updateTopbarUser();
 
-  const now          = new Date();
+  const now = new Date();
   const currentMonth = now.getMonth();
-  const currentYear  = now.getFullYear();
-  const monthLabel   = `${MONTHS_LONG[currentMonth]} ${currentYear}`;
+  const currentYear = now.getFullYear();
+  const monthLabel = `${MONTHS_LONG[currentMonth]} ${currentYear}`;
 
-  // Set month label elements immediately (synchronous)
-  setText('kpiMonthLabel',      monthLabel);
-  setText('ledgerMonthLabel',   monthLabel);
-  setText('summaryMonthTitle',  monthLabel);
+  setText('kpiMonthLabel', monthLabel);
+  setText('ledgerMonthLabel', monthLabel);
+  setText('summaryMonthTitle', monthLabel);
 
   try {
     const data = await apiRequest('/appointments/earnings/branch');
@@ -35,7 +34,6 @@ const MONTHS_LONG = ['January','February','March','April','May','June',
   }
 })();
 
-/* ── Helpers ── */
 function fmtCurrency(n) {
   return '₹' + Number(n || 0).toLocaleString('en-IN', {
     minimumFractionDigits: 2,
@@ -55,55 +53,59 @@ function pct(part, total) {
   return Math.max(Math.round((part / total) * 100), 2);
 }
 
-/* ── Main render ── */
 function renderEarnings(data, currentMonth, currentYear, monthLabel) {
-  // Filter current-month entries
-  const monthEntries = (data.entries || []).filter(e => {
-    const d = new Date(`${e.date}T00:00:00`);
+  const allAppointments = Array.isArray(data.entries) ? data.entries : [];
+  const allLabEntries = Array.isArray(data.labEntries) ? data.labEntries : [];
+
+  const monthAppointments = allAppointments.filter((entry) => {
+    const d = new Date(`${entry.date}T00:00:00`);
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
   });
 
-  const monthRevenue = monthEntries.reduce((s, e) => s + (e.consultationFee || 0), 0);
-  const monthCuts    = monthEntries.reduce((s, e) => s + (e.doctorEarning   || 0), 0);
-  const monthProfit  = monthEntries.reduce((s, e) => s + (e.branchProfit    || 0), 0);
+  const monthLabEntries = allLabEntries.filter((entry) => {
+    const d = new Date(entry.date);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
 
-  // Hero badge
+  const monthAppointmentRevenue = monthAppointments.reduce((sum, entry) => sum + (entry.consultationFee || 0), 0);
+  const monthLabRevenue = monthLabEntries.reduce((sum, entry) => sum + (entry.testPrice || 0), 0);
+  const monthRevenue = monthAppointmentRevenue + monthLabRevenue;
+  const monthCuts = monthAppointments.reduce((sum, entry) => sum + (entry.doctorEarning || 0), 0);
+  const monthAppointmentProfit = monthAppointments.reduce((sum, entry) => sum + (entry.branchProfit || 0), 0);
+  const monthProfit = monthAppointmentProfit + monthLabRevenue;
+
   setText('heroBadgeValue', fmtCurrency(monthRevenue));
-  setText('heroBadgeNote',  monthLabel);
+  setText('heroBadgeNote', monthLabel);
 
-  // KPI cards
-  setText('kpiTotalRevenue', fmtCurrency(data.totalRevenue    || 0));
+  setText('kpiTotalRevenue', fmtCurrency(data.totalRevenue || 0));
   setText('kpiMonthRevenue', fmtCurrency(monthRevenue));
-  setText('kpiTotalCuts',    fmtCurrency(data.totalDoctorCuts || 0));
-  setText('kpiMonthProfit',  fmtCurrency(monthProfit));
+  setText('kpiTotalCuts', fmtCurrency(data.totalDoctorCuts || 0));
+  setText('kpiLabRevenue', fmtCurrency(data.totalLabTestRevenue || 0));
+  setText('kpiMonthProfit', fmtCurrency(monthProfit));
 
-  // Summary bars (widths relative to monthly revenue)
   setBar('barRevenue', 'barRevenueVal', monthRevenue, monthRevenue);
-  setBar('barCuts',    'barCutsVal',    monthCuts,    monthRevenue);
-  setBar('barProfit',  'barProfitVal',  monthProfit,  monthRevenue);
+  setBar('barCuts', 'barCutsVal', monthCuts, monthRevenue);
+  setBar('barProfit', 'barProfitVal', monthProfit, monthRevenue);
 
-  // Health cards
-  setText('healthTotal',  data.completedAppointmentsCount || 0);
-  setText('healthMonth',  monthEntries.length);
-  const margin = monthRevenue
-    ? `${Math.round((monthProfit / monthRevenue) * 100)}%`
-    : '—';
+  setText('healthTotal', data.completedAppointmentsCount || 0);
+  setText('healthMonth', monthAppointments.length);
+  setText('healthLabTests', monthLabEntries.length);
+  const margin = monthRevenue ? `${Math.round((monthProfit / monthRevenue) * 100)}%` : '—';
   setText('healthMargin', margin);
 
-  // Summary pills
-  setText('summaryCount', `${monthEntries.length} Completed`);
+  setText('summaryCount', `${monthAppointments.length} appointments · ${monthLabEntries.length} lab tests`);
 
-  // All-time panel
-  setText('allTimeRevenue', fmtCurrency(data.totalRevenue    || 0));
-  setText('allTimeCuts',    fmtCurrency(data.totalDoctorCuts || 0));
-  setText('allTimeProfit',  fmtCurrency(data.branchProfit    || 0));
+  setText('allTimeRevenue', fmtCurrency(data.totalRevenue || 0));
+  setText('allTimeCuts', fmtCurrency(data.totalDoctorCuts || 0));
+  setText('allTimeLabRevenue', fmtCurrency(data.totalLabTestRevenue || 0));
+  setText('allTimeProfit', fmtCurrency(data.branchProfit || 0));
 
-  // Doctor breakdown (this month)
-  renderDoctorBreakdown(monthEntries);
+  setText('labCount', `${monthLabEntries.length} done`);
 
-  // Ledger
-  setText('ledgerCount', `${monthEntries.length} appointments`);
-  renderLedger(monthEntries);
+  renderDoctorBreakdown(monthAppointments);
+  renderLabBreakdown(monthLabEntries);
+  setText('ledgerCount', `${monthAppointments.length} appointments`);
+  renderLedger(monthAppointments);
 }
 
 function setBar(barId, valId, value, total) {
@@ -112,13 +114,12 @@ function setBar(barId, valId, value, total) {
   setText(valId, fmtCurrency(value));
 }
 
-/* ── Doctor breakdown panel ── */
 function renderDoctorBreakdown(entries) {
   const container = document.getElementById('doctorBreakdownList');
   if (!container) return;
 
   const byDoctor = {};
-  entries.forEach(e => {
+  entries.forEach((e) => {
     if (!byDoctor[e.doctorId]) {
       byDoctor[e.doctorId] = {
         name: e.doctorName || e.doctorId,
@@ -127,7 +128,7 @@ function renderDoctorBreakdown(entries) {
         count: 0,
       };
     }
-    byDoctor[e.doctorId].cut   += (e.doctorEarning || 0);
+    byDoctor[e.doctorId].cut += e.doctorEarning || 0;
     byDoctor[e.doctorId].count += 1;
   });
 
@@ -143,17 +144,41 @@ function renderDoctorBreakdown(entries) {
     return;
   }
 
-  container.innerHTML = doctors.map(d => `
+  container.innerHTML = doctors.map((doctor) => `
     <div class="mini-item">
       <div>
-        <div class="mini-label">${escHtml(d.name)}</div>
-        <div class="mini-meta">${d.pct}% cut · ${d.count} appointment${d.count !== 1 ? 's' : ''}</div>
+        <div class="mini-label">${escHtml(doctor.name)}</div>
+        <div class="mini-meta">${doctor.pct}% cut · ${doctor.count} appointment${doctor.count !== 1 ? 's' : ''}</div>
       </div>
-      <div class="mini-value cut-value">${fmtCurrency(d.cut)}</div>
+      <div class="mini-value cut-value">${fmtCurrency(doctor.cut)}</div>
     </div>`).join('');
 }
 
-/* ── Appointments ledger ── */
+function renderLabBreakdown(entries) {
+  const container = document.getElementById('labBreakdownList');
+  if (!container) return;
+
+  if (!entries.length) {
+    container.innerHTML = `
+      <div class="mini-item">
+        <div style="color:var(--text-muted);font-size:.875rem;">
+          No completed lab tests this month.
+        </div>
+      </div>`;
+    return;
+  }
+
+  const sorted = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
+  container.innerHTML = sorted.slice(0, 6).map((entry) => `
+    <div class="mini-item">
+      <div>
+        <div class="mini-label">${escHtml(entry.testName || 'Lab Test')}</div>
+        <div class="mini-meta">${escHtml(entry.patientName || 'Unknown patient')} · ${fmtDate(entry.date)} · ${escHtml(entry.technicianName || 'Lab Technician')}</div>
+      </div>
+      <div class="mini-value cut-value">${fmtCurrency(entry.testPrice || 0)}</div>
+    </div>`).join('');
+}
+
 function renderLedger(entries) {
   const tbody = document.getElementById('ledgerTbody');
   if (!tbody) return;
@@ -173,23 +198,22 @@ function renderLedger(entries) {
 
   const sorted = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  sorted.forEach(e => {
+  sorted.forEach((entry) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${fmtDate(e.date)}</td>
-      <td><strong>${escHtml(e.patientName)}</strong></td>
-      <td>${escHtml(e.doctorName)}</td>
-      <td><code style="font-size:.78rem;color:var(--text-muted);">${escHtml(e.appointmentId)}</code></td>
-      <td><span class="revenue-badge">${fmtCurrency(e.consultationFee)}</span></td>
-      <td class="td-cut-col">${e.percentageCut}% → ${fmtCurrency(e.doctorEarning)}</td>
-      <td class="td-doc-earn">${fmtCurrency(e.doctorEarning)}</td>
-      <td class="td-branch-profit">${fmtCurrency(e.branchProfit)}</td>
+      <td>${fmtDate(entry.date)}</td>
+      <td><strong>${escHtml(entry.patientName)}</strong></td>
+      <td>${escHtml(entry.doctorName)}</td>
+      <td><code style="font-size:.78rem;color:var(--text-muted);">${escHtml(entry.appointmentId)}</code></td>
+      <td><span class="revenue-badge">${fmtCurrency(entry.consultationFee)}</span></td>
+      <td class="td-cut-col">${entry.percentageCut}% → ${fmtCurrency(entry.doctorEarning)}</td>
+      <td class="td-doc-earn">${fmtCurrency(entry.doctorEarning)}</td>
+      <td class="td-branch-profit">${fmtCurrency(entry.branchProfit)}</td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-/* ── Error state ── */
 function renderBranchError(msg) {
   const tbody = document.getElementById('ledgerTbody');
   if (tbody) {
@@ -201,15 +225,19 @@ function renderBranchError(msg) {
       </tr>`;
   }
   [
-    'kpiTotalRevenue','kpiMonthRevenue','kpiTotalCuts','kpiMonthProfit',
-    'allTimeRevenue','allTimeCuts','allTimeProfit',
-    'heroBadgeValue','barRevenueVal','barCutsVal','barProfitVal',
-  ].forEach(id => setText(id, '—'));
+    'kpiTotalRevenue', 'kpiMonthRevenue', 'kpiTotalCuts', 'kpiLabRevenue', 'kpiMonthProfit',
+    'allTimeRevenue', 'allTimeCuts', 'allTimeLabRevenue', 'allTimeProfit',
+    'heroBadgeValue', 'barRevenueVal', 'barCutsVal', 'barProfitVal',
+    'healthTotal', 'healthMonth', 'healthLabTests', 'healthMargin',
+    'summaryCount', 'ledgerCount', 'labCount',
+  ].forEach((id) => setText(id, '—'));
 }
 
 function escHtml(str) {
   if (!str) return '';
   return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

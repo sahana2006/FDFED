@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="MEDBITS Branch Admin Earnings — live appointment revenue, doctor cuts, and branch profit">
+  <meta name="description" content="MEDBITS Branch Admin Earnings - live appointment revenue, doctor cuts, lab tests, and branch profit">
   <title>MEDBITS - Branch Earnings</title>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/branch-admin/global.css">
@@ -13,20 +13,20 @@
 
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
-    <span class="brand-icon">⨞</span>
+    <span class="brand-icon">&#x22D7;</span>
     <span class="brand-name">MEDBITS</span>
   </div>
   <nav class="sidebar-nav">
-    <a class="nav-item" data-page="dashboard" href="dashboard.html"><span class="nav-icon">⨞</span><span>Dashboard</span></a>
-    <a class="nav-item" data-page="doctors" href="doctors.html"><span class="nav-icon">🩺</span><span>Manage Doctors</span></a>
-    <a class="nav-item" data-page="frontdesk" href="frontdesk.html"><span class="nav-icon">🖥️</span><span>Manage Front Desk</span></a>
-    <a class="nav-item" data-page="lab-technicians" href="lab-technicians.html"><span class="nav-icon">🔬</span><span>Lab Technicians</span></a>
-    <a class="nav-item" data-page="leave-management" href="leave-management.html"><span class="nav-icon">📅</span><span>Leave Management</span></a>
+    <a class="nav-item" data-page="dashboard" href="dashboard.html"><span class="nav-icon">&#x22D7;</span><span>Dashboard</span></a>
+    <a class="nav-item" data-page="doctors" href="doctors.html"><span class="nav-icon">&#129682;</span><span>Manage Doctors</span></a>
+    <a class="nav-item" data-page="frontdesk" href="frontdesk.html"><span class="nav-icon">&#128187;</span><span>Manage Front Desk</span></a>
+    <a class="nav-item" data-page="lab-technicians" href="lab-technicians.html"><span class="nav-icon">&#128300;</span><span>Lab Technicians</span></a>
+    <a class="nav-item" data-page="leave-management" href="leave-management.html"><span class="nav-icon">&#128197;</span><span>Leave Management</span></a>
     <a class="nav-item active" data-page="earnings" href="earnings.html"><span class="nav-icon">&#8377;</span><span>Earnings</span></a>
   </nav>
   <div class="sidebar-bottom">
     <a class="nav-item logout-btn" id="logoutBtn">
-      <span class="nav-icon">⇥</span><span>Logout</span>
+      <span class="nav-icon">&#x21E5;</span><span>Logout</span>
     </a>
   </div>
 </aside>
@@ -34,14 +34,14 @@
 <div class="main-wrap earnings-page">
   <header class="topbar">
     <div class="topbar-left">
-      <button class="menu-toggle" id="menuToggle">☰</button>
+      <button class="menu-toggle" id="menuToggle">&#9776;</button>
       <div>
         <div class="page-title" id="pageTitle">Earnings</div>
         <div class="page-sub" id="portalLabel">Branch Admin Portal</div>
       </div>
     </div>
     <div class="topbar-right">
-      <button class="notif-btn" id="notifBtn">🔔</button>
+      <button class="notif-btn" id="notifBtn">&#128276;</button>
       <div class="user-chip">
         <div class="user-avatar" id="userAvatarTop">BA</div>
         <div>
@@ -53,102 +53,104 @@
   </header>
 
   <main class="content">
-
-    <!-- Hero Banner -->
     <section class="hero-banner earnings-hero-dynamic">
       <div>
         <div class="hero-greeting">MEDBITS BRANCH REVENUE OVERVIEW</div>
         <div class="hero-name" id="branchHeroTitle">Branch Earnings Dashboard</div>
-        <div class="hero-sub" id="branchHeroSub">Live revenue data from completed appointments across this branch.</div>
+        <div class="hero-sub" id="branchHeroSub">Live revenue data from completed appointments and completed lab tests across this branch.</div>
       </div>
       <div>
         <div class="revenue-badge-dynamic" id="heroBadge">
           <div class="rbd-label">Current Month</div>
-          <div class="rbd-value" id="heroBadgeValue">₹—</div>
-          <div class="rbd-note" id="heroBadgeNote">Loading…</div>
+          <div class="rbd-value" id="heroBadgeValue">&#8377;—</div>
+          <div class="rbd-note" id="heroBadgeNote">Loading...</div>
         </div>
       </div>
     </section>
 
-    <!-- KPI Row -->
     <section class="earnings-kpi-row" id="kpiRow">
       <div class="earnings-kpi">
         <div class="earnings-kpi-label">Total Branch Revenue</div>
-        <div class="earnings-kpi-value" id="kpiTotalRevenue">₹—</div>
-        <div class="earnings-kpi-note">All-time completed appointment fees</div>
+        <div class="earnings-kpi-value" id="kpiTotalRevenue">&#8377;—</div>
+        <div class="earnings-kpi-note">All-time appointments + lab test collections</div>
       </div>
       <div class="earnings-kpi">
         <div class="earnings-kpi-label">This Month Revenue</div>
-        <div class="earnings-kpi-value kpi-accent" id="kpiMonthRevenue">₹—</div>
+        <div class="earnings-kpi-value kpi-accent" id="kpiMonthRevenue">&#8377;—</div>
         <div class="earnings-kpi-note" id="kpiMonthLabel">Current month collections</div>
       </div>
       <div class="earnings-kpi">
         <div class="earnings-kpi-label">Total Doctor Cuts</div>
-        <div class="earnings-kpi-value kpi-orange" id="kpiTotalCuts">₹—</div>
+        <div class="earnings-kpi-value kpi-orange" id="kpiTotalCuts">&#8377;—</div>
         <div class="earnings-kpi-note">Doctor earnings across all time</div>
       </div>
       <div class="earnings-kpi">
+        <div class="earnings-kpi-label">Lab Test Revenue</div>
+        <div class="earnings-kpi-value kpi-blue" id="kpiLabRevenue">&#8377;—</div>
+        <div class="earnings-kpi-note">Completed lab tests billed to this branch</div>
+      </div>
+      <div class="earnings-kpi">
         <div class="earnings-kpi-label">Branch Profit (This Month)</div>
-        <div class="earnings-kpi-value kpi-green" id="kpiMonthProfit">₹—</div>
-        <div class="earnings-kpi-note">Revenue minus all doctor cuts</div>
+        <div class="earnings-kpi-value kpi-green" id="kpiMonthProfit">&#8377;—</div>
+        <div class="earnings-kpi-note">Revenue minus doctor cuts plus lab test revenue</div>
       </div>
     </section>
 
-    <!-- Summary Cards + Breakdown -->
     <section class="earnings-layout">
-      <!-- Left: Month Summary -->
       <div class="analytics-panel">
         <div class="panel-heading">
           <div>
             <div class="panel-eyebrow">This Month's Summary</div>
-            <div class="panel-title" id="summaryMonthTitle">Loading…</div>
-            <div class="panel-copy">Revenue vs doctor cuts vs branch profit for the current month.</div>
+            <div class="panel-title" id="summaryMonthTitle">Loading...</div>
+            <div class="panel-copy">Revenue vs doctor cuts vs branch profit for the current month, including lab-test income.</div>
           </div>
-          <span class="pill pill-green" id="summaryCount">— Completed</span>
+          <span class="pill pill-green" id="summaryCount">- Completed</span>
         </div>
 
-        <!-- Summary Bars -->
         <div class="summary-bars" id="summaryBars">
           <div class="summary-bar-row">
             <div class="summary-bar-label">Gross Revenue</div>
             <div class="summary-bar-track">
               <div class="summary-bar-fill fill-revenue" id="barRevenue" style="width:100%"></div>
             </div>
-            <div class="summary-bar-value" id="barRevenueVal">₹—</div>
+            <div class="summary-bar-value" id="barRevenueVal">&#8377;—</div>
           </div>
           <div class="summary-bar-row">
             <div class="summary-bar-label">Doctor Cuts</div>
             <div class="summary-bar-track">
               <div class="summary-bar-fill fill-cuts" id="barCuts" style="width:0%"></div>
             </div>
-            <div class="summary-bar-value" id="barCutsVal">₹—</div>
+            <div class="summary-bar-value" id="barCutsVal">&#8377;—</div>
           </div>
           <div class="summary-bar-row">
             <div class="summary-bar-label">Branch Profit</div>
             <div class="summary-bar-track">
               <div class="summary-bar-fill fill-profit" id="barProfit" style="width:0%"></div>
             </div>
-            <div class="summary-bar-value" id="barProfitVal">₹—</div>
+            <div class="summary-bar-value" id="barProfitVal">&#8377;—</div>
           </div>
         </div>
 
         <div class="branch-health" style="margin-top:20px;">
           <div class="health-card">
             <div class="health-label">Total Appointments</div>
-            <div class="health-value" id="healthTotal">—</div>
+            <div class="health-value" id="healthTotal">-</div>
           </div>
           <div class="health-card">
             <div class="health-label">Month Appointments</div>
-            <div class="health-value" id="healthMonth">—</div>
+            <div class="health-value" id="healthMonth">-</div>
+          </div>
+          <div class="health-card">
+            <div class="health-label">Lab Tests Completed</div>
+            <div class="health-value" id="healthLabTests">-</div>
           </div>
           <div class="health-card">
             <div class="health-label">Profit Margin</div>
-            <div class="health-value" id="healthMargin">—</div>
+            <div class="health-value" id="healthMargin">-</div>
           </div>
         </div>
       </div>
 
-      <!-- Right: Doctor Breakdown -->
       <aside class="side-panel">
         <div class="stacked-card">
           <div class="stacked-card-header">
@@ -178,38 +180,59 @@
             <div class="mini-item">
               <div>
                 <div class="mini-label">Total Revenue</div>
-                <div class="mini-meta">All completed appointments</div>
+                <div class="mini-meta">Appointments and lab-test collections</div>
               </div>
-              <div class="mini-value" id="allTimeRevenue">₹—</div>
+              <div class="mini-value" id="allTimeRevenue">&#8377;—</div>
             </div>
             <div class="mini-item">
               <div>
                 <div class="mini-label">Total Doctor Cuts</div>
                 <div class="mini-meta">Sum of all doctor earnings</div>
               </div>
-              <div class="mini-value" id="allTimeCuts">₹—</div>
+              <div class="mini-value" id="allTimeCuts">&#8377;—</div>
+            </div>
+            <div class="mini-item">
+              <div>
+                <div class="mini-label">Lab Test Revenue</div>
+                <div class="mini-meta">Completed lab-test income</div>
+              </div>
+              <div class="mini-value" id="allTimeLabRevenue">&#8377;—</div>
             </div>
             <div class="mini-item">
               <div>
                 <div class="mini-label">Branch Profit</div>
                 <div class="mini-meta">Revenue minus doctor cuts</div>
               </div>
-              <div class="mini-value" id="allTimeProfit">₹—</div>
+              <div class="mini-value" id="allTimeProfit">&#8377;—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stacked-card stacked-card-lab">
+          <div class="stacked-card-header">
+            <div>
+              <div class="panel-eyebrow">Lab Revenue</div>
+              <div class="stacked-card-title">Completed lab tests this month</div>
+            </div>
+            <span class="pill pill-blue" id="labCount">-</span>
+          </div>
+          <div class="mini-list" id="labBreakdownList">
+            <div class="mini-item">
+              <div style="color:var(--text-muted);font-size:.875rem;">Loading lab revenue data...</div>
             </div>
           </div>
         </div>
       </aside>
     </section>
 
-    <!-- Appointments Ledger Table -->
     <section class="table-panel mt-20">
       <div class="panel-heading">
         <div>
           <div class="panel-eyebrow">Revenue Ledger</div>
-          <div class="panel-title">Completed Appointments — <span id="ledgerMonthLabel">This Month</span></div>
+          <div class="panel-title">Completed Appointments - <span id="ledgerMonthLabel">This Month</span></div>
           <div class="panel-copy">Live ledger of completed appointments showing fees, doctor cuts, and branch profit per row.</div>
         </div>
-        <span class="pill pill-green" id="ledgerCount">—</span>
+        <span class="pill pill-green" id="ledgerCount">-</span>
       </div>
 
       <div class="table-wrap branch-table-wrap">
@@ -229,14 +252,13 @@
           <tbody id="ledgerTbody">
             <tr>
               <td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted);">
-                Loading ledger data…
+                Loading ledger data...
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
-
   </main>
 </div>
 
