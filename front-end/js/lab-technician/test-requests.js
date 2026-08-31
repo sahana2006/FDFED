@@ -217,8 +217,9 @@ function renderTable() {
         <strong style="color:var(--accent);">${escapeHtml(req.testName)}</strong>
       </td>
       <td>
-        <div style="font-weight:500;">Dr. ${escapeHtml(req.doctorName)}</div>
+        <div style="font-weight:500;">${req.sourceType === 'patient_labtest' ? 'Booked from Patient Portal' : `Dr. ${escapeHtml(req.doctorName)}`}</div>
         <div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(req.doctorId)}</div>
+        ${req.branchId ? `<div style="font-size:.72rem;color:var(--text-muted);">Branch: ${escapeHtml(req.branchName || req.branchId)}</div>` : ''}
       </td>
       <td>
         <span style="font-family:monospace;font-size:.82rem;color:var(--text-muted);">${escapeHtml(req.appointmentId || '—')}</span>
@@ -351,7 +352,7 @@ function renderModalContent(req) {
       </div>
       <div class="req-detail-item">
         <span class="req-detail-label">Prescribing Doctor</span>
-        <span class="req-detail-value">Dr. ${escapeHtml(req.doctorName)} (${escapeHtml(req.doctorId)})</span>
+        <span class="req-detail-value">${req.sourceType === 'patient_labtest' ? 'Booked from Patient Portal' : `Dr. ${escapeHtml(req.doctorName)} (${escapeHtml(req.doctorId)})`}</span>
       </div>
       <div class="req-detail-item">
         <span class="req-detail-label">Appointment ID</span>
@@ -361,6 +362,11 @@ function renderModalContent(req) {
         <span class="req-detail-label">Requested Test</span>
         <span class="req-detail-value" style="color:var(--accent);font-weight:700;">${escapeHtml(req.testName)}</span>
       </div>
+      ${req.branchId ? `
+      <div class="req-detail-item">
+        <span class="req-detail-label">Branch</span>
+        <span class="req-detail-value">${escapeHtml(req.branchName || req.branchId)}</span>
+      </div>` : ''}
       <div class="req-detail-item">
         <span class="req-detail-label">Doctor Recommendation Date</span>
         <span class="req-detail-value">${escapeHtml(req.recommendationDate || req.requestDate)}</span>

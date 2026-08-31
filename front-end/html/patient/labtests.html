@@ -26,6 +26,21 @@
 
     <div class="card mb-16">
       <div class="section-header">
+        <div class="section-title">Select Branch</div>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end;flex-wrap:wrap;">
+        <label class="field" style="min-width:280px;">
+          <span>Hospital Branch</span>
+          <select id="labBranchSelect" class="input-field"></select>
+        </label>
+        <div style="min-width:240px;">
+          <p id="labBranchNote" style="margin:0;color:var(--text-muted);font-size:.9rem;">Loading branches...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="section-header">
         <div class="section-title">Health Check Categories</div>
         <button class="view-all" onclick="showAllLab()">View All</button>
       </div>
@@ -82,6 +97,7 @@
         <div class="section-title">Your Lab Cart</div>
         <button class="btn btn-outline btn-sm" onclick="hideLabCart()">Close</button>
       </div>
+      <p id="labCartBranchNote" style="margin-top:-4px;color:var(--text-muted);font-size:.9rem;">Choose a branch to route this lab order.</p>
       <div class="cart-empty" id="labCartEmptyState">
         <div class="empty-icon">🛒</div>
         <h3>Your lab cart is empty</h3>
@@ -131,11 +147,12 @@
 
 <template id="tpl-lab-cart-row">
   <div class="cart-item">
-    <div class="cart-item-info">
+  <div class="cart-item-info">
       <div class="cart-item-icon lab-cart-icon"></div>
       <div>
         <div class="cart-item-name lab-cart-name"></div>
         <div class="cart-item-qty lab-cart-cat"></div>
+        <div class="cart-item-qty lab-cart-branch" style="font-size:.75rem;color:var(--text-muted);margin-top:2px;"></div>
       </div>
     </div>
     <div class="cart-item-actions">

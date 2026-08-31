@@ -1,12 +1,13 @@
 {
   "testBookings": [
     {
-      "id": "TBOOK1788186390075",
+      "id": "TBOOK1788188223810",
       "userId": "PAT001",
-      "labTestId": "LAB001",
-      "status": "cart",
-      "cartId": "LABCART1788186390076",
-      "orderId": null
+      "labTestId": "LAB003",
+      "branchId": "00000000-0000-4000-8000-000000000001",
+      "status": "booked",
+      "cartId": "LABCART1788188223810",
+      "orderId": "LABORD1788188231340"
     }
   ]
 }

@@ -37,6 +37,8 @@ export type LabRequest = {
   rejectedByTechnicianId?: string | null;
   rejectionReason?: string | null;
   reportId: string | null;
+  sourceType?: 'doctor_order' | 'patient_labtest';
+  sourceBookingId?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -94,6 +96,16 @@ export type UploadedLabReportFile = {
   mimetype: string;
   size: number;
   path?: string;
+};
+
+export type CreateDirectPatientLabRequestInput = {
+  sourceBookingId: string;
+  orderId: string;
+  patientId: string;
+  patientName: string;
+  branchId: string;
+  testName: string;
+  requestDate: string;
 };
 
 const LAB_REQUESTS_DATA_FILE = join(
@@ -177,6 +189,74 @@ export class LabRequestsService {
       rejectedByTechnicianId: null,
       rejectionReason: null,
       reportId: null,
+      sourceType: 'doctor_order',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.labRequests.unshift(request);
+    this.persistData();
+    return { ...request };
+  }
+
+  createDirectPatientRequest(input: CreateDirectPatientLabRequestInput): LabRequest {
+    const normalizedBookingId = input.sourceBookingId.trim();
+    const normalizedOrderId = input.orderId.trim();
+    const normalizedPatientId = input.patientId.trim();
+    const normalizedPatientName = input.patientName.trim();
+    const normalizedBranchId = input.branchId.trim();
+    const normalizedTestName = input.testName.trim();
+    const normalizedRequestDate = input.requestDate.trim();
+
+    if (
+      !normalizedBookingId ||
+      !normalizedOrderId ||
+      !normalizedPatientId ||
+      !normalizedPatientName ||
+      !normalizedBranchId ||
+      !normalizedTestName ||
+      !normalizedRequestDate
+    ) {
+      throw new BadRequestException('All direct patient lab request fields are required');
+    }
+
+    const existing = this.labRequests.find(
+      (req) =>
+        req.sourceType === 'patient_labtest' &&
+        req.sourceBookingId === normalizedBookingId,
+    );
+    if (existing) {
+      return { ...existing };
+    }
+
+    const now = new Date().toISOString();
+    const request: LabRequest = {
+      id: this.generateRequestId(),
+      medicalRecordId: normalizedBookingId,
+      appointmentId: normalizedOrderId,
+      patientId: normalizedPatientId,
+      patientName: normalizedPatientName,
+      doctorId: 'PATIENT_PORTAL',
+      doctorName: 'Patient Portal',
+      branchId: normalizedBranchId,
+      testName: normalizedTestName,
+      recommendationDate: normalizedRequestDate,
+      labTestDate: normalizedRequestDate,
+      requestDate: normalizedRequestDate,
+      consultationNote: 'Booked directly by the patient from the lab tests page.',
+      prescriptionMedicines: '',
+      status: 'pending',
+      acceptedByTechnicianId: null,
+      acceptedAt: null,
+      startedAt: null,
+      draftSavedAt: null,
+      completedAt: null,
+      rejectedAt: null,
+      rejectedByTechnicianId: null,
+      rejectionReason: null,
+      reportId: null,
+      sourceType: 'patient_labtest',
+      sourceBookingId: normalizedBookingId,
       createdAt: now,
       updatedAt: now,
     };

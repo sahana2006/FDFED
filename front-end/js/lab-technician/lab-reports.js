@@ -233,8 +233,9 @@ function renderTable(items) {
           <strong style="color:var(--accent);">${escapeHtml(req.testName)}</strong>
         </td>
         <td>
-          <div style="font-weight:500;">Dr. ${escapeHtml(req.doctorName)}</div>
+          <div style="font-weight:500;">${req.sourceType === 'patient_labtest' ? 'Booked from Patient Portal' : `Dr. ${escapeHtml(req.doctorName)}`}</div>
           <div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(req.doctorId)}</div>
+          ${req.branchId ? `<div style="font-size:.72rem;color:var(--text-muted);">Branch: ${escapeHtml(req.branchName || req.branchId)}</div>` : ''}
         </td>
         <td>
           <span style="font-family:monospace;font-size:.82rem;color:var(--text-muted);">${escapeHtml(req.appointmentId || '—')}</span>
@@ -270,8 +271,9 @@ function renderTable(items) {
           <strong style="color:var(--accent);">${escapeHtml(report.testName)}</strong>
         </td>
         <td>
-          <div style="font-weight:500;">Dr. ${escapeHtml(report.doctorName)}</div>
+          <div style="font-weight:500;">${report.sourceType === 'patient_labtest' ? 'Booked from Patient Portal' : `Dr. ${escapeHtml(report.doctorName)}`}</div>
           <div style="font-size:.78rem;color:var(--text-muted);">${escapeHtml(report.doctorId)}</div>
+          ${report.branchId ? `<div style="font-size:.72rem;color:var(--text-muted);">Branch: ${escapeHtml(report.branchName || report.branchId)}</div>` : ''}
         </td>
         <td>
           <span style="font-family:monospace;font-size:.82rem;color:var(--text-muted);">${escapeHtml(report.appointmentId || 'Direct')}</span>
@@ -323,8 +325,9 @@ async function openSendReportModal(req, technicianId) {
     </div>
     <div class="ps-item">
       <span class="ps-label">Prescribed By Doctor</span>
-      <span class="ps-value">Dr. ${escapeHtml(req.doctorName)} (${escapeHtml(req.doctorId)})</span>
+      <span class="ps-value">${req.sourceType === 'patient_labtest' ? 'Booked from Patient Portal' : `Dr. ${escapeHtml(req.doctorName)} (${escapeHtml(req.doctorId)})`}</span>
     </div>
+    ${req.branchId ? `<div class="ps-item"><span class="ps-label">Branch</span><span class="ps-value">${escapeHtml(req.branchName || req.branchId)}</span></div>` : ''}
     <div class="ps-item">
       <span class="ps-label">Test Name</span>
       <span class="ps-value" style="color:var(--accent);">${escapeHtml(req.testName)}</span>
@@ -599,9 +602,10 @@ async function openReportPreview(reportId, technicianId) {
             <div class="rpm-row" style="margin-top:6px;"><span class="rpm-label">Appointment ID:</span><span class="rpm-val" style="font-family:monospace;">${escapeHtml(report.appointmentId || 'Direct')}</span></div>
           </div>
           <div>
-            <div class="rpm-row"><span class="rpm-label">Prescribed By:</span><span class="rpm-val">Dr. ${escapeHtml(report.doctorName)}</span></div>
+            <div class="rpm-row"><span class="rpm-label">Prescribed By:</span><span class="rpm-val">${report.sourceType === 'patient_labtest' ? 'Booked from Patient Portal' : `Dr. ${escapeHtml(report.doctorName)}`}</span></div>
             <div class="rpm-row" style="margin-top:6px;"><span class="rpm-label">Doctor ID:</span><span class="rpm-val" style="font-family:monospace;">${escapeHtml(report.doctorId)}</span></div>
             <div class="rpm-row" style="margin-top:6px;"><span class="rpm-label">Test Name:</span><span class="rpm-val" style="color:var(--accent);">${escapeHtml(report.testName)}</span></div>
+            ${report.branchId ? `<div class="rpm-row" style="margin-top:6px;"><span class="rpm-label">Branch:</span><span class="rpm-val">${escapeHtml(report.branchName || report.branchId)}</span></div>` : ''}
           </div>
         </div>
 

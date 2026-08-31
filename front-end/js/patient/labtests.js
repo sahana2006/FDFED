@@ -1,6 +1,7 @@
 /* MEDBITS - labtests.js */
 
 const LABTESTS_API_BASE_URL = 'http://localhost:3000';
+const LABTESTS_BRANCH_KEY = 'medbits_patient_labtests_branch';
 
 const LAB_TEST_ICONS = {
   'Full Body Check Up': '🧪',
@@ -16,11 +17,13 @@ const LAB_TEST_ICONS = {
 };
 
 let labTests = [];
+let labBranches = [];
 let cartBookings = [];
 let bookingHistory = [];
 let patientLabReports = [];
 let patientLabRequests = [];
 let activeLabCategory = 'Full Body Check Up';
+let selectedLabBranchId = '';
 
 function useTemplate(id) {
   return document.getElementById(id).content.cloneNode(true);
@@ -31,12 +34,38 @@ let labTestsRefreshTimer = null;
 async function initializeLabTestsPage() {
   setupPatientReportModal();
   await Promise.all([
+    loadLabBranches(),
     loadLabTests(),
     loadLabCart(),
     loadLabHistory(),
     loadPatientLabReports(),
     loadPatientLabRequests(),
   ]);
+  renderLabBranchOptions();
+  const branchSelect = document.getElementById('labBranchSelect');
+  if (branchSelect) {
+    branchSelect.addEventListener('change', () => {
+      const nextBranchId = branchSelect.value;
+      const cartBranchId = cartBookings[0]?.branchId || '';
+      if (cartBookings.length && cartBranchId && nextBranchId && nextBranchId !== cartBranchId) {
+        const branch = labBranches.find((item) => item.id === cartBranchId);
+        showToast(
+          `Your cart is already tied to ${branch ? branch.branchName : 'the selected branch'}. Clear the cart before switching branches.`,
+          'error',
+        );
+        branchSelect.value = cartBranchId;
+        return;
+      }
+
+      selectedLabBranchId = nextBranchId;
+      if (selectedLabBranchId) {
+        localStorage.setItem(LABTESTS_BRANCH_KEY, selectedLabBranchId);
+      } else {
+        localStorage.removeItem(LABTESTS_BRANCH_KEY);
+      }
+      renderLabBranchOptions();
+    });
+  }
   renderLabTests();
   startLabTestsRefresh();
 }
@@ -120,6 +149,39 @@ async function loadLabTests() {
   labTests = await response.json();
 }
 
+async function loadLabBranches() {
+  try {
+    const response = await fetch(`${LABTESTS_API_BASE_URL}/hospital-branches`, {
+      headers: {
+        role: 'patient',
+      },
+    });
+
+    if (!response.ok) {
+      labBranches = [];
+      return;
+    }
+
+    const payload = await response.json();
+    labBranches = Array.isArray(payload) ? payload : [];
+
+    const savedBranchId = localStorage.getItem(LABTESTS_BRANCH_KEY) || '';
+    if (savedBranchId && labBranches.some((branch) => branch.id === savedBranchId)) {
+      selectedLabBranchId = savedBranchId;
+    } else if (cartBookings.length && cartBookings[0]?.branchId) {
+      selectedLabBranchId = cartBookings[0].branchId;
+    } else if (!selectedLabBranchId) {
+      selectedLabBranchId = labBranches[0]?.id || '';
+    }
+
+    if (selectedLabBranchId) {
+      localStorage.setItem(LABTESTS_BRANCH_KEY, selectedLabBranchId);
+    }
+  } catch (_) {
+    labBranches = [];
+  }
+}
+
 async function loadLabCart() {
   const session = requireRole('patient');
   if (!session) return;
@@ -138,6 +200,10 @@ async function loadLabCart() {
   }
 
   cartBookings = await response.json();
+  if (!selectedLabBranchId && cartBookings.length && cartBookings[0]?.branchId) {
+    selectedLabBranchId = cartBookings[0].branchId;
+    localStorage.setItem(LABTESTS_BRANCH_KEY, selectedLabBranchId);
+  }
 }
 
 async function loadLabHistory() {
@@ -205,6 +271,41 @@ function renderLabProducts(tests) {
   fillLabGrid(document.getElementById('labProductGrid'), tests);
 }
 
+function renderLabBranchOptions() {
+  const select = document.getElementById('labBranchSelect');
+  const note = document.getElementById('labBranchNote');
+  if (!select) return;
+
+  if (!labBranches.length) {
+    select.innerHTML = '<option value="">No branches available</option>';
+    select.disabled = true;
+    if (note) note.textContent = 'No hospital branches were found.';
+    return;
+  }
+
+  const cartBranchId = cartBookings[0]?.branchId || '';
+  const branchId = selectedLabBranchId || cartBranchId || labBranches[0]?.id || '';
+  selectedLabBranchId = branchId;
+
+  select.disabled = false;
+  select.innerHTML = [
+    '<option value="">Select a branch</option>',
+    ...labBranches.map((branch) => `
+      <option value="${escapeHtml(branch.id)}">${escapeHtml(branch.branchName)}${branch.city ? ` · ${escapeHtml(branch.city)}` : ''}</option>
+    `),
+  ].join('');
+  select.value = branchId;
+
+  if (note) {
+    const branch = labBranches.find((item) => item.id === branchId);
+    note.textContent = branch
+      ? `Lab tests will be routed to ${branch.branchName}${branch.city ? `, ${branch.city}` : ''}.`
+      : 'Choose the branch that should receive this lab order.';
+  }
+
+  localStorage.setItem(LABTESTS_BRANCH_KEY, selectedLabBranchId);
+}
+
 function renderTopTests() {
   fillLabGrid(document.getElementById('topLabGrid'), labTests.slice(0, 4));
 }
@@ -253,6 +354,19 @@ function fillLabGrid(grid, tests) {
 async function addLabTestToCart(labTestId) {
   const session = requireRole('patient');
   if (!session) return;
+  if (!selectedLabBranchId) {
+    showToast('Please select a branch before adding lab tests.', 'error');
+    return;
+  }
+  const cartBranchId = cartBookings[0]?.branchId || '';
+  if (cartBranchId && cartBranchId !== selectedLabBranchId) {
+    const cartBranch = labBranches.find((item) => item.id === cartBranchId);
+    showToast(
+      `Your cart is already tied to ${cartBranch ? cartBranch.branchName : 'another branch'}. Clear the cart before adding tests for a different branch.`,
+      'error',
+    );
+    return;
+  }
 
   const response = await fetch(`${LABTESTS_API_BASE_URL}/labtests/book`, {
     method: 'POST',
@@ -263,6 +377,7 @@ async function addLabTestToCart(labTestId) {
     body: JSON.stringify({
       userId: session.id,
       labTestId,
+      branchId: selectedLabBranchId,
     }),
   });
 
@@ -312,6 +427,13 @@ function renderLabCartSummary() {
     'labCartCount',
     `(${cartBookings.length} item${cartBookings.length !== 1 ? 's' : ''})`,
   );
+  const cartBranch = labBranches.find((branch) => branch.id === (cartBookings[0]?.branchId || selectedLabBranchId));
+  const summaryNote = document.getElementById('labCartBranchNote');
+  if (summaryNote) {
+    summaryNote.textContent = cartBranch
+      ? `Routing to ${cartBranch.branchName}${cartBranch.city ? `, ${cartBranch.city}` : ''}.`
+      : 'Choose a branch to route this lab order.';
+  }
 }
 
 function showLabCart() {
@@ -358,6 +480,11 @@ function renderLabCartItems() {
     row.querySelector('.lab-cart-name').textContent = booking.labTest.name;
     row.querySelector('.lab-cart-cat').textContent = booking.labTest.category;
     row.querySelector('.lab-cart-price').textContent = `Rs ${booking.labTest.price.toFixed(2)}`;
+    const branchTag = row.querySelector('.lab-cart-branch');
+    if (branchTag) {
+      const branch = labBranches.find((item) => item.id === booking.branchId);
+      branchTag.textContent = branch ? branch.branchName : 'Selected branch';
+    }
     row.querySelector('.lab-cart-remove').onclick = async function () {
       await removeLabTestFromCart(booking.id);
     };
@@ -381,8 +508,12 @@ async function confirmLabBooking() {
     {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         role: 'patient',
       },
+      body: JSON.stringify({
+        patientName: session.name || session.fullName || session.userName || '',
+      }),
     },
   );
 
@@ -450,8 +581,12 @@ function renderLabOrders() {
         <div>
           <div class="list-item-title" style="font-weight:700;color:var(--text);font-size:0.95rem;">${escapeHtml(report.testName)}</div>
           <div class="list-item-sub" style="font-size:.82rem;color:var(--text-muted);margin-top:2px;">
-            <strong>Recommended by Doctor:</strong> Dr. ${escapeHtml(report.doctorName)}${recDate ? ` on <span style="font-weight:600;color:var(--navy);">${formatDate(recDate)}</span>` : ''} &middot; Verified by ${escapeHtml(report.technicianName || 'Lab Technician')} (${escapeHtml(reportDate)})
+            ${report.sourceType === 'patient_labtest'
+              ? `<strong>Booked from Patient Portal:</strong> ${escapeHtml(report.patientName || report.patientId)}`
+              : `<strong>Recommended by Doctor:</strong> Dr. ${escapeHtml(report.doctorName)}${recDate ? ` on <span style="font-weight:600;color:var(--navy);">${formatDate(recDate)}</span>` : ''}`
+            } &middot; Verified by ${escapeHtml(report.technicianName || 'Lab Technician')} (${escapeHtml(reportDate)})
           </div>
+          ${report.branchId ? `<div style="font-size:.76rem;color:var(--text-muted);margin-top:2px;">Branch: ${escapeHtml((labBranches.find((branch) => branch.id === report.branchId) || {}).branchName || report.branchId)}</div>` : ''}
           ${report.result ? `<div style="font-size:.82rem;color:#047857;margin-top:4px;font-weight:600;">Result: ${escapeHtml(report.result)}</div>` : ''}
         </div>
       </div>
@@ -516,9 +651,13 @@ function renderLabOrders() {
           <div>
             <div class="list-item-title" style="font-weight:700;color:var(--text);">${escapeHtml(req.testName)}</div>
             <div class="list-item-sub" style="font-size:.82rem;color:var(--text-muted);margin-top:2px;">
-              <strong>Recommended by Doctor:</strong> Dr. ${escapeHtml(req.doctorName)} on <span style="font-weight:600;color:var(--navy);">${recDateStr}</span>
+              ${req.sourceType === 'patient_labtest'
+                ? `<strong>Booked from Patient Portal:</strong> ${escapeHtml(req.patientName || req.patientId)}`
+                : `<strong>Recommended by Doctor:</strong> Dr. ${escapeHtml(req.doctorName)} on <span style="font-weight:600;color:var(--navy);">${recDateStr}</span>`
+              }
               ${labDateStr && labDateStr !== recDateStr ? ` &middot; <strong style="color:var(--accent);">Scheduled Lab Date: ${labDateStr}</strong>` : ''}
             </div>
+            ${req.branchId ? `<div style="font-size:.76rem;color:var(--text-muted);margin-top:2px;">Branch: ${escapeHtml((labBranches.find((branch) => branch.id === req.branchId) || {}).branchName || req.branchId)}</div>` : ''}
             ${req.consultationNote ? `<div style="font-size:.8rem;color:var(--text-muted);margin-top:2px;">Instructions: ${escapeHtml(req.consultationNote)}</div>` : ''}
           </div>
         </div>

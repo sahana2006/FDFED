@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { LabRequestsService } from '../lab-requests/lab-requests.service';
 
 export type LabTest = {
   id: string;
@@ -16,6 +17,7 @@ export type TestBooking = {
   id: string;
   userId: string;
   labTestId: string;
+  branchId: string;
   status: TestBookingStatus;
   cartId: string;
   orderId: string | null;
@@ -24,6 +26,7 @@ export type TestBooking = {
 export type CreateTestBookingInput = {
   userId: string;
   labTestId: string;
+  branchId: string;
 };
 
 type LabTestsState = {
@@ -88,7 +91,7 @@ export class LabTestsService {
   private testBookings: TestBooking[] = [];
   private readonly activeCartIds = new Map<string, string>();
 
-  constructor() {
+  constructor(private readonly labRequestsService: LabRequestsService) {
     this.loadPersistedState();
   }
 
@@ -97,8 +100,8 @@ export class LabTestsService {
   }
 
   createBooking(input: CreateTestBookingInput) {
-    if (!input.userId || !input.labTestId) {
-      throw new BadRequestException('userId and labTestId are required');
+    if (!input.userId || !input.labTestId || !input.branchId) {
+      throw new BadRequestException('userId, labTestId and branchId are required');
     }
 
     const labTest = this.findTestById(input.labTestId);
@@ -110,6 +113,7 @@ export class LabTestsService {
       (booking) =>
         booking.userId === input.userId &&
         booking.labTestId === input.labTestId &&
+        booking.branchId === input.branchId &&
         booking.status === 'cart',
     );
 
@@ -121,6 +125,7 @@ export class LabTestsService {
       id: `TBOOK${Date.now()}`,
       userId: input.userId,
       labTestId: input.labTestId,
+      branchId: input.branchId,
       status: 'cart',
       cartId: this.getOrCreateActiveCartId(input.userId),
       orderId: null,
@@ -137,7 +142,7 @@ export class LabTestsService {
       .map((booking) => this.toBookingDetails(booking));
   }
 
-  confirmBookingsByUserId(userId: string) {
+  confirmBookingsByUserId(userId: string, context?: { patientName?: string }) {
     const cartBookings = this.testBookings.filter(
       (booking) => booking.userId === userId && booking.status === 'cart',
     );
@@ -151,6 +156,19 @@ export class LabTestsService {
     cartBookings.forEach((booking) => {
       booking.status = 'booked';
       booking.orderId = orderId;
+
+      const labTest = this.findTestById(booking.labTestId);
+      if (labTest) {
+        this.labRequestsService.createDirectPatientRequest({
+          sourceBookingId: booking.id,
+          orderId,
+          patientId: booking.userId,
+          patientName: context?.patientName?.trim() || booking.userId,
+          branchId: booking.branchId,
+          testName: labTest.name,
+          requestDate: new Date().toISOString().split('T')[0],
+        });
+      }
     });
 
     this.activeCartIds.delete(userId);

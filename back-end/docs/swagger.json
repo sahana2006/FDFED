@@ -2040,6 +2040,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmTestBookingsDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": ""
@@ -2114,132 +2124,6 @@
         "summary": "Remove a lab test from cart",
         "tags": [
           "Lab Tests"
-        ]
-      }
-    },
-    "/medical-records/doctor/{doctorId}": {
-      "get": {
-        "operationId": "MedicalRecordsController_getRecordsByDoctorId",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "doctorId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of doctor medical records"
-          }
-        },
-        "summary": "Get medical records by doctor ID",
-        "tags": [
-          "Medical Records"
-        ]
-      }
-    },
-    "/medical-records/{patientId}": {
-      "get": {
-        "operationId": "MedicalRecordsController_getRecordsByPatientId",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "patientId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of patient medical records"
-          }
-        },
-        "summary": "Get medical records by patient ID",
-        "tags": [
-          "Medical Records"
-        ]
-      }
-    },
-    "/medical-records": {
-      "post": {
-        "operationId": "MedicalRecordsController_createRecord",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMedicalRecordDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Medical record created successfully"
-          }
-        },
-        "summary": "Create a new medical record",
-        "tags": [
-          "Medical Records"
-        ]
-      }
-    },
-    "/followups": {
-      "get": {
-        "operationId": "FollowUpsController_getFollowUps",
-        "parameters": [
-          {
-            "name": "role",
-            "in": "header",
-            "description": "User role (admin, doctor, patient, frontdesk)",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of followups"
-          }
-        },
-        "summary": "Get followups list",
-        "tags": [
-          "Followups"
         ]
       }
     },
@@ -3130,6 +3014,132 @@
         "summary": "Delete a lab technician account",
         "tags": [
           "Lab Technicians"
+        ]
+      }
+    },
+    "/medical-records/doctor/{doctorId}": {
+      "get": {
+        "operationId": "MedicalRecordsController_getRecordsByDoctorId",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "doctorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of doctor medical records"
+          }
+        },
+        "summary": "Get medical records by doctor ID",
+        "tags": [
+          "Medical Records"
+        ]
+      }
+    },
+    "/medical-records/{patientId}": {
+      "get": {
+        "operationId": "MedicalRecordsController_getRecordsByPatientId",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "patientId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of patient medical records"
+          }
+        },
+        "summary": "Get medical records by patient ID",
+        "tags": [
+          "Medical Records"
+        ]
+      }
+    },
+    "/medical-records": {
+      "post": {
+        "operationId": "MedicalRecordsController_createRecord",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMedicalRecordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Medical record created successfully"
+          }
+        },
+        "summary": "Create a new medical record",
+        "tags": [
+          "Medical Records"
+        ]
+      }
+    },
+    "/followups": {
+      "get": {
+        "operationId": "FollowUpsController_getFollowUps",
+        "parameters": [
+          {
+            "name": "role",
+            "in": "header",
+            "description": "User role (admin, doctor, patient, frontdesk)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of followups"
+          }
+        },
+        "summary": "Get followups list",
+        "tags": [
+          "Followups"
         ]
       }
     },
@@ -4632,96 +4642,26 @@
           "labTestId": {
             "type": "string",
             "example": "TEST001"
+          },
+          "branchId": {
+            "type": "string",
+            "example": "00000000-0000-4000-8000-000000000001"
           }
         },
         "required": [
           "userId",
-          "labTestId"
+          "labTestId",
+          "branchId"
         ]
       },
-      "CreateMedicalRecordDto": {
+      "ConfirmTestBookingsDto": {
         "type": "object",
         "properties": {
-          "doctorId": {
-            "type": "string",
-            "example": "DOC001"
-          },
-          "patientId": {
-            "type": "string",
-            "example": "PAT001"
-          },
           "patientName": {
             "type": "string",
             "example": "Ria Sharma"
-          },
-          "type": {
-            "type": "string",
-            "example": "consultation",
-            "enum": [
-              "consultation",
-              "treatment",
-              "lab"
-            ]
-          },
-          "doctorName": {
-            "type": "string",
-            "example": "Dr. Smith"
-          },
-          "specialization": {
-            "type": "string",
-            "example": "Cardiology"
-          },
-          "date": {
-            "type": "string",
-            "example": "2026-05-10"
-          },
-          "consultationNote": {
-            "type": "string",
-            "example": "Patient complains of chest pain."
-          },
-          "medicines": {
-            "type": "string",
-            "example": "Aspirin 75mg"
-          },
-          "followUp": {
-            "type": "string",
-            "example": "Review after 1 week"
-          },
-          "followUpDate": {
-            "type": "string",
-            "example": "2026-05-17"
-          },
-          "appointmentId": {
-            "type": "string",
-            "example": "APT001"
-          },
-          "tests": {
-            "type": "string",
-            "example": "ECG"
-          },
-          "labTestDate": {
-            "type": "string",
-            "example": "2026-05-12"
-          },
-          "lifestyle": {
-            "type": "string",
-            "example": "Avoid spicy food"
-          },
-          "diet": {
-            "type": "string",
-            "example": "Low sodium"
-          },
-          "duration": {
-            "type": "string",
-            "example": "15 mins"
           }
-        },
-        "required": [
-          "doctorId",
-          "patientId",
-          "doctorName",
-          "specialization"
-        ]
+        }
       },
       "FileAttachmentDto": {
         "type": "object",
@@ -4812,6 +4752,90 @@
           "email",
           "password",
           "branchId"
+        ]
+      },
+      "CreateMedicalRecordDto": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string",
+            "example": "DOC001"
+          },
+          "patientId": {
+            "type": "string",
+            "example": "PAT001"
+          },
+          "patientName": {
+            "type": "string",
+            "example": "Ria Sharma"
+          },
+          "type": {
+            "type": "string",
+            "example": "consultation",
+            "enum": [
+              "consultation",
+              "treatment",
+              "lab"
+            ]
+          },
+          "doctorName": {
+            "type": "string",
+            "example": "Dr. Smith"
+          },
+          "specialization": {
+            "type": "string",
+            "example": "Cardiology"
+          },
+          "date": {
+            "type": "string",
+            "example": "2026-05-10"
+          },
+          "consultationNote": {
+            "type": "string",
+            "example": "Patient complains of chest pain."
+          },
+          "medicines": {
+            "type": "string",
+            "example": "Aspirin 75mg"
+          },
+          "followUp": {
+            "type": "string",
+            "example": "Review after 1 week"
+          },
+          "followUpDate": {
+            "type": "string",
+            "example": "2026-05-17"
+          },
+          "appointmentId": {
+            "type": "string",
+            "example": "APT001"
+          },
+          "tests": {
+            "type": "string",
+            "example": "ECG"
+          },
+          "labTestDate": {
+            "type": "string",
+            "example": "2026-05-12"
+          },
+          "lifestyle": {
+            "type": "string",
+            "example": "Avoid spicy food"
+          },
+          "diet": {
+            "type": "string",
+            "example": "Low sodium"
+          },
+          "duration": {
+            "type": "string",
+            "example": "15 mins"
+          }
+        },
+        "required": [
+          "doctorId",
+          "patientId",
+          "doctorName",
+          "specialization"
         ]
       },
       "CreateQueueDto": {
