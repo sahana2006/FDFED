@@ -23,6 +23,8 @@ const state = {
   branches: [],
   selectedBranchId: '',
   overview: null,
+  branchEarnings: null,
+  selectedMonthKey: '',
 };
 
 function getSession() {
@@ -104,7 +106,7 @@ function pct(part, total) {
 }
 
 function formatDate(dateStr) {
-  if (!dateStr) return '—';
+  if (!dateStr) return '\u2014';
   const d = new Date(`${dateStr}T00:00:00`);
   if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -119,6 +121,97 @@ function setBar(barId, valueId, value, total) {
   const bar = $(barId);
   if (bar) bar.style.width = `${pct(value, total)}%`;
   setText(valueId, formatCurrency(value));
+}
+
+function getMonthKeyFromDate(dateStr) {
+  if (!dateStr) return '';
+  const rawDate = String(dateStr);
+  const d = new Date(rawDate.length === 10 ? `${rawDate}T00:00:00` : rawDate);
+  if (isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getMonthLabel(monthKey, fallbackDate = new Date()) {
+  if (!monthKey) {
+    return `${MONTHS_LONG[fallbackDate.getMonth()]} ${fallbackDate.getFullYear()}`;
+  }
+
+  const [year, month] = monthKey.split('-').map(Number);
+  if (!year || !month) {
+    return `${MONTHS_LONG[fallbackDate.getMonth()]} ${fallbackDate.getFullYear()}`;
+  }
+
+  return `${MONTHS_LONG[month - 1]} ${year}`;
+}
+
+function getAvailableMonthKeys(data) {
+  const keys = new Set();
+  const now = new Date();
+  const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const allAppointments = Array.isArray(data?.entries) ? data.entries : [];
+  const allLabEntries = Array.isArray(data?.labEntries) ? data.labEntries : [];
+
+  allAppointments.forEach((entry) => {
+    const key = getMonthKeyFromDate(entry.date);
+    if (key && key <= currentKey && Number(entry.consultationFee || 0) > 0) keys.add(key);
+  });
+
+  allLabEntries.forEach((entry) => {
+    const key = getMonthKeyFromDate(entry.date);
+    if (key && key <= currentKey && Number(entry.testPrice || 0) > 0) keys.add(key);
+  });
+
+  keys.add(currentKey);
+
+  return [...keys].sort((a, b) => b.localeCompare(a));
+}
+
+function resolveDefaultMonthKey(monthKeys) {
+  const now = new Date();
+  const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  if (monthKeys.includes(currentKey)) return currentKey;
+  return monthKeys[0] || currentKey;
+}
+
+function ensureMonthFilter() {
+  const heroBadge = $('heroBadge');
+  const heroSection = heroBadge?.parentElement;
+  if (!heroBadge || !heroSection || $('monthSelect')) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'hero-controls';
+  heroSection.insertBefore(wrapper, heroBadge);
+  wrapper.appendChild(heroBadge);
+  wrapper.insertAdjacentHTML('afterbegin', `
+    <label class="month-filter">
+      <span>Month</span>
+      <select id="monthSelect" aria-label="Select revenue month"></select>
+    </label>
+  `);
+
+  const select = $('monthSelect');
+  if (select && !select.dataset.bound) {
+    select.addEventListener('change', () => {
+      state.selectedMonthKey = select.value;
+      if (state.branchEarnings) {
+        renderBranchEarnings(state.branchEarnings, state.selectedMonthKey);
+      }
+    });
+    select.dataset.bound = '1';
+  }
+}
+
+function populateMonthSelect(monthKeys, selectedKey) {
+  const select = $('monthSelect');
+  if (!select) return;
+
+  select.innerHTML = monthKeys.map((key) => `
+    <option value="${key}">${escapeHtml(getMonthLabel(key))}</option>
+  `).join('');
+  select.disabled = !monthKeys.length;
+  if (selectedKey) {
+    select.value = selectedKey;
+  }
 }
 
 function logoutSuperUser(event) {
@@ -146,6 +239,7 @@ async function loadShell() {
   const userName = document.querySelector('.user-name');
   if (userName) userName.textContent = session?.name || 'Super Admin';
 
+  ensureMonthFilter();
   lucide.createIcons();
 }
 
@@ -175,7 +269,7 @@ function renderBranchOptions(branches) {
     '<option value="">Select a branch</option>',
     ...branches.map((branch) => `
       <option value="${escapeHtml(branch.id)}">
-        ${escapeHtml(branch.branchName)} · ${escapeHtml(branch.hospitalName || '')} · ${escapeHtml(branch.city || '-')}, ${escapeHtml(branch.state || '-')}
+        ${escapeHtml(branch.branchName)} \u00b7 ${escapeHtml(branch.hospitalName || '')} \u00b7 ${escapeHtml(branch.city || '-')}, ${escapeHtml(branch.state || '-')}
       </option>
     `),
   ].join('');
@@ -223,81 +317,11 @@ function renderDoctorBreakdown(entries) {
     <div class="mini-item">
       <div>
         <div class="mini-label">${escapeHtml(doctor.name)}</div>
-        <div class="mini-meta">${doctor.pct}% cut · ${doctor.count} appointment${doctor.count !== 1 ? 's' : ''}</div>
+        <div class="mini-meta">${doctor.pct}% cut \u00b7 ${doctor.count} appointment${doctor.count !== 1 ? 's' : ''}</div>
       </div>
       <div class="mini-value cut-value">${formatCurrency(doctor.cut)}</div>
     </div>
   `).join('');
-}
-
-function renderBranchEarnings(data) {
-  const branch = data?.branch || {};
-  const entries = Array.isArray(data?.entries) ? data.entries : [];
-  const allLabEntries = Array.isArray(data?.labEntries) ? data.labEntries : [];
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  const monthLabel = `${MONTHS_LONG[currentMonth]} ${currentYear}`;
-
-  const monthEntries = entries.filter((entry) => {
-    const date = new Date(`${entry.date}T00:00:00`);
-    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-  });
-
-  const monthLabEntries = allLabEntries.filter((entry) => {
-    const date = new Date(entry.date);
-    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-  });
-
-  const monthAppointmentRevenue = monthEntries.reduce((sum, entry) => sum + Number(entry.consultationFee || 0), 0);
-  const monthLabRevenue = monthLabEntries.reduce((sum, entry) => sum + Number(entry.testPrice || 0), 0);
-  
-  const monthRevenue = monthAppointmentRevenue + monthLabRevenue;
-  const monthCuts = monthEntries.reduce((sum, entry) => sum + Number(entry.doctorEarning || 0), 0);
-  
-  const monthAppointmentProfit = monthEntries.reduce((sum, entry) => sum + Number(entry.branchProfit || 0), 0);
-  const monthProfit = monthAppointmentProfit + monthLabRevenue;
-  const averageTicket = (monthEntries.length || monthLabEntries.length) ? monthRevenue / (monthEntries.length + monthLabEntries.length) : 0;
-
-  const doctorCutTotals = monthEntries.reduce((acc, entry) => {
-    const doctorKey = entry.doctorId || entry.doctorName || 'Unknown';
-    acc[doctorKey] = (acc[doctorKey] || 0) + Number(entry.doctorEarning || 0);
-    return acc;
-  }, {});
-  const topDoctorCut = Object.values(doctorCutTotals).reduce((max, value) => Math.max(max, value), 0);
-  const topDoctorShare = monthCuts ? Math.round((topDoctorCut / monthCuts) * 100) : 0;
-  const profitEfficiency = monthRevenue ? Math.round((monthProfit / monthRevenue) * 100) : 0;
-
-  setText('branchHeroTitle', `${branch.branchName || 'Branch'} - ${branch.hospitalName || 'Hospital'}`);
-  setText('branchHeroSub', `${branch.city || '—'}, ${branch.state || '—'} | ${branch.email || 'No email provided'}`);
-  setText('heroBadgeValue', formatCurrency(monthRevenue));
-  setText('heroBadgeNote', monthLabel);
-
-  setText('kpiTotalRevenue', formatCurrency(data.totalRevenue ?? 0));
-  setText('kpiMonthRevenue', formatCurrency(monthRevenue));
-  setText('kpiTotalCuts', formatCurrency(data.totalDoctorCuts ?? 0));
-  setText('kpiLabRevenue', formatCurrency(data.totalLabTestRevenue ?? 0));
-  setText('kpiMonthProfit', formatCurrency(monthProfit));
-  setText('kpiMonthLabel', monthLabel);
-
-  setText('kpiMonthLabel', monthLabel);
-
-  setText('summaryMonthTitle', monthLabel);
-  setText('summaryCount', `${monthEntries.length} Appointments · ${monthLabEntries.length} Lab Tests`);
-  setBar('barRevenue', 'barRevenueVal', monthRevenue, monthRevenue);
-  setBar('barCuts', 'barCutsVal', monthCuts, monthRevenue);
-  setBar('barProfit', 'barProfitVal', monthProfit, monthRevenue);
-
-  setText('healthTotal', formatNumber(data.completedAppointmentsCount ?? entries.length));
-  setText('healthMonth', formatNumber(monthEntries.length));
-  setText('healthMargin', monthRevenue ? `${Math.round((monthProfit / monthRevenue) * 100)}%` : '—');
-
-  setText('insightAvgTicket', formatCurrency(averageTicket));
-  setText('insightTopDoctorShare', `${topDoctorShare}%`);
-  setText('insightProfitEfficiency', `${profitEfficiency}%`);
-
-  renderDoctorBreakdown(monthEntries);
-  renderLabBreakdown(monthLabEntries);
 }
 
 function renderLabBreakdown(entries) {
@@ -310,7 +334,8 @@ function renderLabBreakdown(entries) {
         <div style="color:var(--text-muted);font-size:.875rem;">
           No completed lab tests this month.
         </div>
-      </div>`;
+      </div>
+    `;
     return;
   }
 
@@ -319,10 +344,89 @@ function renderLabBreakdown(entries) {
     <div class="mini-item">
       <div>
         <div class="mini-label">${escapeHtml(entry.testName || 'Lab Test')}</div>
-        <div class="mini-meta">${escapeHtml(entry.patientName || 'Unknown patient')} · ${formatDate(entry.date)} · ${escapeHtml(entry.technicianName || 'Lab Technician')}</div>
+        <div class="mini-meta">${escapeHtml(entry.patientName || 'Unknown patient')} \u00b7 ${formatDate(entry.date)} \u00b7 ${escapeHtml(entry.technicianName || 'Lab Technician')}</div>
       </div>
       <div class="mini-value cut-value">${formatCurrency(entry.testPrice || 0)}</div>
-    </div>`).join('');
+    </div>
+  `).join('');
+}
+
+function renderBranchEarnings(data, selectedMonthKey) {
+  const branch = data?.branch || {};
+  const entries = Array.isArray(data?.entries) ? data.entries : [];
+  const allLabEntries = Array.isArray(data?.labEntries) ? data.labEntries : [];
+  const now = new Date();
+  const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const monthKeys = getAvailableMonthKeys(data);
+  const monthKey = monthKeys.includes(selectedMonthKey)
+    ? selectedMonthKey
+    : resolveDefaultMonthKey(monthKeys);
+  const monthLabel = getMonthLabel(monthKey, now);
+
+  const monthEntries = entries.filter((entry) => getMonthKeyFromDate(entry.date) === monthKey);
+  const monthLabEntries = allLabEntries.filter((entry) => getMonthKeyFromDate(entry.date) === monthKey);
+
+  const monthAppointmentRevenue = monthEntries.reduce((sum, entry) => sum + Number(entry.consultationFee || 0), 0);
+  const monthLabRevenue = monthLabEntries.reduce((sum, entry) => sum + Number(entry.testPrice || 0), 0);
+  const monthRevenue = monthAppointmentRevenue + monthLabRevenue;
+  const monthCuts = monthEntries.reduce((sum, entry) => sum + Number(entry.doctorEarning || 0), 0);
+  const monthAppointmentProfit = monthEntries.reduce((sum, entry) => sum + Number(entry.branchProfit || 0), 0);
+  const monthProfit = monthAppointmentProfit + monthLabRevenue;
+  const averageTicket = (monthEntries.length || monthLabEntries.length)
+    ? monthRevenue / (monthEntries.length + monthLabEntries.length)
+    : 0;
+
+  const doctorCutTotals = monthEntries.reduce((acc, entry) => {
+    const doctorKey = entry.doctorId || entry.doctorName || 'Unknown';
+    acc[doctorKey] = (acc[doctorKey] || 0) + Number(entry.doctorEarning || 0);
+    return acc;
+  }, {});
+  const topDoctorCut = Object.values(doctorCutTotals).reduce((max, value) => Math.max(max, value), 0);
+  const topDoctorShare = monthCuts ? Math.round((topDoctorCut / monthCuts) * 100) : 0;
+  const profitEfficiency = monthRevenue ? Math.round((monthProfit / monthRevenue) * 100) : 0;
+
+  const badgeLabel = $('heroBadge')?.querySelector('.branch-badge-label');
+  if (badgeLabel) {
+    badgeLabel.textContent = monthKey === currentKey ? 'Current Month' : 'Selected Month';
+  }
+
+  const summaryEyebrow = document.querySelector('.analytics-panel .panel-eyebrow');
+  const summaryCopy = document.querySelector('.analytics-panel .panel-copy');
+  if (summaryEyebrow) {
+    summaryEyebrow.textContent = monthKey === currentKey ? "This Month's Summary" : 'Selected Month Summary';
+  }
+  if (summaryCopy) {
+    summaryCopy.textContent = `Revenue vs doctor cuts vs branch profit for ${monthLabel}.`;
+  }
+
+  setText('branchHeroTitle', `${branch.branchName || 'Branch'} - ${branch.hospitalName || 'Hospital'}`);
+  setText('branchHeroSub', `${branch.city || '\u2014'}, ${branch.state || '\u2014'} | ${branch.email || 'No email provided'}`);
+  setText('heroBadgeValue', formatCurrency(monthRevenue));
+  setText('heroBadgeNote', monthLabel);
+
+  setText('kpiTotalRevenue', formatCurrency(data.totalRevenue ?? 0));
+  setText('kpiMonthRevenue', formatCurrency(monthRevenue));
+  setText('kpiTotalCuts', formatCurrency(data.totalDoctorCuts ?? 0));
+  setText('kpiLabRevenue', formatCurrency(monthLabRevenue));
+  setText('kpiMonthProfit', formatCurrency(monthProfit));
+  setText('kpiMonthLabel', monthLabel);
+
+  setText('summaryMonthTitle', monthLabel);
+  setText('summaryCount', `${monthEntries.length} Appointments \u00b7 ${monthLabEntries.length} Lab Tests`);
+  setBar('barRevenue', 'barRevenueVal', monthRevenue, monthRevenue);
+  setBar('barCuts', 'barCutsVal', monthCuts, monthRevenue);
+  setBar('barProfit', 'barProfitVal', monthProfit, monthRevenue);
+
+  setText('healthTotal', formatNumber(data.completedAppointmentsCount ?? entries.length));
+  setText('healthMonth', formatNumber(monthEntries.length));
+  setText('healthMargin', monthRevenue ? `${Math.round((monthProfit / monthRevenue) * 100)}%` : '\u2014');
+
+  setText('insightAvgTicket', formatCurrency(averageTicket));
+  setText('insightTopDoctorShare', `${topDoctorShare}%`);
+  setText('insightProfitEfficiency', `${profitEfficiency}%`);
+
+  renderDoctorBreakdown(monthEntries);
+  renderLabBreakdown(monthLabEntries);
 }
 
 async function loadBranches() {
@@ -338,7 +442,13 @@ async function loadSelectedBranchEarnings(branchId) {
 
   setText('branch-select-note', 'Loading branch earnings...');
   const data = await apiRequest(`/super-admin/hospital-branches/${encodeURIComponent(branchId)}/earnings`);
-  renderBranchEarnings(data);
+  state.branchEarnings = data;
+
+  const monthKeys = getAvailableMonthKeys(data);
+  state.selectedMonthKey = resolveDefaultMonthKey(monthKeys);
+  populateMonthSelect(monthKeys, state.selectedMonthKey);
+  renderBranchEarnings(data, state.selectedMonthKey);
+
   localStorage.setItem(SELECTED_BRANCH_KEY, branchId);
   const branch = state.branches.find((item) => item.id === branchId);
   setText('branch-select-note', branch ? `Showing earnings for ${branch.branchName}.` : 'Showing earnings for selected branch.');
