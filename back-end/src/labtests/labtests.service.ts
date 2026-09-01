@@ -128,7 +128,7 @@ export class LabTestsService {
       id: `TBOOK${Date.now()}`,
       userId: input.userId,
       labTestId: input.labTestId,
-      branchId: input.branchId,
+      branchId: '00000000-0000-4000-8000-000000000001', // Force main branch
       status: 'cart',
       cartId: this.getOrCreateActiveCartId(input.userId),
       orderId: null,

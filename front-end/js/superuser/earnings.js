@@ -324,35 +324,10 @@ function renderDoctorBreakdown(entries) {
   `).join('');
 }
 
-function renderLabBreakdown(entries) {
-  const container = $('labBreakdownList');
-  if (!container) return;
 
-  if (!entries.length) {
-    container.innerHTML = `
-      <div class="mini-item">
-        <div style="color:var(--text-muted);font-size:.875rem;">
-          No completed lab tests this month.
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  const sorted = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
-  container.innerHTML = sorted.slice(0, 6).map((entry) => `
-    <div class="mini-item">
-      <div>
-        <div class="mini-label">${escapeHtml(entry.testName || 'Lab Test')}</div>
-        <div class="mini-meta">${escapeHtml(entry.patientName || 'Unknown patient')} \u00b7 ${formatDate(entry.date)} \u00b7 ${escapeHtml(entry.technicianName || 'Lab Technician')}</div>
-      </div>
-      <div class="mini-value cut-value">${formatCurrency(entry.testPrice || 0)}</div>
-    </div>
-  `).join('');
-}
 
 function renderBranchEarnings(data, selectedMonthKey) {
-  const branch = data?.branch || {};
+  const branch = data?.branch || state.branches.find(b => b.id === state.selectedBranchId) || {};
   const entries = Array.isArray(data?.entries) ? data.entries : [];
   const allLabEntries = Array.isArray(data?.labEntries) ? data.labEntries : [];
   const now = new Date();
@@ -400,7 +375,10 @@ function renderBranchEarnings(data, selectedMonthKey) {
   }
 
   setText('branchHeroTitle', `${branch.branchName || 'Branch'} - ${branch.hospitalName || 'Hospital'}`);
-  setText('branchHeroSub', `${branch.city || '\u2014'}, ${branch.state || '\u2014'} | ${branch.email || 'No email provided'}`);
+  const subEl = $('branchHeroSub');
+  if (subEl) {
+    subEl.innerHTML = `${escapeHtml(branch.city || '\u2014')}, ${escapeHtml(branch.state || '\u2014')}<br>${escapeHtml(branch.email || 'No email provided')}`;
+  }
   setText('heroBadgeValue', formatCurrency(monthRevenue));
   setText('heroBadgeNote', monthLabel);
 
@@ -426,7 +404,6 @@ function renderBranchEarnings(data, selectedMonthKey) {
   setText('insightProfitEfficiency', `${profitEfficiency}%`);
 
   renderDoctorBreakdown(monthEntries);
-  renderLabBreakdown(monthLabEntries);
 }
 
 async function loadBranches() {

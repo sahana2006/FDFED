@@ -165,18 +165,8 @@ async function loadLabBranches() {
     const payload = await response.json();
     labBranches = Array.isArray(payload) ? payload : [];
 
-    const savedBranchId = localStorage.getItem(LABTESTS_BRANCH_KEY) || '';
-    if (savedBranchId && labBranches.some((branch) => branch.id === savedBranchId)) {
-      selectedLabBranchId = savedBranchId;
-    } else if (cartBookings.length && cartBookings[0]?.branchId) {
-      selectedLabBranchId = cartBookings[0].branchId;
-    } else if (!selectedLabBranchId) {
-      selectedLabBranchId = labBranches[0]?.id || '';
-    }
-
-    if (selectedLabBranchId) {
-      localStorage.setItem(LABTESTS_BRANCH_KEY, selectedLabBranchId);
-    }
+    selectedLabBranchId = '00000000-0000-4000-8000-000000000001';
+    localStorage.setItem(LABTESTS_BRANCH_KEY, selectedLabBranchId);
   } catch (_) {
     labBranches = [];
   }
@@ -274,36 +264,23 @@ function renderLabProducts(tests) {
 function renderLabBranchOptions() {
   const select = document.getElementById('labBranchSelect');
   const note = document.getElementById('labBranchNote');
+
+  selectedLabBranchId = '00000000-0000-4000-8000-000000000001';
+  localStorage.setItem(LABTESTS_BRANCH_KEY, selectedLabBranchId);
+
   if (!select) return;
 
-  if (!labBranches.length) {
-    select.innerHTML = '<option value="">No branches available</option>';
-    select.disabled = true;
-    if (note) note.textContent = 'No hospital branches were found.';
-    return;
-  }
+  const branch = labBranches.find((item) => item.id === selectedLabBranchId);
 
-  const cartBranchId = cartBookings[0]?.branchId || '';
-  const branchId = selectedLabBranchId || cartBranchId || labBranches[0]?.id || '';
-  selectedLabBranchId = branchId;
-
-  select.disabled = false;
-  select.innerHTML = [
-    '<option value="">Select a branch</option>',
-    ...labBranches.map((branch) => `
-      <option value="${escapeHtml(branch.id)}">${escapeHtml(branch.branchName)}${branch.city ? ` · ${escapeHtml(branch.city)}` : ''}</option>
-    `),
-  ].join('');
-  select.value = branchId;
+  select.disabled = true;
+  select.innerHTML = branch 
+    ? `<option value="${escapeHtml(branch.id)}">${escapeHtml(branch.branchName)} (Main)</option>`
+    : `<option value="00000000-0000-4000-8000-000000000001">Apollo Main Branch</option>`;
+  select.value = selectedLabBranchId;
 
   if (note) {
-    const branch = labBranches.find((item) => item.id === branchId);
-    note.textContent = branch
-      ? `Lab tests will be routed to ${branch.branchName}${branch.city ? `, ${branch.city}` : ''}.`
-      : 'Choose the branch that should receive this lab order.';
+    note.textContent = 'All lab tests are strictly routed to the Apollo Main Branch.';
   }
-
-  localStorage.setItem(LABTESTS_BRANCH_KEY, selectedLabBranchId);
 }
 
 function renderTopTests() {
